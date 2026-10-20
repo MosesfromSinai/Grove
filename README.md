@@ -12,13 +12,13 @@ We are launching at UC Riverside. Built for CS 175 (Entrepreneurship in Computin
 
 ## Team
 
-| Person | Engineering role 
-|---|---|---|
-| Moses Avila | Backend and redemption engine 
-| Celso Lopez | Security and auth 
-| Edward Van | Student app 
-| Adolfo Magallanes | Business dashboard 
-| Hikaru Shimada | Maps and notifications 
+| Person | Engineering role |
+|---|---|
+| Moses Avila | Backend and redemption engine |
+| Celso Lopez | Security and auth |
+| Edward Van | Student app |
+| Adolfo Magallanes | Business dashboard |
+| Hikaru Shimada | Maps and notifications |
 
 ---
 
@@ -121,35 +121,6 @@ grove/
 │   └── sw.js               # Hikaru: service worker for push
 └── docs/                   # Project context and logs (see below)
 ```
-
----
-
-## Docs (keep these current)
-
-| File | Purpose |
-|---|---|
-| `CLAUDE.md` | All shared rules and project context; Claude Code reads it automatically |
-| `docs/STATUS.md` | Where the project is right now: phase, focus, blockers, open decisions |
-| `docs/team/<name>.md` | Your tasks, dependencies, and personal session log |
-| `docs/LOG.md` | What each person got done, grouped by person |
-| `docs/DECISIONS.md` | Decisions grouped by who made them; teammates acknowledge with ✅/❓/❌ |
-| `docs/API_CONTRACT.md` | Table shapes and function inputs/outputs everyone builds against |
-
-**Rule: every session starts by reading `CLAUDE.md`, `docs/STATUS.md`, and your team file, and ends by updating your team file and `docs/LOG.md`** (plus any other file the session changed). Doc updates go in the same pull request as the code; the PR template checks this. If you change a table or function, update `docs/API_CONTRACT.md` and `mocks/` and tell the team. Copy the start-of-session prompt from the bottom of `CLAUDE.md`.
-
----
-
-## How we work
-
-- **Pull `main` at the start of every session.** Teammates' updates only reach you through `main`.
-- **Issues:** every task has a GitHub issue, assigned to its owner, on the project board. Moses creates them during setup; add one for any new task.
-- **One branch per feature:** `name/feature`, e.g. `edward/deal-feed`. One open at a time, about 1–2 a week. Delete it after merging.
-- **Short messages:** commits like `Add deal feed`; PR descriptions 1–3 lines plus `Closes #12` for each issue the feature finishes.
-- **No attribution:** no `Co-Authored-By` lines or AI-related text in commits, PRs, or branch names. Turn it off once in your own Claude Code settings (`~/.claude/settings.json`); see the Git workflow in `CLAUDE.md`.
-- **Merge small and often** through PRs (`main` is protected). One review: Moses for migrations and functions, Celso for auth and RLS. Lint, type check, and build must pass.
-- Full rules: the Git workflow section of `CLAUDE.md`.
-- **Weekly sync:** 15 minutes. Each person covers what they finished, what's next, and what's blocking them. Check the week's gate (Roadmap below), then update `docs/STATUS.md`.
-
 ---
 
 ## Roadmap
@@ -162,5 +133,3 @@ grove/
 | 4. Pilot and polish (Nov 9–15) | First real redemption at a business near UCR |
 
 Demo date: **TBD**. Week dates assume a demo around Nov 16–20; re-date this table and the team files once it's set. Task-level detail is in `docs/team/<name>.md`.
-
-Full plan: Grove Tech Stack Plan (Claude Docs).
