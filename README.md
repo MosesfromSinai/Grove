@@ -12,15 +12,13 @@ We are launching at UC Riverside. Built for CS 175 (Entrepreneurship in Computin
 
 ## Team
 
-| Person | Engineering role | Business role |
+| Person | Engineering role 
 |---|---|---|
-| Moses Avila | Backend and redemption engine | Pitch deck and live demo |
-| Celso Lopez | Security and auth | Competitor analysis |
-| Edward Van | Student app | Student survey |
-| Adolfo Magallanes | Business dashboard | Pilot business outreach |
-| Hikaru Shimada | Maps and notifications | Lean Canvas, pricing, business model |
-
-Everyone codes, and everyone does 1–2 customer interviews. Each person's full task list is in `docs/team/<name>.md`.
+| Moses Avila | Backend and redemption engine 
+| Celso Lopez | Security and auth 
+| Edward Van | Student app 
+| Adolfo Magallanes | Business dashboard 
+| Hikaru Shimada | Maps and notifications 
 
 ---
 
@@ -77,17 +75,15 @@ npm run dev                  # http://localhost:3000
 
 ### Environment variables
 
-| Variable | Where it's used | Secret? |
+| Variable | Where it's used
 |---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Browser and server | No |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser and server | No (protected by Row Level Security) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server and Edge Functions only | **Yes. Never use in browser code.** |
-| `NEXT_PUBLIC_MAPBOX_TOKEN` | Map | No (restrict it to our domains in Mapbox) |
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Push subscription | No |
-| `VAPID_PRIVATE_KEY` | Sending push | **Yes** |
-| `RESEND_API_KEY` | Email | **Yes** |
-
-Never commit `.env.local`. Share secrets through a password manager, not the group chat.
+| `NEXT_PUBLIC_SUPABASE_URL` | Browser and server 
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser and server 
+| `SUPABASE_SERVICE_ROLE_KEY` | Server and Edge Functions only
+| `NEXT_PUBLIC_MAPBOX_TOKEN` | Map 
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Push subscription 
+| `VAPID_PRIVATE_KEY` | Sending push 
+| `RESEND_API_KEY` | Email 
 
 ### Testing on a phone
 
