@@ -31,29 +31,29 @@ _Last updated: 2026-10-19_
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [ ] Dashboard layout (desktop sidebar, phone and tablet friendly)
-- [ ] Business onboarding: name, address (sets `location`), hours, logo upload, food-truck toggle
-- [ ] Post-deal form: title, description, discount, start/end, photo, "UCR students only"
-- [ ] My deals list: active, scheduled, expired, with redemption counts (mocks)
+- [ ] Dashboard layout (desktop sidebar, phone and tablet friendly) (#69)
+- [ ] Business onboarding: name, address (sets `location`), hours, logo upload, food-truck toggle (#70)
+- [ ] Post-deal form: title, description, discount, start/end, photo, "UCR students only" (#71)
+- [ ] My deals list: active, scheduled, expired, with redemption counts (mocks) (#72)
 
 ### Week 2 — Live data and stickers (Oct 26–Nov 1)
-- [ ] Wire onboarding, posting, and My deals to real tables
-- [ ] Printable sticker: QR of `grove.app/b/<qr_slug>` via `qrcode`, Grove branding, "Scan in the Grove app to redeem," download as PDF or PNG
-- [ ] Overview page: today's and this week's redemptions, active deals, live visit feed via Realtime
+- [ ] Wire onboarding, posting, and My deals to real tables (#73)
+- [ ] Printable sticker: QR of `grove.app/b/<qr_slug>` via `qrcode`, Grove branding, "Scan in the Grove app to redeem," download as PDF or PNG (#74)
+- [ ] Overview page: today's and this week's redemptions, active deals, live visit feed via Realtime (#75)
 
 ### Week 3 — Stats, settings, staff scanner (Nov 2–8)
-- [ ] Stats: redemptions per deal and busiest hours (Recharts)
-- [ ] Redemption settings: Sticker vs. Staff scan selector, show/reset store PIN
-- [ ] Staff scanner: camera via `html5-qrcode`, calls `staff-redeem`, green "Verified" or red "Not valid" with reason, "Scan next"
+- [ ] Stats: redemptions per deal and busiest hours (Recharts) (#76)
+- [ ] Redemption settings: Sticker vs. Staff scan selector, show/reset store PIN (#77)
+- [ ] Staff scanner: camera via `html5-qrcode`, calls `staff-redeem`, green "Verified" or red "Not valid" with reason, "Scan next" (#78)
 
 ### Week 4 — Pilot (Nov 9–15)
-- [ ] Onboard pilot businesses in person; print and place stickers
-- [ ] Test the dashboard on a phone and a tablet at the counter
-- [ ] Fix issues owners report
+- [ ] Onboard pilot businesses in person; print and place stickers (#79)
+- [ ] Test the dashboard on a phone and a tablet at the counter (#80)
+- [ ] Fix issues owners report (#81)
 
 ### Business
-- [ ] Pilot outreach: contact local businesses near UCR, track in the shared Drive folder, aim for 2–3 signed
-- [ ] 1–2 customer interviews; notes in the shared Drive folder
+- [ ] Pilot outreach: contact local businesses near UCR, track in the shared Drive folder, aim for 2–3 signed (#82)
+- [ ] 1–2 customer interviews; notes in the shared Drive folder (#83)
 
 ---
 
