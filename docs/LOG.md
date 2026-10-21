@@ -20,7 +20,7 @@ At the start of every session, each person's Claude reads the other sections for
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
-- **2026-10-20:** Created the GitHub repo `MosesfromSinai/Grove`; all four teammates accepted their invites.
+- **2026-10-20:** Created the GitHub repo `MosesfromSinai/Grove`, protected `main`, linked the Grove project board; Hikaru and Adolfo accepted invites.
 - **2026-10-20:** API contract: defined `Deal`, `DealDetail`, `MyDeal`, `Redemption`, `BusinessPublic`, `BusinessStats`; added structured discount; deal status now computed; `getDealsNearby` returns businesses without deals (`has_deal`) (`docs/API_CONTRACT.md`, `DECISIONS.md`).
 - **2026-10-20:** Added `mocks/` for every contract query and function, with canvas sample data, plus `lib/supabase/types.ts` (`mocks/`, `lib/supabase/`).
 - **2026-10-20:** Added the public-repo secrets rule to `CLAUDE.md` Conventions.
