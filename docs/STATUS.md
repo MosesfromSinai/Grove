@@ -24,7 +24,7 @@ _Last updated: 2026-10-20 by Moses_
 ## Blockers
 
 - Repo exists (`MosesfromSinai/Grove`, public); `main` is protected. Celso and Edward still need to accept their GitHub invites.
-- GitHub issues for team-file tasks aren't created yet; Moses's `gh` login needs the `project` scope to reach the board.
+- Every task has a GitHub issue on the Grove board (#1–#99). Celso's and Edward's are unassigned until they accept; then Moses assigns them.
 - `mocks/` are ready to build against. Celso, Edward, Adolfo, Hikaru: three contract decisions in `DECISIONS.md` (Moses section) need your ✅/❓/❌ before the contract is final on Oct 21.
 
 ## Open decisions

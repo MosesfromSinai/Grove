@@ -30,7 +30,9 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 1. Create the private GitHub repo, push these docs as the first commit, add teammates, protect `main`, and create the Grove project board (Todo, In progress, In review, Done; auto-add on).
    - Done: repo `MosesfromSinai/Grove` exists (currently **public**, not private) with the docs pushed.
    - Teammates: Hikaru and Adolfo accepted; Celso and Edward invited, pending (2026-10-20).
-   - `main` protected; Grove board (project #6) linked to the repo.
+   - `main` protected (ruleset: PR + 1 approval); Grove board (project #6) linked to the repo.
+   - Step 2 done: issues #1–#99 created for every task, on the board, numbers written in all five team files. Celso's and Edward's are unassigned until they accept.
+   - Step 3: `moses/scaffold` created.
 2. Once teammates accept their invites, create a GitHub issue for every task in all five team files, assigned to its owner and on the board, and write each issue number next to its task (one-time exception to "never write in someone else's team file").
 3. Create your first feature branch from `main` (`moses/scaffold`) and tell the team the repo is ready.
 
@@ -92,9 +94,9 @@ _Record things only you need to remember (gotchas, commands, links). Team-wide d
 _Newest at the top. One entry per session._
 
 ### 2026-10-20
-- **Did:** Confirmed repo exists; Hikaru and Adolfo accepted, Celso and Edward still pending. Protected `main`; linked Grove board #6. Filled API contract gaps (`Deal`, `DealDetail`, `MyDeal`, `Redemption`, `BusinessPublic`, `BusinessStats`), added structured discount, computed deal status, and `has_deal` rows in `getDealsNearby`. Wrote `lib/supabase/types.ts`, `lib/supabase/deal-status.ts`, and `mocks/` (all contract queries and functions, canvas sample data); strict type check and smoke test pass. Added the public-repo secrets rule to `CLAUDE.md`.
-- **Next:** Fix the `gh` project scope, create and number the issues, protect `main`, create `moses/scaffold`, then Week 1 build.
-- **Blockers:** `gh` token still lacks the `project` scope, so issues aren't created yet.
+- **Did:** Confirmed repo exists; Hikaru and Adolfo accepted, Celso and Edward still pending. Protected `main`; linked Grove board #6; created issues #1–#99 and numbered every team-file task. Filled API contract gaps (`Deal`, `DealDetail`, `MyDeal`, `Redemption`, `BusinessPublic`, `BusinessStats`), added structured discount, computed deal status, and `has_deal` rows in `getDealsNearby`. Wrote `lib/supabase/types.ts`, `lib/supabase/deal-status.ts`, and `mocks/` (all contract queries and functions, canvas sample data); strict type check and smoke test pass. Added the public-repo secrets rule to `CLAUDE.md`.
+- **Next:** Week 1 build on `moses/scaffold`: Next.js scaffold (#5), Supabase dev project (#6), migrations (#7).
+- **Blockers:** Celso and Edward haven't accepted their GitHub invites, so their issues are unassigned.
 
 ### 2026-10-19
 - **Did:** Set up project docs and roles.
