@@ -30,35 +30,35 @@ _Last updated: 2026-10-19_
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [ ] Tailwind theme from the tokens in `CLAUDE.md` → Design reference (colors, Bricolage Grotesque + Figtree, radii, shadow)
-- [ ] App shell with bottom tabs: Map, Deals, Profile
-- [ ] Deal card component (shared with Hikaru)
-- [ ] Deals feed on mocks: photo, business, title, distance, countdown, "UCR students only" tag
-- [ ] Deal detail page with the orange "Redeem in store" button
+- [ ] Tailwind theme from the tokens in `CLAUDE.md` → Design reference (colors, Bricolage Grotesque + Figtree, radii, shadow) (#48)
+- [ ] App shell with bottom tabs: Map, Deals, Profile (#49)
+- [ ] Deal card component (shared with Hikaru) (#50)
+- [ ] Deals feed on mocks: photo, business, title, distance, countdown, "UCR students only" tag (#51)
+- [ ] Deal detail page with the orange "Redeem in store" button (#52)
 
 ### Week 2 — Sticker redemption (Oct 26–Nov 1)
-- [ ] Scanner page with `html5-qrcode` (not the built-in detector; Safari lacks it)
-- [ ] Ask for location before scanning; clear message if denied, with the PIN backup link
-- [ ] Call `redeem`; show a friendly message for every `ErrorCode`
-- [ ] Redeemed screen: big green check, deal and business name, live ticking clock, moving animation
-- [ ] Sticker landing page `/b/[slug]`: live deals, or "No deals right now, follow for alerts"
-- [ ] PIN entry screen calling `redeem-pin`
-- [ ] Swap mocks for real queries
+- [ ] Scanner page with `html5-qrcode` (not the built-in detector; Safari lacks it) (#53)
+- [ ] Ask for location before scanning; clear message if denied, with the PIN backup link (#54)
+- [ ] Call `redeem`; show a friendly message for every `ErrorCode` (#55)
+- [ ] Redeemed screen: big green check, deal and business name, live ticking clock, moving animation (#56)
+- [ ] Sticker landing page `/b/[slug]`: live deals, or "No deals right now, follow for alerts" (#57)
+- [ ] PIN entry screen calling `redeem-pin` (#58)
+- [ ] Swap mocks for real queries (#59)
 
 ### Week 3 — Staff mode and profile (Nov 2–8)
-- [ ] Show-your-code screen: QR from `issue-code`, refreshes every ~30 s with a countdown, screen stays bright
-- [ ] Switch to Redeemed screen when the staff scan lands (Realtime)
-- [ ] Profile: name, school, notification toggle, past redemptions, sign out
-- [ ] "Add to Home Screen" prompt (needed for iPhone push)
+- [ ] Show-your-code screen: QR from `issue-code`, refreshes every ~30 s with a countdown, screen stays bright (#60)
+- [ ] Switch to Redeemed screen when the staff scan lands (Realtime) (#61)
+- [ ] Profile: name, school, notification toggle, past redemptions, sign out (#62)
+- [ ] "Add to Home Screen" prompt (needed for iPhone push) (#63)
 
 ### Week 4 — Polish (Nov 9–15)
-- [ ] Test on iPhone Safari and Android Chrome over HTTPS
-- [ ] Loading, empty, and offline states
-- [ ] Accessibility: contrast, tap targets, screen reader labels
+- [ ] Test on iPhone Safari and Android Chrome over HTTPS (#64)
+- [ ] Loading, empty, and offline states (#65)
+- [ ] Accessibility: contrast, tap targets, screen reader labels (#66)
 
 ### Business
-- [ ] Student survey: how students find food deals now, which apps they check, would they use Grove. Results in the shared Drive folder
-- [ ] 1–2 customer interviews; notes in the shared Drive folder
+- [ ] Student survey: how students find food deals now, which apps they check, would they use Grove. Results in the shared Drive folder (#67)
+- [ ] 1–2 customer interviews; notes in the shared Drive folder (#68)
 
 ---
 
