@@ -23,9 +23,10 @@ _Last updated: 2026-10-20 by Moses_
 
 ## Blockers
 
-- Repo exists (`MosesfromSinai/Grove`, public) and everyone has accepted their invite. Still left: protect `main` (Moses).
-- GitHub issues for team-file tasks aren't created yet; Moses's `gh` login needs the `project` scope to reach the board.
-- `mocks/` are ready to build against. Celso, Edward, Adolfo, Hikaru: three contract decisions in `DECISIONS.md` (Moses section) need your ✅/❓/❌ before the contract is final on Oct 21.
+- Repo exists (`MosesfromSinai/Grove`, public); `main` is protected. Celso and Edward still need to accept their GitHub invites.
+- Next.js scaffold is ready on `moses/scaffold` and needs a PR approved by a teammate (Hikaru or Adolfo) before everyone can build on `main`.
+- Every task has a GitHub issue on the Grove board (#1–#99). Celso's and Edward's are unassigned until they accept; then Moses assigns them.
+- `mocks/` are ready to build against. Celso, Edward, Adolfo, Hikaru: three contract decisions in `DECISIONS.md` (Moses section) need your ✅/❓/❌ before the contract is final on Oct 21. A fourth, dev setup (keys via `vercel env pull`, Node 22, review rules), affects everyone.
 
 ## Open decisions
 

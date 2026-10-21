@@ -31,30 +31,30 @@ _Last updated: 2026-10-19_
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [ ] Mapbox token, restricted to our domains
-- [ ] Map page with mock pins: orange for deals, green for the rest
-- [ ] Filter chips: Open now, Has deals, Walking distance
-- [ ] Location permission flow; fall back to campus center if denied
+- [ ] Mapbox token, restricted to our domains (#84)
+- [ ] Map page with mock pins: orange for deals, green for the rest (#85)
+- [ ] Filter chips: Open now, Has deals, Walking distance (#86)
+- [ ] Location permission flow; fall back to campus center if denied (#87)
 
 ### Week 2 — Real data (Oct 26–Nov 1)
-- [ ] `deals_nearby` PostGIS function (radius, open now from `hours`, has deals)
-- [ ] Wire map and filters to real data
-- [ ] Pin tap opens a bottom sheet: name, open/closed, distance, today's deal
+- [ ] `deals_nearby` PostGIS function (radius, open now from `hours`, has deals) (#88)
+- [ ] Wire map and filters to real data (#89)
+- [ ] Pin tap opens a bottom sheet: name, open/closed, distance, today's deal (#90)
 
 ### Week 3 — Push and trucks (Nov 2–8)
-- [ ] VAPID keys; `manifest.json`; `sw.js` service worker
-- [ ] Subscription flow saving to `push_subscriptions`
-- [ ] `notify-deal`: when a deal goes live, push to subscribed students near the business (decide the radius, record in `DECISIONS.md`)
-- [ ] Food-truck location update ("I'm here now")
+- [ ] VAPID keys; `manifest.json`; `sw.js` service worker (#91)
+- [ ] Subscription flow saving to `push_subscriptions` (#92)
+- [ ] `notify-deal`: when a deal goes live, push to subscribed students near the business (decide the radius, record in `DECISIONS.md`) (#93)
+- [ ] Food-truck location update ("I'm here now") (#94)
 
 ### Week 4 — Polish (Nov 9–15)
-- [ ] Test push on iPhone (installed to home screen, iOS 16.4+) and Android
-- [ ] Map performance with many pins; polish
+- [ ] Test push on iPhone (installed to home screen, iOS 16.4+) and Android (#95)
+- [ ] Map performance with many pins; polish (#96)
 
 ### Business
-- [ ] Fill the blank Lean Canvas boxes: Key Metrics, Unfair Advantage, Channels, Cost Structure, Revenue Streams, Project Name
-- [ ] Pricing questions for interviews (per-redemption vs. monthly); summarize answers
-- [ ] 1–2 customer interviews; notes in the shared Drive folder
+- [ ] Fill the blank Lean Canvas boxes: Key Metrics, Unfair Advantage, Channels, Cost Structure, Revenue Streams, Project Name (#97)
+- [ ] Pricing questions for interviews (per-redemption vs. monthly); summarize answers (#98)
+- [ ] 1–2 customer interviews; notes in the shared Drive folder (#99)
 
 ---
 

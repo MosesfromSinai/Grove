@@ -98,6 +98,14 @@ Never delete an entry. If a decision is reversed, add a new one and mark the old
 
 ## Moses
 
+### 2026-10-20 — Dev setup: keys via Vercel, Node 22, review rules
+- **What:** No password manager: Moses invites everyone to the Vercel and Supabase projects, and each person runs `vercel env pull .env.local` to get keys. Node 22 is pinned (`.nvmrc`, `package.json` engines). `main` needs 1 approval from a teammate other than the author, with no bypass for anyone. `CODEOWNERS` requests reviewers, but code-owner review isn't required yet.
+- **Why:** The repo is public, so keys come from one place and never pass through chat. One Node version avoids "works on my machine" builds on Vercel. Requiring code-owner review now would block PRs while Celso and Edward haven't accepted their invites.
+- **Affects:** Everyone
+- **Status:** Proposed
+- **Acknowledged:** ✅ Moses
+- **Responses:**
+
 ### 2026-10-20 — Deal status is computed from start and end times
 - **What:** `deals` has no `status` column. A deal is `scheduled` before `starts_at`, `live` until `ends_at`, then `ended`. "End now" sets `ends_at = now()`; cancelling a scheduled deal deletes it. Queries return the computed `status`.
 - **Why:** A stored status goes stale unless a job keeps flipping it, and then `redeem` and the feed could disagree about whether a deal is live.

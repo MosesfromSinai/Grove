@@ -48,7 +48,7 @@ We are launching at UC Riverside. Built for CS 175 (Entrepreneurship in Computin
 
 | Layer | Choice |
 |---|---|
-| App | Next.js (App Router) + React + TypeScript, installable PWA |
+| App | Next.js 16 (App Router) + React + TypeScript, installable PWA, Node 22 |
 | Hosting | Vercel (preview deploy for every pull request) |
 | Database, auth, storage, server functions | Supabase (Postgres + PostGIS, Auth, Storage, Edge Functions, Realtime) |
 | Map | Mapbox GL JS |
@@ -63,27 +63,35 @@ We are launching at UC Riverside. Built for CS 175 (Entrepreneurship in Computin
 
 ## Getting started
 
-**Requirements:** Node.js 20+, Git, the [Supabase CLI](https://supabase.com/docs/guides/cli), and Docker (only if you run Supabase locally).
+**Requirements:** Node.js 22 (pinned in `.nvmrc`; with [nvm](https://github.com/nvm-sh/nvm), run `nvm install` then `nvm use`), Git, the [Vercel CLI](https://vercel.com/docs/cli) (`npm i -g vercel`), the [Supabase CLI](https://supabase.com/docs/guides/cli), and Docker (only if you run Supabase locally).
+
+**Accounts:** accept Moses's invites to the Grove project on Vercel and Supabase first. That's how you get keys; nobody sends them in chat.
 
 ```bash
-git clone <repo-url> grove
+git clone git@github.com:MosesfromSinai/Grove.git grove
 cd grove
+nvm use                      # Node 22
 npm install
-cp .env.example .env.local   # then fill in the values (ask Moses)
+vercel link                  # pick the Grove project
+vercel env pull .env.local   # downloads every key; .env.local is git-ignored
 npm run dev                  # http://localhost:3000
 ```
 
+When a key changes, run `vercel env pull .env.local` again. Before pushing, run `npm run lint`, `npm run typecheck`, and `npm run build`.
+
 ### Environment variables
 
-| Variable | Where it's used
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Browser and server 
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser and server 
-| `SUPABASE_SERVICE_ROLE_KEY` | Server and Edge Functions only
-| `NEXT_PUBLIC_MAPBOX_TOKEN` | Map 
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Push subscription 
-| `VAPID_PRIVATE_KEY` | Sending push 
-| `RESEND_API_KEY` | Email 
+Values live in Vercel and arrive through `vercel env pull`. `.env.example` lists the names with empty values.
+
+| Variable | Where it's used |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Browser and server |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser and server |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server and Edge Functions only |
+| `NEXT_PUBLIC_MAPBOX_TOKEN` | Map |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Push subscription |
+| `VAPID_PRIVATE_KEY` | Sending push |
+| `RESEND_API_KEY` | Email |
 
 ### Testing on a phone
 

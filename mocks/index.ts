@@ -61,8 +61,18 @@ function toDeal(d: MockDeal): Deal {
 }
 
 function toBusinessPublic(b: MockBusiness): BusinessPublic {
-  const { qr_slug: _slug, staff_pin: _pin, ...pub } = b;
-  return pub;
+  return {
+    id: b.id,
+    name: b.name,
+    address: b.address,
+    lat: b.lat,
+    lng: b.lng,
+    hours: b.hours,
+    logo_url: b.logo_url,
+    is_truck: b.is_truck,
+    open_now: b.open_now,
+    redemption_mode: b.redemption_mode,
+  };
 }
 
 function businessById(id: string): MockBusiness {
