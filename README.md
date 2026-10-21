@@ -6,7 +6,7 @@ Grove is a campus marketing platform. Locally owned restaurants and food trucks 
 
 We are launching at UC Riverside. Built for CS 175 (Entrepreneurship in Computing), Fall 2026.
 
-> Working name. "Grove" may be trademarked; see `docs/DECISIONS.md`.
+> Working name. "Grove" may be trademarked; see Open decisions in `docs/STATUS.md`.
 
 ---
 
