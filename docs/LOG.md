@@ -12,9 +12,9 @@ What each person got done, **grouped by person**, newest first within each secti
 
 **Decisions**
 - Only decisions that affect someone else are logged, as a line in your own section tagged **Decision** with who it affects: `- **2026-10-20:** **Decision** (affects Hikaru, Edward): getDealsNearby returns businesses with no deal; id is now deal_id.` Decisions made together at a sync go under **Team**.
-- Teammates respond with one line in their own section: `- **2026-10-21:** ✅ Moses's deal_id change`, or ❓ / ❌ with a short reason. Raise every ❓ and ❌ at the weekly sync.
+- If you disagree, raise it with the person who decided or at the weekly sync.
 
-At the start of every session, each person's Claude reads the other sections for entries since that person's last session and summarizes them, so everyone stays current and can ask teammates about their work. It also flags every **Decision** line that affects that person and records their answer in their own section.
+At the start of every session, each person's Claude reads the other sections for entries since that person's last session and summarizes them, so everyone stays current and can ask teammates about their work. It also tells that person about every **Decision** line that affects them.
 
 ---
 

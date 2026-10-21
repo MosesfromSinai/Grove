@@ -13,7 +13,7 @@ _Last updated: 2026-10-20 by Moses_
 2. **Read, in order:** this file → `docs/STATUS.md` → `docs/team/<name>.md` → `docs/API_CONTRACT.md` (if the session touches data, queries, or functions).
 3. **Catch up on teammates** in `docs/LOG.md`, using the date of the person's last Session log entry as the cutoff:
    - **Log:** summarize what each teammate logged since then, by name.
-   - **Decisions:** flag every **Decision** line in someone else's section (or Team) since then that affects this person (or everyone). Say who decided what and when, then ask: follow it, ask a question, or push back? Example: "Celso decided yesterday that PINs lock after 5 wrong tries. Do you want to follow the same rule, ask him a question, or push back?" Record the answer as one line in this person's own LOG section: `✅ Celso's PIN lockout`, or ❓ / ❌ with a short reason. Raise every ❓ and ❌ at the weekly sync.
+   - **Decisions:** tell the person about every **Decision** line in someone else's section (or Team) since then that affects them (or everyone), in one or two lines each: who decided what, and when. Example: "Celso decided yesterday that PINs lock after 5 wrong tries." Don't ask them to respond or record anything.
    - If a teammate's work or decision conflicts with this person's plan, say so before starting.
 4. **State back** in a few lines: teammate updates, this week's goal, the next unchecked task, and anything in the files that looks outdated or contradictory.
 
@@ -32,7 +32,7 @@ Update files **as things happen**, not only at the end:
 ### End
 Before stopping, update:
 1. `docs/team/<name>.md`: tasks ticked, new tasks added, a dated Session log entry (Did / Next / Blockers), and today's date on _Last updated_.
-2. `docs/LOG.md`: one dated line per thing shipped or changed, plus any **Decision** lines and responses, in the person's own section.
+2. `docs/LOG.md`: one dated line per thing shipped or changed, plus any **Decision** lines, in the person's own section.
 3. `docs/STATUS.md`: if the current state, a blocker, or an open decision changed.
 4. `docs/API_CONTRACT.md`, this file: if affected.
 
@@ -153,9 +153,9 @@ Use the Tailwind class name with any color utility (`bg-green`, `text-ink-muted`
 | `CLAUDE.md` | All shared rules and project context | Anyone (tell the team) | Scope, stack, roles, or rules change |
 | `docs/STATUS.md` | Current phase, this week's gate, focus, blockers, open decisions | Anyone | When the current state changes; at each weekly sync |
 | `docs/team/<name>.md` | Personal tasks, notes, and session log | That person only | During and after every session |
-| `docs/LOG.md` | What each person did, plus **Decision** lines and ✅/❓/❌ responses, grouped by person | Each person, own section only | End of every session; when a decision is made or answered |
+| `docs/LOG.md` | What each person did, plus **Decision** lines, grouped by person | Each person, own section only | End of every session; when a decision is made |
 | `docs/API_CONTRACT.md` | Tables, queries, functions, error codes | Moses (others propose) | Any data shape change |
 
 ## Start-of-session prompt (copy this)
 
-> I'm [name] on the Grove team. Pull the latest `main` first. Then read `CLAUDE.md`, `docs/STATUS.md`, and `docs/team/[name].md`, plus `docs/API_CONTRACT.md` if we touch data. Catch me up on what teammates logged and any decisions I need to respond to, summarize this week's goal and my next task, and flag anything outdated. Then let's work on: [task]. Keep my team file and the shared docs updated as we go, and give me the end-of-session updates before we finish.
+> I'm [name] on the Grove team. Pull the latest `main` first. Then read `CLAUDE.md`, `docs/STATUS.md`, and `docs/team/[name].md`, plus `docs/API_CONTRACT.md` if we touch data. Catch me up on what teammates logged and any decisions that affect me, summarize this week's goal and my next task, and flag anything outdated. Then let's work on: [task]. Keep my team file and the shared docs updated as we go, and give me the end-of-session updates before we finish.

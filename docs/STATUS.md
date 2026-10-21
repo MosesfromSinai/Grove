@@ -26,7 +26,7 @@ _Last updated: 2026-10-20 by Moses_
 - Repo exists (`MosesfromSinai/Grove`, public); `main` is protected. Celso and Edward still need to accept their GitHub invites.
 - Next.js scaffold is ready on `moses/scaffold` and needs a PR approved by a teammate (Hikaru or Adolfo) before everyone can build on `main`.
 - Every task has a GitHub issue on the Grove board (#1–#99). Celso's and Edward's are unassigned until they accept; then Moses assigns them.
-- `mocks/` are ready to build against. Celso, Edward, Adolfo, Hikaru: four **Decision** lines in Moses's section of `LOG.md` (three contract changes and dev setup) need your ✅/❓/❌ line in your own section before the contract is final on Oct 21.
+- `mocks/` are ready to build against. The API contract is finalized on Oct 21.
 
 ## Open decisions
 

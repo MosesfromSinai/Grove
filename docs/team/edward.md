@@ -1,7 +1,7 @@
 # Edward Van — Student App
 
 > **Session reminder.** Full rules are in `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
-> - **Start:** pull `main`; read `CLAUDE.md`, `docs/STATUS.md`, and this file; catch up on teammates (and answer their **Decision** lines) in `docs/LOG.md`.
+> - **Start:** pull `main`; read `CLAUDE.md`, `docs/STATUS.md`, and this file; catch up on teammates and their **Decision** lines in `docs/LOG.md`.
 > - **During:** tick tasks here as they finish; log decisions that affect others as **Decision** lines in your section of `docs/LOG.md`.
 > - **End:** add a dated Session log entry here and a line in your section of `docs/LOG.md`; commit them with your code.
 
