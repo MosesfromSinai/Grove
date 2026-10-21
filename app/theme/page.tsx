@@ -87,12 +87,12 @@ export default function ThemePage() {
           </article>
 
           <div className="flex flex-col gap-3">
-            <Button className="h-11 rounded-button px-5 font-extrabold">Post a deal (default)</Button>
-            <Button variant="outline" className="h-11 rounded-button px-5">Outline</Button>
-            <Button variant="secondary" className="h-11 rounded-button px-5">Secondary</Button>
-            <Button variant="ghost" className="h-11 rounded-button px-5">Ghost</Button>
-            <Button variant="destructive" className="h-11 rounded-button px-5">End now</Button>
-            <Button variant="link" className="h-11 px-0 text-green-dark">Link</Button>
+            <Button>Post a deal (default)</Button>
+            <Button variant="outline">Outline</Button>
+            <Button variant="secondary">Secondary</Button>
+            <Button variant="ghost">Ghost</Button>
+            <Button variant="destructive">End now</Button>
+            <Button variant="link">Link</Button>
           </div>
         </div>
       </section>
