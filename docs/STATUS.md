@@ -17,7 +17,7 @@ _Last updated: 2026-10-20 by Moses_
 |---|---|
 | Moses | Repo, Supabase project, tables, seed data, `mocks/`, finalize `API_CONTRACT.md` |
 | Celso | Google sign-in, .edu check, profile creation, threat model |
-| Edward | App shell, theme, deal feed and deal page on mocks |
+| Edward | App shell, deal feed and deal page on mocks (theme done by Moses; see `/theme`) |
 | Adolfo | Dashboard layout, business onboarding, post-deal form on mocks |
 | Hikaru | Map with mock pins, filter chips, location permission handling |
 

@@ -95,6 +95,11 @@ _Record things only you need to remember (gotchas, commands, links). Team-wide d
 ## Session log
 _Newest at the top. One entry per session._
 
+### 2026-10-20 (theme)
+- **Did:** Built Edward's theme task (#48) on `main`: Grove tokens in `app/globals.css`, Bricolage Grotesque + Figtree in the root layout, shadcn mapped to Grove colors, `/theme` preview page. Updated the review rule in `CLAUDE.md`.
+- **Next:** `.env.example` (#11) and CI (#12), Vercel (#13), Supabase (#6).
+- **Blockers:** None new.
+
 ### 2026-10-20 (scaffold)
 - **Did:** Scaffolded Next.js 16.4.2 on `moses/scaffold` (TypeScript strict, Tailwind 4, shadcn/ui, README folder layout), pinned Node 22, added `CODEOWNERS`. Lint, typecheck, and build pass on Node 22. Updated the secrets rule (keys via `vercel env pull`), review rules, and README setup; recorded the dev setup decision.
 - **Next:** Push and open the scaffold PR (Closes #4, #5); Hikaru or Adolfo approves. Then `.env.example` (#11) and CI (#12), Vercel (#13), Supabase (#6).
