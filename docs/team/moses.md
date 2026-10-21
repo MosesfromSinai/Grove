@@ -1,8 +1,8 @@
 # Moses Avila — Backend and Redemption Engine
 
 > **Session reminder.** Full rules are in `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
-> - **Start:** pull `main`; read `CLAUDE.md`, `docs/STATUS.md`, and this file; catch up on teammates in `docs/LOG.md` and `docs/DECISIONS.md`.
-> - **During:** tick tasks here as they finish; record decisions in your section of `docs/DECISIONS.md`.
+> - **Start:** pull `main`; read `CLAUDE.md`, `docs/STATUS.md`, and this file; catch up on teammates (and answer their **Decision** lines) in `docs/LOG.md`.
+> - **During:** tick tasks here as they finish; log decisions that affect others as **Decision** lines in your section of `docs/LOG.md`.
 > - **End:** add a dated Session log entry here and a line in your section of `docs/LOG.md`; commit them with your code.
 
 _Last updated: 2026-10-20_
@@ -48,7 +48,7 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 - [ ] Migrations for `campuses`, `profiles`, `businesses`, `business_members`, `deals`, `redemptions`, `push_subscriptions`, including the unique rule on `(student_id, deal_id, redeemed_on)` (#7)
 - [ ] `seed.sql` with UCR campus and invented sample businesses and deals (#8)
 - [x] `mocks/` matching `API_CONTRACT.md` (day 1–3) (#9)
-- [ ] Finalize `API_CONTRACT.md` with the team by Oct 21; change status from DRAFT (gaps filled 2026-10-20; waiting on teammates' ✅ in `DECISIONS.md`) (#10)
+- [ ] Finalize `API_CONTRACT.md` with the team by Oct 21; change status from DRAFT (gaps filled 2026-10-20; waiting on teammates' ✅ lines in `LOG.md`) (#10)
 - [ ] `.env.example`; keys reach teammates only through `vercel env pull` (#11)
 - [ ] GitHub Actions: lint, type check, build (#12)
 - [ ] Connect Vercel; preview deploy per PR (#13)
@@ -61,7 +61,7 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 - [ ] Run the week-2 gate test: one printed sticker, two phones (#18)
 
 ### Week 3 — Staff mode and stats (Nov 2–8)
-- [ ] Agree staff-scan token design with Celso; record in `DECISIONS.md` (#19)
+- [ ] Agree staff-scan token design with Celso; log it as a **Decision** in `LOG.md` (#19)
 - [ ] `issue-code` (token refreshes ~every 30 s) and `staff-redeem` (staff of that business only) (#20)
 - [ ] `getBusinessStats` SQL (per deal, per hour) (#21)
 - [ ] Sentry for app and functions (#22)
@@ -79,7 +79,7 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 ---
 
 ## Notes and decisions
-_Record things only you need to remember (gotchas, commands, links). Team-wide decisions go in `docs/DECISIONS.md`._
+_Record things only you need to remember (gotchas, commands, links). Decisions that affect others go in `docs/LOG.md` as **Decision** lines._
 
 - GitHub usernames: Moses `MosesfromSinai`, Hikaru `hika583`, Celso `CelsoSLopez`, Edward `TheEdwardVan`, Adolfo `GorillaAdolfo`.
 - `gh` needs the `project` scope for the board: `gh auth refresh -s project`.
