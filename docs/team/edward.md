@@ -30,7 +30,7 @@ _Last updated: 2026-10-19_
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [ ] Tailwind theme from the tokens in `CLAUDE.md` → Design reference (colors, Bricolage Grotesque + Figtree, radii, shadow) (#48)
+- [x] Tailwind theme from the tokens in `CLAUDE.md` → Design reference (colors, Bricolage Grotesque + Figtree, radii, shadow) (#48) — done by Moses; preview at `/theme`
 - [ ] App shell with bottom tabs: Map, Deals, Profile (#49)
 - [ ] Deal card component (shared with Hikaru) (#50)
 - [ ] Deals feed on mocks: photo, business, title, distance, countdown, "UCR students only" tag (#51)
