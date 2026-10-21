@@ -11,9 +11,9 @@ _Last updated: 2026-10-20 by Moses_
 ### Start
 1. **Get the latest:** `git checkout main && git pull`, then switch to the feature branch and run `git merge main` (or create the branch from `main`). Teammates' logs, decisions, and contract changes only reach you through `main`; reading stale files is how context goes out of date.
 2. **Read, in order:** this file → `docs/STATUS.md` → `docs/team/<name>.md` → `docs/API_CONTRACT.md` (if the session touches data, queries, or functions).
-3. **Catch up on teammates** in `docs/LOG.md` and `docs/DECISIONS.md`, using the date of the person's last Session log entry as the cutoff:
+3. **Catch up on teammates** in `docs/LOG.md`, using the date of the person's last Session log entry as the cutoff:
    - **Log:** summarize what each teammate logged since then, by name.
-   - **Decisions:** for every decision in someone else's section (or Team) whose **Affects** includes this person or "Everyone" and whose **Acknowledged** line doesn't include them, say who decided what and when, then ask: follow it, ask a question, or push back? Example: "Celso decided yesterday that PINs lock after 5 wrong tries. Do you want to follow the same rule, ask him a question, or push back?" Record ✅ agreed, ❓ question, or ❌ disagree on that entry, with any comment under **Responses**. When everyone affected has ✅, set Status to Accepted.
+   - **Decisions:** flag every **Decision** line in someone else's section (or Team) since then that affects this person (or everyone). Say who decided what and when, then ask: follow it, ask a question, or push back? Example: "Celso decided yesterday that PINs lock after 5 wrong tries. Do you want to follow the same rule, ask him a question, or push back?" Record the answer as one line in this person's own LOG section: `✅ Celso's PIN lockout`, or ❓ / ❌ with a short reason. Raise every ❓ and ❌ at the weekly sync.
    - If a teammate's work or decision conflicts with this person's plan, say so before starting.
 4. **State back** in a few lines: teammate updates, this week's goal, the next unchecked task, and anything in the files that looks outdated or contradictory.
 
@@ -24,7 +24,7 @@ _Last updated: 2026-10-20 by Moses_
 ### During
 Update files **as things happen**, not only at the end:
 - **Task finished:** tick it in `docs/team/<name>.md`. **New task:** add it there and create a GitHub issue for it.
-- **Decision made:** add it right away to the person's own section of `docs/DECISIONS.md` (or Team, if made together) with **Affects**, Status `Proposed` (or `Accepted` if it only affects them), and ✅ for the person on Acknowledged.
+- **Decision made:** if it affects someone else, add it right away as a line in the person's own section of `docs/LOG.md` (or Team, if made together), tagged **Decision** with who it affects: `- **2026-10-20:** **Decision** (affects Hikaru, Edward): getDealsNearby returns businesses with no deal; id is now deal_id.` Decisions that only affect the person go in their team file's notes.
 - **Table, column, or function input/output changed:** update `docs/API_CONTRACT.md` and `mocks/` in the same change. Moses reviews it; tell anyone it affects.
 - **New blocker:** add it to the person's file and to `docs/STATUS.md`.
 - **Feature works:** suggest a small PR and merge into `main`, and say why (see Git workflow).
@@ -32,9 +32,9 @@ Update files **as things happen**, not only at the end:
 ### End
 Before stopping, update:
 1. `docs/team/<name>.md`: tasks ticked, new tasks added, a dated Session log entry (Did / Next / Blockers), and today's date on _Last updated_.
-2. `docs/LOG.md`: one dated line per thing shipped or changed, in the person's own section.
+2. `docs/LOG.md`: one dated line per thing shipped or changed, plus any **Decision** lines and responses, in the person's own section.
 3. `docs/STATUS.md`: if the current state, a blocker, or an open decision changed.
-4. `docs/DECISIONS.md`, `docs/API_CONTRACT.md`, this file: if affected.
+4. `docs/API_CONTRACT.md`, this file: if affected.
 
 Doc updates go in the same pull request as the code. **A session isn't finished until its files are updated.** In Claude Code, make the edits directly. In claude.ai, output the full updated sections ready to paste.
 
@@ -55,7 +55,7 @@ A campus marketing platform. **Paying customers are locally owned restaurants an
 - **Solution:** businesses post deals; Grove sends them to verified nearby students; students redeem in store with a QR scan, so every visit is proven.
 - **Business model (to be validated in interviews):** pay per verified redemption (~$0.50–1, monthly cap) at launch; a flat monthly plan (~$49–99) later.
 - **Launch:** UC Riverside, then campus by campus.
-- **Name:** "Grove" is a working name; it may be trademarked (see `docs/DECISIONS.md`).
+- **Name:** "Grove" is a working name; it may be trademarked (see Open decisions in `docs/STATUS.md`).
 - **Class:** CS 175, UCR, Fall 2026. Graded as a funding decision, 80% business, 20% engineering.
 
 ## Team
@@ -153,8 +153,7 @@ Use the Tailwind class name with any color utility (`bg-green`, `text-ink-muted`
 | `CLAUDE.md` | All shared rules and project context | Anyone (tell the team) | Scope, stack, roles, or rules change |
 | `docs/STATUS.md` | Current phase, this week's gate, focus, blockers, open decisions | Anyone | When the current state changes; at each weekly sync |
 | `docs/team/<name>.md` | Personal tasks, notes, and session log | That person only | During and after every session |
-| `docs/LOG.md` | What each person did, grouped by person | Each person, own section only | End of every session |
-| `docs/DECISIONS.md` | Decisions by who made them, who's affected, who's acknowledged | Decision-maker adds; affected people add ✅/❓/❌ | When made; when acknowledging |
+| `docs/LOG.md` | What each person did, plus **Decision** lines and ✅/❓/❌ responses, grouped by person | Each person, own section only | End of every session; when a decision is made or answered |
 | `docs/API_CONTRACT.md` | Tables, queries, functions, error codes | Moses (others propose) | Any data shape change |
 
 ## Start-of-session prompt (copy this)
