@@ -30,33 +30,33 @@ _Last updated: 2026-10-19_
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [ ] Set up Google OAuth in Google Cloud and Supabase Auth
-- [ ] Sign-in page (one button: "Sign in with your school Google account")
-- [ ] .edu check: email domain must match a `campuses.email_domain`; set `verified_student`
-- [ ] Database trigger to create a `profiles` row on first sign-in
-- [ ] Onboarding: route to student app or business onboarding
-- [ ] Review the threat model below; add anything missing
+- [ ] Set up Google OAuth in Google Cloud and Supabase Auth (#29)
+- [ ] Sign-in page (one button: "Sign in with your school Google account") (#30)
+- [ ] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` (#31)
+- [ ] Database trigger to create a `profiles` row on first sign-in (#32)
+- [ ] Onboarding: route to student app or business onboarding (#33)
+- [ ] Review the threat model below; add anything missing (#34)
 
 ### Week 2 — Lock down data (Oct 26–Nov 1)
-- [ ] RLS on every table, e.g. students read live deals and only their own redemptions; owners read only their own business's data; nobody inserts redemptions directly (only Edge Functions)
-- [ ] Hash `staff_pin`; never return it to the browser
-- [ ] Rate limits on `redeem` and `redeem-pin`; lockout after repeated bad PINs
-- [ ] Server-side sanity checks on location (reject impossible coordinates)
+- [ ] RLS on every table, e.g. students read live deals and only their own redemptions; owners read only their own business's data; nobody inserts redemptions directly (only Edge Functions) (#35)
+- [ ] Hash `staff_pin`; never return it to the browser (#36)
+- [ ] Rate limits on `redeem` and `redeem-pin`; lockout after repeated bad PINs (#37)
+- [ ] Server-side sanity checks on location (reject impossible coordinates) (#38)
 
 ### Week 3 — Staff mode security (Nov 2–8)
-- [ ] Design staff-scan tokens with Moses (short-lived, signed, single use)
-- [ ] `business_members` access: only staff of that business can call `staff-redeem`
-- [ ] Security test pass: try to redeem without being there, reuse a token, redeem twice in a day, read another business's stats; log results in the Security test log below
+- [ ] Design staff-scan tokens with Moses (short-lived, signed, single use) (#39)
+- [ ] `business_members` access: only staff of that business can call `staff-redeem` (#40)
+- [ ] Security test pass: try to redeem without being there, reuse a token, redeem twice in a day, read another business's stats; log results in the Security test log below (#41)
 
 ### Week 4 — Review (Nov 9–15)
-- [ ] Fix findings from the test pass
-- [ ] Check no secrets are in the repo or browser bundle
-- [ ] Competitor slide for the pitch
+- [ ] Fix findings from the test pass (#42)
+- [ ] Check no secrets are in the repo or browser bundle (#43)
+- [ ] Competitor slide for the pitch (#44)
 
 ### Business
-- [ ] Competitor analysis in the shared Drive folder (Instagram, Yelp, Google Maps, coupon and student-discount apps)
-- [ ] 1–2 customer interviews; notes in the shared Drive folder
-- [ ] Fill in your attendance cell on the effort table
+- [ ] Competitor analysis in the shared Drive folder (Instagram, Yelp, Google Maps, coupon and student-discount apps) (#45)
+- [ ] 1–2 customer interviews; notes in the shared Drive folder (#46)
+- [ ] Fill in your attendance cell on the effort table (#47)
 
 ---
 
