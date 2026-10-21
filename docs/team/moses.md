@@ -42,14 +42,14 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 - [x] Create GitHub repo (#1)
 - [x] Protect `main` (PR + 1 review; add passing checks once CI exists) (#2)
 - [x] Link the existing Grove project board to the repo (Todo, In progress, In review, Done; auto-add on) (#3)
-- [ ] Add teammates; collect GitHub usernames; set up `CODEOWNERS` (#4)
-- [ ] Scaffold Next.js (App Router, TypeScript strict, Tailwind, shadcn/ui) with the folder layout from the README (#5)
+- [x] Add teammates; collect GitHub usernames; set up `CODEOWNERS` (#4)
+- [x] Scaffold Next.js (App Router, TypeScript strict, Tailwind, shadcn/ui) with the folder layout from the README (#5)
 - [ ] Create Supabase dev project; enable PostGIS (#6)
 - [ ] Migrations for `campuses`, `profiles`, `businesses`, `business_members`, `deals`, `redemptions`, `push_subscriptions`, including the unique rule on `(student_id, deal_id, redeemed_on)` (#7)
 - [ ] `seed.sql` with UCR campus and invented sample businesses and deals (#8)
 - [x] `mocks/` matching `API_CONTRACT.md` (day 1–3) (#9)
 - [ ] Finalize `API_CONTRACT.md` with the team by Oct 21; change status from DRAFT (gaps filled 2026-10-20; waiting on teammates' ✅ in `DECISIONS.md`) (#10)
-- [ ] `.env.example`; share secrets via a password manager (#11)
+- [ ] `.env.example`; keys reach teammates only through `vercel env pull` (#11)
 - [ ] GitHub Actions: lint, type check, build (#12)
 - [ ] Connect Vercel; preview deploy per PR (#13)
 
@@ -83,6 +83,8 @@ _Record things only you need to remember (gotchas, commands, links). Team-wide d
 
 - GitHub usernames: Moses `MosesfromSinai`, Hikaru `hika583`, Celso `CelsoSLopez`, Edward `TheEdwardVan`, Adolfo `GorillaAdolfo`.
 - `gh` needs the `project` scope for the board: `gh auth refresh -s project`.
+- Local Node 22 via nvm: `nvm install 22 && nvm use` (the default was 21). Scaffold is Next.js 16.4.2; `npm run typecheck` runs `next typegen` first because `LayoutProps` is generated.
+- `AGENTS.md` is git-ignored: `next dev` rewrites it on every run, and shared rules live in `CLAUDE.md`.
 - The Grove board is user project #6 (`gh project item-add 6 --owner MosesfromSinai`). Project #2 is an unused duplicate.
 
 ## Blockers
@@ -92,6 +94,11 @@ _Record things only you need to remember (gotchas, commands, links). Team-wide d
 
 ## Session log
 _Newest at the top. One entry per session._
+
+### 2026-10-20 (scaffold)
+- **Did:** Scaffolded Next.js 16.4.2 on `moses/scaffold` (TypeScript strict, Tailwind 4, shadcn/ui, README folder layout), pinned Node 22, added `CODEOWNERS`. Lint, typecheck, and build pass on Node 22. Updated the secrets rule (keys via `vercel env pull`), review rules, and README setup; recorded the dev setup decision.
+- **Next:** Push and open the scaffold PR (Closes #4, #5); Hikaru or Adolfo approves. Then `.env.example` (#11) and CI (#12), Vercel (#13), Supabase (#6).
+- **Blockers:** Celso and Edward haven't accepted invites; until they do, only Hikaru or Adolfo can approve PRs.
 
 ### 2026-10-20
 - **Did:** Confirmed repo exists; Hikaru and Adolfo accepted, Celso and Edward still pending. Protected `main`; linked Grove board #6; created issues #1–#99 and numbered every team-file task. Filled API contract gaps (`Deal`, `DealDetail`, `MyDeal`, `Redemption`, `BusinessPublic`, `BusinessStats`), added structured discount, computed deal status, and `has_deal` rows in `getDealsNearby`. Wrote `lib/supabase/types.ts`, `lib/supabase/deal-status.ts`, and `mocks/` (all contract queries and functions, canvas sample data); strict type check and smoke test pass. Added the public-repo secrets rule to `CLAUDE.md`.
