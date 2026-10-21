@@ -37,42 +37,42 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [x] Create GitHub repo
-- [x] Protect `main` (PR + 1 review; add passing checks once CI exists)
-- [x] Link the existing Grove project board to the repo (Todo, In progress, In review, Done; auto-add on)
-- [ ] Add teammates; collect GitHub usernames; set up `CODEOWNERS`
-- [ ] Scaffold Next.js (App Router, TypeScript strict, Tailwind, shadcn/ui) with the folder layout from the README
-- [ ] Create Supabase dev project; enable PostGIS
-- [ ] Migrations for `campuses`, `profiles`, `businesses`, `business_members`, `deals`, `redemptions`, `push_subscriptions`, including the unique rule on `(student_id, deal_id, redeemed_on)`
-- [ ] `seed.sql` with UCR campus and invented sample businesses and deals
-- [x] `mocks/` matching `API_CONTRACT.md` (day 1–3)
-- [ ] Finalize `API_CONTRACT.md` with the team by Oct 21; change status from DRAFT (gaps filled 2026-10-20; waiting on teammates' ✅ in `DECISIONS.md`)
-- [ ] `.env.example`; share secrets via a password manager
-- [ ] GitHub Actions: lint, type check, build
-- [ ] Connect Vercel; preview deploy per PR
+- [x] Create GitHub repo (#1)
+- [x] Protect `main` (PR + 1 review; add passing checks once CI exists) (#2)
+- [x] Link the existing Grove project board to the repo (Todo, In progress, In review, Done; auto-add on) (#3)
+- [ ] Add teammates; collect GitHub usernames; set up `CODEOWNERS` (#4)
+- [ ] Scaffold Next.js (App Router, TypeScript strict, Tailwind, shadcn/ui) with the folder layout from the README (#5)
+- [ ] Create Supabase dev project; enable PostGIS (#6)
+- [ ] Migrations for `campuses`, `profiles`, `businesses`, `business_members`, `deals`, `redemptions`, `push_subscriptions`, including the unique rule on `(student_id, deal_id, redeemed_on)` (#7)
+- [ ] `seed.sql` with UCR campus and invented sample businesses and deals (#8)
+- [x] `mocks/` matching `API_CONTRACT.md` (day 1–3) (#9)
+- [ ] Finalize `API_CONTRACT.md` with the team by Oct 21; change status from DRAFT (gaps filled 2026-10-20; waiting on teammates' ✅ in `DECISIONS.md`) (#10)
+- [ ] `.env.example`; share secrets via a password manager (#11)
+- [ ] GitHub Actions: lint, type check, build (#12)
+- [ ] Connect Vercel; preview deploy per PR (#13)
 
 ### Week 2 — Core loop (Oct 26–Nov 1)
-- [ ] `redeem` Edge Function: sticker belongs to business, deal live, within ~150 m (PostGIS `ST_DWithin`), daily limit, returns `ErrorCode` on failure
-- [ ] `redeem-pin` Edge Function (hashed PIN check, with Celso)
-- [ ] Typed queries in `lib/supabase/` for every function in the contract
-- [ ] Enable Realtime on `redemptions` for dashboards
-- [ ] Run the week-2 gate test: one printed sticker, two phones
+- [ ] `redeem` Edge Function: sticker belongs to business, deal live, within ~150 m (PostGIS `ST_DWithin`), daily limit, returns `ErrorCode` on failure (#14)
+- [ ] `redeem-pin` Edge Function (hashed PIN check, with Celso) (#15)
+- [ ] Typed queries in `lib/supabase/` for every function in the contract (#16)
+- [ ] Enable Realtime on `redemptions` for dashboards (#17)
+- [ ] Run the week-2 gate test: one printed sticker, two phones (#18)
 
 ### Week 3 — Staff mode and stats (Nov 2–8)
-- [ ] Agree staff-scan token design with Celso; record in `DECISIONS.md`
-- [ ] `issue-code` (token refreshes ~every 30 s) and `staff-redeem` (staff of that business only)
-- [ ] `getBusinessStats` SQL (per deal, per hour)
-- [ ] Sentry for app and functions
+- [ ] Agree staff-scan token design with Celso; record in `DECISIONS.md` (#19)
+- [ ] `issue-code` (token refreshes ~every 30 s) and `staff-redeem` (staff of that business only) (#20)
+- [ ] `getBusinessStats` SQL (per deal, per hour) (#21)
+- [ ] Sentry for app and functions (#22)
 
 ### Week 4 — Pilot and demo (Nov 9–15)
-- [ ] Production Supabase project; migrate; real campus data only
-- [ ] Pilot support and bug fixes
-- [ ] Demo script (sticker redemption live on stage)
-- [ ] Pitch deck
+- [ ] Production Supabase project; migrate; real campus data only (#23)
+- [ ] Pilot support and bug fixes (#24)
+- [ ] Demo script (sticker redemption live on stage) (#25)
+- [ ] Pitch deck (#26)
 
 ### Business
-- [ ] 1–2 customer interviews; notes in the shared Drive folder
-- [ ] Pitch deck built from real interview numbers
+- [ ] 1–2 customer interviews; notes in the shared Drive folder (#27)
+- [ ] Pitch deck built from real interview numbers (#28)
 
 ---
 
