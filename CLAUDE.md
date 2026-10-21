@@ -78,7 +78,7 @@ Everyone does 1–2 customer interviews.
 
 ## Stack
 
-Next.js (App Router) + React + TypeScript PWA on Vercel. Supabase for Postgres + PostGIS, Auth (Google), Storage, Edge Functions, Realtime. Mapbox GL JS. `qrcode` and `html5-qrcode` (Safari has no built-in QR reader). Web Push with VAPID. Tailwind + shadcn/ui. Recharts. Sentry. Resend.
+Next.js 16 (App Router) + React + TypeScript PWA on Vercel, Node 22 (pinned in `.nvmrc` and `package.json` engines; run `nvm use`). Supabase for Postgres + PostGIS, Auth (Google), Storage, Edge Functions, Realtime. Mapbox GL JS. `qrcode` and `html5-qrcode` (Safari has no built-in QR reader). Web Push with VAPID. Tailwind + shadcn/ui. Recharts. Sentry. Resend.
 
 ## Redemption rules
 
@@ -102,7 +102,7 @@ If the sticker is scanned with no deal live, it opens the business page ("No dea
 - All data access goes through `lib/supabase/`. Don't write raw queries inside components.
 - Security lives in the database (Row Level Security), not only in the UI. Only Edge Functions insert into `redemptions`.
 - `SUPABASE_SERVICE_ROLE_KEY` is only used in Edge Functions and server code, never in the browser.
-- Secrets: the repo is public. Every key and password lives only in .env.local (git-ignored). Never put a key in code, docs, issues, commit messages, or chat. .env.example lists the variable names with empty values. If a key is ever committed, rotate it immediately; deleting the commit isn't enough.
+- Secrets: the repo is public. Every key and password lives only in `.env.local` (git-ignored). Never put a key in code, docs, issues, commit messages, or chat. Moses invites everyone to the Vercel and Supabase projects; get keys only by running `vercel env pull .env.local`, never from a teammate directly. `.env.example` lists the variable names with empty values. If a key is ever committed, rotate it immediately; deleting the commit isn't enough.
 - Build against `mocks/` until the real table or function exists. Mocks must match `docs/API_CONTRACT.md` exactly.
 - Every `ErrorCode` from a function gets a friendly message in the UI.
 - Mobile-first: design for a phone screen, then scale up for the dashboard. Camera, location, and push need HTTPS, so test on the Vercel preview.
@@ -142,7 +142,7 @@ If the sticker is scanned with no deal live, it opens the business page ("No dea
 - **Pull requests:** title in the same style as a commit. Description is 1–3 lines plus the template checklist and `Closes #<issue>` for each issue the feature finishes.
 - **Merge into `main` often.** When a feature works, or at the end of a session with working code, suggest a small PR and merge, and say why: log lines and decisions only reach teammates once they're in `main`; small PRs are quick to review and rarely conflict; and anyone waiting on the work gets unblocked. `main` is protected, so everything merges through a PR.
 - **Issues:** every task in a team file has a GitHub issue, assigned to its owner, on the Grove project board. The issue number goes next to the task (`- [ ] Deal feed (#12)`). The PR that finishes it says `Closes #12` (one line per issue), which closes the issue and moves it on the board.
-- **Reviews:** one review per PR. Moses reviews migrations and functions; Celso reviews auth and RLS.
+- **Reviews:** one review per PR. Moses reviews migrations and functions; Celso reviews auth and RLS. `.github/CODEOWNERS` requests the right reviewer automatically, but code-owner review isn't required yet: any teammate's approval merges. `main` needs 1 approval from someone other than the author, and nobody bypasses it, Moses included.
 
 ## File map
 
