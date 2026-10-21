@@ -98,7 +98,29 @@ Never delete an entry. If a decision is reversed, add a new one and mark the old
 
 ## Moses
 
-_No decisions yet._
+### 2026-10-20 — Deal status is computed from start and end times
+- **What:** `deals` has no `status` column. A deal is `scheduled` before `starts_at`, `live` until `ends_at`, then `ended`. "End now" sets `ends_at = now()`; cancelling a scheduled deal deletes it. Queries return the computed `status`.
+- **Why:** A stored status goes stale unless a job keeps flipping it, and then `redeem` and the feed could disagree about whether a deal is live.
+- **Affects:** Celso (RLS on `deals` checks the time window), Adolfo (My deals tabs, End now, Cancel), Hikaru (`deals_nearby` filters on the time window), Edward
+- **Status:** Proposed
+- **Acknowledged:** ✅ Moses
+- **Responses:**
+
+### 2026-10-20 — Deals get a structured discount
+- **What:** `deals` gets `discount_type` (`amount_off`, `percent_off`, `free_item`, `bogo`) and `discount_value` (dollars or percent; null for free item and BOGO), matching the four choices on the Post a deal screen.
+- **Why:** The post-deal form had a discount field with nowhere to store it.
+- **Affects:** Adolfo (post-deal form), Edward (deal card and detail can show it), Hikaru (`deals_nearby` returns it)
+- **Status:** Proposed
+- **Acknowledged:** ✅ Moses
+- **Responses:**
+
+### 2026-10-20 — getDealsNearby also returns businesses with no live deal
+- **What:** `DealCard` now has `has_deal`. Each live deal is one row; each nearby business with no live deal is one row with `has_deal: false` and null deal fields. `hasDeals: true` drops those rows. The deal id field is now `deal_id` (was `id`).
+- **Why:** The map shows green pins for businesses without deals, and the old shape only returned deals.
+- **Affects:** Hikaru (`deals_nearby` SQL and map pins), Edward (feed passes `hasDeals: true`; use `deal_id`)
+- **Status:** Proposed
+- **Acknowledged:** ✅ Moses
+- **Responses:**
 
 ## Celso
 

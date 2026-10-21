@@ -23,9 +23,9 @@ _Last updated: 2026-10-20 by Moses_
 
 ## Blockers
 
-- Repo exists (`MosesfromSinai/Grove`). Still left: `main` isn't protected and the project board doesn't exist yet (Moses).
-- Invites pending: Celso, Edward, and Adolfo need to accept their GitHub invites. Hikaru has accepted.
-- GitHub issues for team-file tasks aren't created yet; waiting on the project board (Moses).
+- Repo exists (`MosesfromSinai/Grove`, public) and everyone has accepted their invite. Still left: protect `main` (Moses).
+- GitHub issues for team-file tasks aren't created yet; Moses's `gh` login needs the `project` scope to reach the board.
+- `mocks/` are ready to build against. Celso, Edward, Adolfo, Hikaru: three contract decisions in `DECISIONS.md` (Moses section) need your ✅/❓/❌ before the contract is final on Oct 21.
 
 ## Open decisions
 

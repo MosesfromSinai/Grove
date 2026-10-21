@@ -29,7 +29,8 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 ## Setup — do this first
 1. Create the private GitHub repo, push these docs as the first commit, add teammates, protect `main`, and create the Grove project board (Todo, In progress, In review, Done; auto-add on).
    - Done: repo `MosesfromSinai/Grove` exists (currently **public**, not private) with the docs pushed.
-   - Left: teammates accept invites (Hikaru `hika583` accepted; Celso `CelsoSLopez`, Edward `TheEdwardVan`, Adolfo `GorillaAdolfo` pending), protect `main`, create the project board.
+   - Teammates: all four accepted (2026-10-20).
+   - Left: protect `main`; link the existing Grove board (on Moses's account) to the repo.
 2. Once teammates accept their invites, create a GitHub issue for every task in all five team files, assigned to its owner and on the board, and write each issue number next to its task (one-time exception to "never write in someone else's team file").
 3. Create your first feature branch from `main` (`moses/scaffold`) and tell the team the repo is ready.
 
@@ -38,14 +39,14 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 ### Week 1 — Foundation (Oct 19–25)
 - [x] Create GitHub repo
 - [ ] Protect `main` (PR + 1 review; add passing checks once CI exists)
-- [ ] Create the Grove project board (Todo, In progress, In review, Done; auto-add on)
+- [ ] Link the existing Grove project board to the repo (Todo, In progress, In review, Done; auto-add on)
 - [ ] Add teammates; collect GitHub usernames; set up `CODEOWNERS`
 - [ ] Scaffold Next.js (App Router, TypeScript strict, Tailwind, shadcn/ui) with the folder layout from the README
 - [ ] Create Supabase dev project; enable PostGIS
 - [ ] Migrations for `campuses`, `profiles`, `businesses`, `business_members`, `deals`, `redemptions`, `push_subscriptions`, including the unique rule on `(student_id, deal_id, redeemed_on)`
 - [ ] `seed.sql` with UCR campus and invented sample businesses and deals
-- [ ] `mocks/` matching `API_CONTRACT.md` (day 1–3)
-- [ ] Finalize `API_CONTRACT.md` with the team by Oct 21; change status from DRAFT
+- [x] `mocks/` matching `API_CONTRACT.md` (day 1–3)
+- [ ] Finalize `API_CONTRACT.md` with the team by Oct 21; change status from DRAFT (gaps filled 2026-10-20; waiting on teammates' ✅ in `DECISIONS.md`)
 - [ ] `.env.example`; share secrets via a password manager
 - [ ] GitHub Actions: lint, type check, build
 - [ ] Connect Vercel; preview deploy per PR
@@ -82,7 +83,7 @@ _Record things only you need to remember (gotchas, commands, links). Team-wide d
 - `gh` needs the `project` scope for the board: `gh auth refresh -s project`.
 
 ## Blockers
-- `gh` token lacks the `project` scope; issues and the board wait on `gh auth refresh -s project`.
+- `gh` token still lacks the `project` scope after one refresh attempt; issues wait on it (check with `gh auth status`).
 
 ---
 
@@ -90,9 +91,9 @@ _Record things only you need to remember (gotchas, commands, links). Team-wide d
 _Newest at the top. One entry per session._
 
 ### 2026-10-20
-- **Did:** Confirmed repo exists; checked collaborators (Hikaru accepted; Celso, Edward, Adolfo invited, pending).
-- **Next:** Run `gh auth refresh -s project`, create the project board, create issues for every team-file task, protect `main`, then `moses/scaffold`.
-- **Blockers:** `gh` token lacks the `project` scope, so issues and the board aren't created yet.
+- **Did:** Confirmed repo exists and all four teammates accepted. Filled API contract gaps (`Deal`, `DealDetail`, `MyDeal`, `Redemption`, `BusinessPublic`, `BusinessStats`), added structured discount, computed deal status, and `has_deal` rows in `getDealsNearby`. Wrote `lib/supabase/types.ts`, `lib/supabase/deal-status.ts`, and `mocks/` (all contract queries and functions, canvas sample data); strict type check and smoke test pass. Added the public-repo secrets rule to `CLAUDE.md`.
+- **Next:** Fix the `gh` project scope, create and number the issues, protect `main`, create `moses/scaffold`, then Week 1 build.
+- **Blockers:** `gh` token still lacks the `project` scope, so issues aren't created yet.
 
 ### 2026-10-19
 - **Did:** Set up project docs and roles.

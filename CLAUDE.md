@@ -2,7 +2,7 @@
 
 This file is the shared memory for every team member's AI sessions. Claude Code reads it automatically from the repo root. In claude.ai, paste or attach it at the start of each session along with the files listed under **Session protocol**. **All shared rules live here and only here.** Team files hold personal tasks, notes, and logs.
 
-_Last updated: 2026-10-19 by Moses_
+_Last updated: 2026-10-20 by Moses_
 
 ---
 
@@ -102,6 +102,7 @@ If the sticker is scanned with no deal live, it opens the business page ("No dea
 - All data access goes through `lib/supabase/`. Don't write raw queries inside components.
 - Security lives in the database (Row Level Security), not only in the UI. Only Edge Functions insert into `redemptions`.
 - `SUPABASE_SERVICE_ROLE_KEY` is only used in Edge Functions and server code, never in the browser.
+- Secrets: the repo is public. Every key and password lives only in .env.local (git-ignored). Never put a key in code, docs, issues, commit messages, or chat. .env.example lists the variable names with empty values. If a key is ever committed, rotate it immediately; deleting the commit isn't enough.
 - Build against `mocks/` until the real table or function exists. Mocks must match `docs/API_CONTRACT.md` exactly.
 - Every `ErrorCode` from a function gets a friendly message in the UI.
 - Mobile-first: design for a phone screen, then scale up for the dashboard. Camera, location, and push need HTTPS, so test on the Vercel preview.

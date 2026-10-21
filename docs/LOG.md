@@ -20,7 +20,10 @@ At the start of every session, each person's Claude reads the other sections for
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
-- **2026-10-20:** Created the GitHub repo `MosesfromSinai/Grove` and invited the team (Hikaru accepted; Celso, Edward, Adolfo pending).
+- **2026-10-20:** Created the GitHub repo `MosesfromSinai/Grove`; all four teammates accepted their invites.
+- **2026-10-20:** API contract: defined `Deal`, `DealDetail`, `MyDeal`, `Redemption`, `BusinessPublic`, `BusinessStats`; added structured discount; deal status now computed; `getDealsNearby` returns businesses without deals (`has_deal`) (`docs/API_CONTRACT.md`, `DECISIONS.md`).
+- **2026-10-20:** Added `mocks/` for every contract query and function, with canvas sample data, plus `lib/supabase/types.ts` (`mocks/`, `lib/supabase/`).
+- **2026-10-20:** Added the public-repo secrets rule to `CLAUDE.md` Conventions.
 - **2026-10-20:** Fixed the Team table formatting in `README.md`.
 - **2026-10-19:** Created project docs: README, CLAUDE.md, STATUS, DECISIONS, LOG, API_CONTRACT, five team files, PR template.
 - **2026-10-19:** Wrote Claude Design prompt for the app with both redemption modes.
