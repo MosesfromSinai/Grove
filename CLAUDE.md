@@ -112,23 +112,25 @@ If the sticker is scanned with no deal live, it opens the business page ("No dea
 
 **Source of truth for every screen's look:** [Grove MVP design canvas](https://claude.ai/artifact/9gApUhQQWpkU2FWTU27K1d) (15 screens). Match it; don't invent new colors, fonts, or styles. If a screen you build isn't on the canvas, build it in the same style.
 
-| Token | Value | Used for |
-|---|---|---|
-| Green (primary) | `#1E7A46` | Brand, icons, live dots |
-| Dark green | `#135C33` | Active nav text, links, sign-in background, hover |
-| Green tint | `#DDF0E2` | Active nav pill, success icon background |
-| Orange (accent) | `#FF8A1F` | Main action buttons ("Post a deal"), deal tags, NEW badges |
-| Light orange | `#FFB36B` | Slogan, timer icons |
-| Peach tints | `#FFE6CC`, `#FFD8B0` | Badges, avatar tiles |
-| Brown text | `#8A3B04` | "UCR students only" badge, BUSINESS tag |
-| Ink | `#1A2019` | Main text, dark buttons |
-| Muted text | `#4F564D` (also `#3F463D` nav, `#5E655C` fine print) | Secondary text |
-| Background | `#FBF7EF` student app, `#F7F2E8` dashboard | Page background |
-| Surface | `#FFFFFF` student cards, `#FFFDF8` dashboard cards | Cards, bottom nav |
-| Borders | `#ECE5D6`, `#E3DCCB`, `#F0EADC` | Dividers, outlines |
+Use the Tailwind class name with any color utility (`bg-green`, `text-ink-muted`, `border-border-strong`); they're defined in `app/globals.css`. See `/theme` for a live preview.
 
-- **Fonts:** Bricolage Grotesque (headings, weight 800, slight negative letter-spacing) and Figtree (body, 400–800), both from Google Fonts.
-- **Shape:** cards 22–24px radius, buttons 14–18px, pills and chips fully rounded (999px). Soft shadow `0 2px 12px rgba(26,32,25,0.07)`.
+| Token | Value | Tailwind class | Used for |
+|---|---|---|---|
+| Green (primary) | `#1E7A46` | `green` | Brand, icons, live dots |
+| Dark green | `#135C33` | `green-dark` | Active nav text, links, sign-in background, hover |
+| Green tint | `#DDF0E2` | `green-tint` | Active nav pill, success icon background |
+| Orange (accent) | `#FF8A1F` | `orange` | Main action buttons ("Post a deal"), deal tags, NEW badges |
+| Light orange | `#FFB36B` | `orange-light` | Slogan, timer icons |
+| Peach tints | `#FFE6CC`, `#FFD8B0` | `peach`, `peach-deep` | Badges, avatar tiles |
+| Brown text | `#8A3B04` | `brown` | "UCR students only" badge, BUSINESS tag |
+| Ink | `#1A2019` | `ink` | Main text, dark buttons |
+| Muted text | `#4F564D` (also `#3F463D` nav, `#5E655C` fine print) | `ink-muted` (`ink-nav`, `ink-fine`) | Secondary text |
+| Background | `#FBF7EF` student app, `#F7F2E8` dashboard | `bg-student`, `bg-dashboard` | Page background |
+| Surface | `#FFFFFF` student cards, `#FFFDF8` dashboard cards | `surface`, `surface-dashboard` | Cards, bottom nav |
+| Borders | `#ECE5D6`, `#E3DCCB`, `#F0EADC` | `border`, `border-strong`, `border-soft` | Dividers, outlines |
+
+- **Fonts:** Bricolage Grotesque (headings, weight 800, slight negative letter-spacing) and Figtree (body, 400–800), both from Google Fonts. Classes: `font-heading` and `font-sans` (the default); `h1`–`h3` use the heading font automatically.
+- **Shape:** cards 22–24px radius, buttons 14–18px, pills and chips fully rounded (999px). Soft shadow `0 2px 12px rgba(26,32,25,0.07)`. Classes: `rounded-card` (24px), `rounded-button` (16px), `rounded-pill`, `shadow-card`.
 - **Sizes:** phone screens 390×844; dashboard is fluid at 1440 wide and stacks on phones. Touch targets at least 44px.
 - **Icons:** inline stroke SVG icons (stroke width about 2), no emoji. Food illustrations are flat SVG on colored tiles.
 - **Not on the canvas yet** (build in the same style): the staff-scan screens (show-your-code, staff scanner) and the redemption mode selector.
