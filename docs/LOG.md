@@ -20,6 +20,8 @@ At the start of every session, each person's Claude reads the other sections for
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-10-20:** Created the GitHub repo `MosesfromSinai/Grove` and invited the team (Hikaru accepted; Celso, Edward, Adolfo pending).
+- **2026-10-20:** Fixed the Team table formatting in `README.md`.
 - **2026-10-19:** Created project docs: README, CLAUDE.md, STATUS, DECISIONS, LOG, API_CONTRACT, five team files, PR template.
 - **2026-10-19:** Wrote Claude Design prompt for the app with both redemption modes.
 - **2026-10-12:** Updated the Grove Tech Stack Plan (Claude Docs) for sticker redemption and both modes.

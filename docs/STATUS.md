@@ -2,7 +2,7 @@
 
 The project's live memory. Read this first every session. Overwrite it (don't append) whenever the current state changes, so it always describes **now**. History goes in `LOG.md`, not here.
 
-_Last updated: 2026-10-19 by Moses_
+_Last updated: 2026-10-20 by Moses_
 
 ---
 
@@ -23,8 +23,9 @@ _Last updated: 2026-10-19 by Moses_
 
 ## Blockers
 
-- Repo doesn't exist yet. Everyone is blocked on Moses's day-1 setup.
-- GitHub usernames needed from everyone for repo access and `CODEOWNERS`.
+- Repo exists (`MosesfromSinai/Grove`). Still left: `main` isn't protected and the project board doesn't exist yet (Moses).
+- Invites pending: Celso, Edward, and Adolfo need to accept their GitHub invites. Hikaru has accepted.
+- GitHub issues for team-file tasks aren't created yet; waiting on the project board (Moses).
 
 ## Open decisions
 
