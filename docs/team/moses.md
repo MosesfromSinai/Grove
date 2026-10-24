@@ -62,9 +62,9 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 - [ ] Typed queries in `lib/supabase/` for every function in the contract (#16)
 - [ ] Enable Realtime on `redemptions` for dashboards (#17)
 - [ ] Run the week-2 gate test: one printed sticker, two phones (#18)
-- [ ] Migration: `active_days`, `daily_start`, `daily_end`, `visibility` on `deals`; `timezone` on `campuses`; `club_nights` table
-- [ ] Live-now check with repeat days: one `deal_status()` SQL function used by `redeem`, `redeem-pin`, `issue-code`, `staff-redeem`, `deals_nearby`, and RLS
-- [ ] `claim-club-night` Edge Function: one claim per night (conditional update), creates the link-only deal, returns `ALREADY_CLAIMED` / `CLUB_NIGHT_EXPIRED` / `NOT_SIGNED_IN`
+- [ ] Migration: `active_days`, `daily_start`, `daily_end`, `visibility` on `deals`; `timezone` on `campuses`; `club_nights` table (#101)
+- [ ] Live-now check with repeat days: one `deal_status()` SQL function used by `redeem`, `redeem-pin`, `issue-code`, `staff-redeem`, `deals_nearby`, and RLS (#102)
+- [ ] `claim-club-night` Edge Function: one claim per night (conditional update), creates the link-only deal, returns `ALREADY_CLAIMED` / `CLUB_NIGHT_EXPIRED` / `NOT_SIGNED_IN` (#103)
 
 ### Week 3 — Staff mode and stats (Nov 2–8)
 - [ ] Agree staff-scan token design with Celso; log it as a **Decision** in `LOG.md` (#19)
@@ -82,7 +82,7 @@ _Feature freeze at the end of Nov 8: anything unfinished goes to the team to dec
 
 ### Business
 - [ ] 1–2 restaurant interviews testing hypotheses 1–4 (slow days, per-visit vs. flat fee, hosting club nights, trusting QR check-in); notes in the shared Drive folder (#27)
-- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder
+- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder (#104)
 - [ ] Pitch deck built from real interview numbers (#28)
 
 ---
