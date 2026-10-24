@@ -39,9 +39,9 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 - [ ] `seed.sql` with UCR campus and invented sample businesses and deals, plus one Mon–Wed repeating deal and one open club night (same as `mocks/`) (#8)
 - [x] `mocks/` matching `API_CONTRACT.md` (day 1–3) (#9)
 - [x] Finalize `API_CONTRACT.md`; change status from DRAFT (final 2026-10-24, with repeat days, link-only deals, club nights) (#10)
-- [x] `.env.example`; keys reach teammates only through `vercel env pull` (#11)
+- [x] `.env.example`; keys reach teammates only through the password manager (#11)
 - [ ] GitHub Actions: lint, type check, build (#12)
-- [ ] Connect Vercel; preview deploy per PR; add every `.env.example` variable in Vercel and invite the team so `vercel env pull` works (#13)
+- [x] Connect Vercel; preview deploy per PR; set the env vars in Vercel and share secrets with the team through the password manager (Hobby plan: teammates can't be added) (#13)
 
 ### Week 2 — Core loop and data (Oct 26–Nov 1)
 - [ ] `redeem` Edge Function: sticker belongs to business, deal live, within ~150 m (PostGIS `ST_DWithin`), daily limit, returns `ErrorCode` on failure; live check via `deal_status()` (#102) (#14)
@@ -82,6 +82,8 @@ _Record things only you need to remember (gotchas, commands, links). Decisions t
 - `gh` needs the `project` scope for the board: `gh auth refresh -s project`.
 - Local Node 22 via nvm: `nvm install 22 && nvm use` (the default was 21). Scaffold is Next.js 16.4.2; `npm run typecheck` runs `next typegen` first because `LayoutProps` is generated.
 - `AGENTS.md` is git-ignored: `next dev` rewrites it on every run, and shared rules live in `CLAUDE.md`.
+- Production: https://grove-jade.vercel.app. Vercel is on the Hobby plan (only Moses has access); teammates' keys come from the password manager.
+- Never run `supabase config push`: the local `config.toml` still has the default `127.0.0.1` auth URLs and would overwrite the remote Site URL and redirect URLs.
 - The Grove board is user project #6 (`gh project item-add 6 --owner MosesfromSinai`). Project #2 is an unused duplicate.
 
 ## Blockers
