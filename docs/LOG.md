@@ -25,6 +25,7 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-10-24:** **Decision** (affects everyone): no password manager. Teammates copy the Supabase URL and anon key from the dashboard (grove-dev → Project Settings → API Keys → Legacy) after accepting the Supabase org invite; the service-role key stays with Moses; anything else goes by one-time link (onetimesecret.com), never chat or email. Replaces the earlier password-manager rule.
 - **2026-10-24:** **Decision** (affects everyone): Vercel is on the Hobby plan, so teammates can't be added or run `vercel env pull`. Moses shares secrets through a password manager; paste them into your own `.env.local`. Replaces the Oct 20 "keys only via `vercel env pull`" rule. Vercel connected (#13): production https://grove-jade.vercel.app, preview links on every PR.
 - **2026-10-24:** Created the Supabase dev project `grove-dev` (us-west-1) with PostGIS 3.3.7, ran `supabase init` and `supabase link`, and committed `supabase/config.toml` (#6).
 - **2026-10-24:** De-bloat pass: README cut to setup and doc links (156 → 44 lines), week gates moved into `CLAUDE.md`, repeated text trimmed in `CLAUDE.md`, STATUS, the contract, LOG, and team files (every rule, task, and issue number kept); ignored editor and Supabase CLI files; removed scaffold leftovers.
