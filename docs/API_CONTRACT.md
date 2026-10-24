@@ -2,11 +2,11 @@
 
 The shapes everyone builds against. Frontend work uses `mocks/` that match this file exactly, then swaps in real queries once the tables and functions exist.
 
-**Owner:** Moses. **Status:** DRAFT. Moses finalizes by day 3 of week 1 (Oct 21) so mocks can match it.
+**Owner:** Moses. **Status:** Final (2026-10-24), including the Activity 2 changes: repeat days, link-only deals, club nights. Later changes still follow the rule below.
 **Rule:** any change here goes in a pull request reviewed by the people it affects, plus a line in `docs/LOG.md`.
 **Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together.
 
-_Last updated: 2026-10-20_
+_Last updated: 2026-10-24_
 
 ---
 
@@ -18,6 +18,7 @@ _Last updated: 2026-10-20_
 | id | uuid | |
 | name | text | "UC Riverside" |
 | email_domain | text | "ucr.edu" |
+| timezone | text | "America/Los_Angeles". Repeat-day windows and club night times use it |
 | center | geography(Point) | Default map center |
 
 ### `profiles`
@@ -65,15 +66,24 @@ Links owner and staff accounts to a business. Needed for staff-scan mode and for
 | description | text | |
 | photo_url | text | Optional |
 | starts_at | timestamptz | |
-| ends_at | timestamptz | |
-| discount_type | text | `amount_off`, `percent_off`, `free_item`, `bogo` (the four choices on the Post a deal form) |
+| ends_at | timestamptz | Null only for a repeating deal that runs until the owner turns it off |
+| active_days | text[] | Optional. Days it repeats: subset of `mon`…`sun`. Null = one window from `starts_at` to `ends_at` |
+| daily_start | time | Set with `active_days`: start of each day's window, campus time ("14:00") |
+| daily_end | time | Set with `active_days`: end of each day's window ("17:00"); later than `daily_start` |
+| visibility | text | `public` (default: feed, map, sticker page) or `link_only` (opens only from its link) |
+| discount_type | text | `amount_off`, `percent_off`, `free_item`, `bogo` (the four choices on the Post a deal form). Null = no student discount (club night deals) |
 | discount_value | numeric | Dollars for `amount_off`, percent for `percent_off`, null for `free_item` and `bogo` |
 | students_only | boolean | Default true |
 | created_at | timestamptz | |
 
-**Status is computed, not stored:** `scheduled` before `starts_at`, `live` while `starts_at <= now() < ends_at`, `ended` from `ends_at` on. SQL uses a `deal_status(starts_at, ends_at)` function; TypeScript uses `dealStatus()` in `lib/supabase/deal-status.ts`. RLS policies and `redeem` check the time window directly.
-- **End now** sets `ends_at = now()`. **Cancel** on a scheduled deal deletes it (it can't have redemptions yet).
-- Check constraint: `ends_at > starts_at`.
+**Status is computed, not stored:** `scheduled` before `starts_at`, `ended` from `ends_at` on. In between:
+- **One-time deal** (`active_days` null): `live`.
+- **Repeating deal:** `live` only when today (campus time) is in `active_days` and the time is in `[daily_start, daily_end)`; `scheduled` otherwise. Example: Mon–Wed 2–5 PM is live Monday at 3 PM and `scheduled` Monday at 6 PM or Thursday.
+
+SQL uses one `deal_status(deal, now)` function; TypeScript uses `dealStatus()` in `lib/supabase/deal-status.ts`. `redeem`, `redeem-pin`, `issue-code`, `staff-redeem`, `deals_nearby`, and RLS all use the same rule.
+- **End now** (or turning off a repeating deal) sets `ends_at = now()`. **Cancel** on a scheduled deal with no redemptions deletes it.
+- Check constraints: `ends_at > starts_at` when set; `ends_at` null only if `active_days` is set; `active_days`, `daily_start`, `daily_end` all set or all null; `daily_end > daily_start`.
+- **Deal link:** every deal opens at `/deals/<id>`, and Adolfo's dashboard offers it as a link and a QR for flyers and group chats. It's advertising only: it opens the deal in Grove and never redeems. Link-only deals rely on the id being unguessable (uuid).
 
 ### `redemptions`
 The billing record: one row per verified visit.
@@ -90,7 +100,28 @@ The billing record: one row per verified visit.
 
 **Unique rule:** `(student_id, deal_id, redeemed_on)`
 
+### `club_nights`
+A restaurant posts an open night; one student claims it for a club by typing the club name (no club accounts).
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | |
+| business_id | uuid → businesses | |
+| night_date | date | Campus date |
+| start_time | time | Campus time |
+| end_time | time | Later than `start_time` |
+| giveback | text | Free text, e.g. "15% back to your club" or "$1 per student". Paid outside the app |
+| claimed_club_name | text | Null until claimed; trimmed, 1–60 characters |
+| claimed_by | uuid → profiles | Student who claimed it; never sent to the browser |
+| claimed_at | timestamptz | |
+| deal_id | uuid → deals | The link-only deal created on claim |
+| created_at | timestamptz | |
+
+**Status is computed:** `claimed` if `claimed_club_name` is set; otherwise `expired` from the night's end time on, else `open`. Claims are allowed the same day, up to the end time.
+- Businesses insert and edit their own club nights directly (RLS: members of that business). Only `claim-club-night` sets the claim columns.
+- On claim, a deal is created: same business, `starts_at`/`ends_at` = the night's window, `visibility = 'link_only'`, `students_only = true`, no discount, title "<club> night", giveback in the description.
+
 ### `push_subscriptions`
+Stretch goal (possible future implementation); not built for the MVP.
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | |
@@ -107,18 +138,22 @@ Moses owns `lib/supabase/` and writes the wrappers; the owner listed writes the 
 
 | Function | Input | Returns | Used by |
 |---|---|---|---|
-| `getDealsNearby` | `{ lat, lng, radiusM, openNow?, hasDeals? }` | `DealCard[]`: one row per live deal, plus one row (`has_deal: false`) per business with no live deal; `hasDeals: true` drops those. Sorted by distance. Calls Hikaru's `deals_nearby` SQL function | Edward (feed, `hasDeals: true`), Hikaru (map: group by `business_id`; orange pin if any row has a deal, green otherwise) |
-| `getDeal` | `{ id }` | `DealDetail \| null` | Edward |
-| `getBusinessBySlug` | `{ slug }` | `{ business: BusinessPublic, liveDeals: Deal[] } \| null` | Edward (sticker landing) |
+| `getDealsNearby` | `{ lat, lng, radiusM, openNow?, hasDeals? }` | `DealCard[]`: one row per live **public** deal (link-only deals never appear), plus one row (`has_deal: false`) per business with no live deal; `hasDeals: true` drops those. Sorted by distance. Calls Hikaru's `deals_nearby` SQL function | Edward (feed, `hasDeals: true`), Hikaru (map: group by `business_id`; orange pin if any row has a deal, green otherwise) |
+| `getDeal` | `{ id }` | `DealDetail \| null`, public or link-only (this is how a deal link opens) | Edward |
+| `getBusinessBySlug` | `{ slug }` | `{ business: BusinessPublic, liveDeals: Deal[] } \| null`, live public deals only | Edward (sticker landing) |
 | `getMyRedemptions` | none | `Redemption[]`, newest first | Edward |
 | `getBusinessStats` | `{ businessId, from, to }` | `BusinessStats` | Adolfo |
-| `getMyDeals` | `{ businessId }` | `MyDeal[]`, newest start first | Adolfo |
+| `getMyDeals` | `{ businessId }` | `MyDeal[]`, newest start first, both visibilities | Adolfo |
+| `getOpenClubNights` | none | `OpenClubNight[]`, open nights at the student's campus, soonest first | Edward (claim screen) |
+| `getClubNights` | `{ businessId }` | `ClubNight[]` with `visit_count`, newest first | Adolfo (club night results) |
 
 ```ts
 type DealStatus = "scheduled" | "live" | "ended";
 type DiscountType = "amount_off" | "percent_off" | "free_item" | "bogo";
 type RedemptionMethod = "sticker" | "pin" | "staff_scan";
 type RedemptionMode = "sticker" | "staff_scan";
+type DealVisibility = "public" | "link_only";
+type ClubNightStatus = "open" | "claimed" | "expired";
 type Weekday = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
 type Hours = Partial<Record<Weekday, [open: string, close: string][]>>; // local "HH:MM"; close < open means past midnight
 
@@ -127,11 +162,15 @@ type Deal = {
   business_id: string;
   title: string;
   description: string;
-  discount_type: DiscountType;
+  discount_type: DiscountType | null;  // null: no student discount (club night deals)
   discount_value: number | null;
   photo_url: string | null;
   starts_at: string;    // ISO timestamp
-  ends_at: string;      // ISO timestamp
+  ends_at: string | null; // null only for repeating deals that run until turned off
+  active_days: Weekday[] | null;
+  daily_start: string | null;  // "HH:MM" campus time
+  daily_end: string | null;
+  visibility: DealVisibility;
   students_only: boolean;
   status: DealStatus;   // computed
   created_at: string;
@@ -174,16 +213,17 @@ type DealCard =
       has_deal: true;
       deal_id: string;
       title: string;
-      discount_type: DiscountType;
+      discount_type: DiscountType | null;
       discount_value: number | null;
-      ends_at: string;
+      ends_at: string | null;
+      live_until: string;   // end of the current live window; use for countdowns
       students_only: boolean;
       photo_url: string | null;
     })
   | (NearbyBusiness & {
       has_deal: false;
       deal_id: null; title: null; discount_type: null; discount_value: null;
-      ends_at: null; students_only: null; photo_url: null;
+      ends_at: null; live_until: null; students_only: null; photo_url: null;
     });
 
 // student_location stays in the table; it's never sent to the browser.
@@ -204,6 +244,24 @@ type BusinessStats = {
   perHour: { hour: number; count: number }[];  // hour 0–23, local time
   total: number;
 };
+
+type OpenClubNight = {
+  id: string;
+  business_id: string;
+  business_name: string;
+  night_date: string;   // "YYYY-MM-DD", campus time
+  start_time: string;   // "HH:MM"
+  end_time: string;
+  giveback: string;
+};
+
+type ClubNight = OpenClubNight & {
+  status: ClubNightStatus;
+  claimed_club_name: string | null;
+  claimed_at: string | null;
+  deal_id: string | null;
+  visit_count: number;  // verified redemptions of deal_id
+};
 ```
 
 ---
@@ -218,9 +276,19 @@ All return either `{ ok: true, ... }` or `{ ok: false, error: ErrorCode }`. `lib
 | `redeem-pin` — `redeemPin()` | `{ deal_id, business_id, pin }` | `{ redemption: Redemption }` | Moses |
 | `issue-code` (staff mode) — `issueCode()` | `{ deal_id }` | `{ token, expires_at }` | Moses |
 | `staff-redeem` — `staffRedeem()` | `{ token }` | `{ redemption: Redemption, deal_title }` | Moses |
-| `notify-deal` — `notifyDeal()` | `{ deal_id }`, called when a deal goes live | `{ sent: number }` | Hikaru |
+| `claim-club-night` — `claimClubNight()` | `{ club_night_id, club_name }` | `{ club_night: ClubNight, deal_id }` (share `/deals/<deal_id>` with members) | Moses |
+| `notify-deal` — `notifyDeal()` | `{ deal_id }`, called when a deal goes live. **Stretch goal** | `{ sent: number }` | Hikaru |
 
 `redeem` checks in this order: `WRONG_BUSINESS`, `DEAL_NOT_LIVE`, `LOCATION_REQUIRED`, `TOO_FAR` (over 150 m), `ALREADY_REDEEMED_TODAY`.
+
+`claim-club-night` errors: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT`, `CLUB_NIGHT_EXPIRED`, `ALREADY_CLAIMED` (one claim per club night; the claim is a single conditional update, so two claims at once can't both win), `RATE_LIMITED` (Celso).
+
+### What changes for redeem (Activity 2)
+- **Live now follows repeat days.** `DEAL_NOT_LIVE` uses `deal_status()`, so a Mon–Wed 2–5 PM deal fails outside that window. Same for `redeem-pin`, `issue-code`, and `staff-redeem`.
+- **Daily limit is unchanged:** one redemption per student per deal per campus date, so a repeating deal can be redeemed once on each day it runs.
+- **Link-only deals redeem exactly like public ones.** No visibility check: anyone with the link still needs a verified student, the counter sticker, ~150 m, a live window, and the daily limit.
+- **Two QR codes:** the deal link QR only opens the deal. Redeeming still only happens by scanning the counter sticker inside Grove.
+- **Club night deals have no discount.** The Redeemed screen shows the deal title (e.g. "Chess Club night") and no discount line; the visit counts for the club.
 
 ```ts
 type ErrorCode =
@@ -234,7 +302,9 @@ type ErrorCode =
   | "BAD_PIN"
   | "CODE_EXPIRED"
   | "NOT_STAFF"
-  | "RATE_LIMITED";
+  | "RATE_LIMITED"
+  | "ALREADY_CLAIMED"
+  | "CLUB_NIGHT_EXPIRED";
 ```
 
 Every error code needs a friendly message in the UI (Edward and Adolfo).
@@ -246,6 +316,8 @@ Every error code needs a friendly message in the UI (Edward and Adolfo).
 `mocks/index.ts` runs the same checks as the real functions on in-memory data (resets on reload). Sample data matches the design canvas: eight businesses near UCR (five with live deals, three without), Orange Peel Tacos' full deal history and stats, and Jordan Reyes as the signed-in student.
 - Jordan already redeemed "$2 off any burrito" today, so redeeming it returns `ALREADY_REDEEMED_TODAY` (screen 8b). Other live deals succeed.
 - Use `MOCK_POSITIONS.atOrangePeelTacos` as the location to pass the 150 m check; your real location will return `TOO_FAR`.
+- "$3 off any bowl" at Verde Bowl repeats Mon–Wed 2–5 PM, so it's only in the feed then.
+- Club nights: Pepper Tree Pizza Co. has one **open** night (claim it with `claimClubNight()`); Orange Peel Tacos has a **claimed** Chess Club night live right now (link-only deal `deal-opt-chess-night`, opens with `getDeal()`, never in the feed) and a past Film Club night with 18 visits.
 - Every mock PIN is `1234`. The mock staff account works at Orange Peel Tacos, so `staffRedeem()` on any other business's code returns `NOT_STAFF`.
 
 ---
@@ -253,4 +325,4 @@ Every error code needs a friendly message in the UI (Edward and Adolfo).
 ## Open questions
 - Staff-scan tokens: signed tokens with no table, or a short-lived `redemption_codes` table? (Moses + Celso)
 - PIN attempts: how many tries before lockout? (Celso)
-- Push targeting: everyone at the campus, or only students within X km of the business? (Hikaru)
+- Push targeting radius: stretch goal, decide only if push is picked back up. (Hikaru)
