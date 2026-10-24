@@ -28,7 +28,7 @@ _Last updated: 2026-10-24_
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [ ] Mapbox token, restricted to our domains (#84)
+- [ ] Mapbox token, restricted to our domains; send it to Moses by one-time link (onetimesecret.com) so he adds it to Vercel (#84)
 - [ ] Map page with mock pins: orange for deals, green for the rest (#85)
 - [ ] Filter chips: Open now, Has deals, Walking distance (#86)
 - [ ] Location permission flow; fall back to campus center if denied (#87)
