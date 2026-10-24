@@ -49,11 +49,13 @@ Doc updates go in the same pull request as the code. **A session isn't finished 
 
 ## What Grove is
 
-A campus marketing platform. **Paying customers are locally owned restaurants and food trucks near a college campus** (not chains). **Students are users, not payers.** The student app is the delivery channel for business deals.
+**A marketing company first.** **Paying customers are locally owned restaurants and food trucks near a college campus** (not chains). They pay Grove to bring in students, especially on slow days (Mon–Wed). **Students are users, not payers.** The app runs the deals and proves every visit.
 
 - **Problem:** businesses near campuses depend on students, but their deals get buried on platforms students don't check (Instagram, Yelp), and owners can't tell what works.
-- **Solution:** businesses post deals; Grove sends them to verified nearby students; students redeem in store with a QR scan, so every visit is proven.
-- **Business model (to be validated in interviews):** pay per verified redemption (~$0.50–1, monthly cap) at launch; a flat monthly plan (~$49–99) later.
+- **Solution:** Grove brings students in through campus channels and its app; every visit is proven by an in-store QR scan.
+- **How we reach students:** campus clubs, flyers and tabling, and the Grove app. Clubs and fraternities we know (PAT, ACM, Cyber) and AMA student ambassadors are possible options we could pursue, **not confirmed partners**. Don't describe them as partners anywhere.
+- **"Campaign"** is only the business word for the marketing service we sell. In the app, deals stay deals; there's no campaign system.
+- **Business model (still to be validated in interviews):** pay per verified visit (~$0.50–1, monthly cap) plus a flat fee for bigger events like club nights. First deal free for pilot restaurants.
 - **Launch:** UC Riverside, then campus by campus.
 - **Name:** "Grove" is a working name; it may be trademarked (see Open decisions in `docs/STATUS.md`).
 - **Class:** CS 175, UCR, Fall 2026. Graded as a funding decision, 80% business, 20% engineering.
@@ -68,29 +70,64 @@ A campus marketing platform. **Paying customers are locally owned restaurants an
 | Adolfo Magallanes | Business dashboard | `app/(business)`, `components/business` | Pilot outreach |
 | Hikaru Shimada | Maps and notifications | `app/(student)/map`, `components/map`, `lib/geo`, `lib/push`, `public/sw.js`, `public/manifest.json`, `notify-deal`, `deals_nearby` SQL | Lean Canvas, pricing |
 
-Everyone does 1–2 customer interviews.
+Everyone does 1–2 restaurant interviews testing hypotheses 1–4 and at least one student interview for hypothesis 5 (see Business below).
 
 ## MVP scope
 
-**In:** deal posting, deal feed and map with filters, .edu verification, scan-to-redeem (sticker mode and staff-scan mode, PIN backup), business dashboard with stats, Web Push alerts.
+**In:**
+- Deal posting, deal feed and map with filters, .edu verification, scan-to-redeem (sticker mode and staff-scan mode, PIN backup), business dashboard with stats.
+- **Repeat days:** a deal can optionally repeat on chosen days within a daily window (e.g. Mon, Tue, Wed, 2–5 PM). It's live automatically in those windows until the owner turns it off.
+- **Link-only deals:** a deal is public (feed and map) or link-only (hidden from feed, map, and sticker page; opens only from its link).
+- **Club nights** (the simple version of the club fundraiser idea): a restaurant posts an open club night (date, time window, giveback in text, e.g. "15% back to your club"). Any signed-in student claims it for their club by typing the club name. No club accounts; one claim per club night; same-day claims are fine. Claiming creates a link-only deal the club shares with members, who redeem the normal way. The dashboard shows verified visits for that night. The giveback is paid outside the app. *Fallback if this slips:* Moses sets up club nights by hand as one-date link-only deals.
+- **Shareable deal link and QR** on every deal, for flyers and group chats (see Redemption rules: two QR codes).
 
-**Out (don't build or suggest now):** rewards points, squad deals, club fundraisers, leaderboards, menu import, dish search, Instagram posting, Square/Toast integration, billing/Stripe, native apps.
+**Stretch goal (possible future implementation):** Web Push notifications, and the Add to Home Screen prompt it needs on iPhone.
+
+**Out (don't build or suggest now):** club accounts or verified club membership, tracking which channel brought each visit, payments/billing (Stripe), in-app giveback payouts, rewards points, squad deals, leaderboards, menu import, dish search, Instagram posting, Square/Toast integration, native apps.
+
+## Week plan
+
+| Week | Focus |
+|---|---|
+| 1 (Oct 19–25) | Sign-in, foundation, database |
+| 2 (Oct 26–Nov 1) | Core loop, scan-to-redeem end to end, plus all the data work: repeat days, visibility, `club_nights`, live-now check, `claim-club-night`; link-only deals hidden from feed and map |
+| 3 (Nov 2–8) | Every remaining feature: staff scan, club night screens (post, claim, results), deal link and QR download, stats |
+| 4 (Nov 9–15) | **No new features.** Pilot at a real restaurant, phone testing, bug fixes, demo prep |
+
+**Feature freeze at the end of Nov 8.** Anything unfinished then goes to the team to decide: finish quickly or move to the stretch goal.
+
+## Business
+
+Part 3 interviews test five hypotheses:
+1. Restaurants have slow days (Mon–Wed) they want to fill.
+2. Which pricing restaurants prefer: per verified visit or a flat fee.
+3. Restaurants will host club nights where part of the sales go back to the club.
+4. Restaurants trust QR check-in as proof of a visit.
+5. Students will try Grove when a deal reaches them through a club or fraternity they're in.
+
+Each person does 1–2 restaurant interviews (1–4) and at least one student interview (5). Notes go in the shared Drive folder; never invent results.
 
 ## Stack
 
-Next.js 16 (App Router) + React + TypeScript PWA on Vercel, Node 22 (pinned in `.nvmrc` and `package.json` engines; run `nvm use`). Supabase for Postgres + PostGIS, Auth (Google), Storage, Edge Functions, Realtime. Mapbox GL JS. `qrcode` and `html5-qrcode` (Safari has no built-in QR reader). Web Push with VAPID. Tailwind + shadcn/ui. Recharts. Sentry. Resend.
+Next.js 16 (App Router) + React + TypeScript PWA on Vercel, Node 22 (pinned in `.nvmrc` and `package.json` engines; run `nvm use`). Supabase for Postgres + PostGIS, Auth (Google), Storage, Edge Functions, Realtime. Mapbox GL JS. `qrcode` and `html5-qrcode` (Safari has no built-in QR reader). Web Push with VAPID (stretch goal). Tailwind + shadcn/ui. Recharts. Sentry. Resend.
 
 ## Redemption rules
 
 **Sticker mode (default):** each business has one permanent sticker, a link like `grove.app/b/<qr_slug>`. Student opens a deal → taps Redeem in store → scans the sticker → the `redeem` Edge Function checks:
 1. The sticker belongs to the deal's business
-2. The deal is live right now
+2. The deal is live right now (for repeating deals: today is an active day and it's inside the daily window, campus time)
 3. The student is within ~150 m (indoor location is off by 20–50 m)
 4. The student hasn't redeemed this deal today (a unique rule on student + deal + date enforces this in the database)
 
 On success, the student's phone shows a big green Redeemed screen with a live clock and an animation (screenshots won't pass), and the cashier applies the discount by hand.
 
 If the sticker is scanned with no deal live, it opens the business page ("No deals right now, follow for alerts"). Scanned with a normal camera, it opens Grove to that business, so it doubles as advertising.
+
+**Two QR codes, two jobs:**
+- **Deal link QR** (`/deals/<id>`, on flyers and in group chats): advertising only. It opens the deal in Grove. It never redeems, never shows a green screen, never applies a discount.
+- **Counter sticker:** the only way to redeem, scanned inside Grove, with every check above (.edu, location, live deal, once per day, live Redeemed screen).
+
+Link-only deals (including club night deals) redeem exactly the same way; having the link only lets you see the deal. Club night deals have no student discount; the visit counts toward the club's giveback.
 
 **Staff-scan mode (optional per business):** the student's phone shows a one-time QR code from `issue-code` that refreshes about every 30 seconds; a logged-in staff account for that business scans it from the dashboard, which calls `staff-redeem`.
 
