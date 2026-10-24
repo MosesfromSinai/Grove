@@ -1,9 +1,6 @@
 # Moses Avila — Backend and Redemption Engine
 
-> **Session reminder.** Full rules are in `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
-> - **Start:** pull `main`; read `CLAUDE.md`, `docs/STATUS.md`, and this file; catch up on teammates and their **Decision** lines in `docs/LOG.md`.
-> - **During:** tick tasks here as they finish; log decisions that affect others as **Decision** lines in your section of `docs/LOG.md`.
-> - **End:** add a dated Session log entry here and a line in your section of `docs/LOG.md`; commit them with your code.
+> Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
 _Last updated: 2026-10-24_
 
@@ -28,9 +25,6 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 - **Edward and Hikaru:** the `visibility` column and `deal_status()` (week 2) to hide link-only deals and show repeating deals at the right times.
 
 ---
-
-## Setup (done 2026-10-20)
-Repo `MosesfromSinai/Grove` (public), the ruleset on `main`, the Grove board (project #6), an issue for every task, `CODEOWNERS`, and the Next.js scaffold are done. Celso still needs to accept his GitHub invite.
 
 ## Tasks
 
@@ -68,7 +62,7 @@ Repo `MosesfromSinai/Grove` (public), the ruleset on `main`, the Grove board (pr
 - [ ] `add-staff` Edge Function and `getStaff` query (owner adds staff by Google email; an invited email becomes active on its first sign-in) (#121)
 - [ ] Production Supabase project; migrate; real campus data only; ready before the Week 4 pilot (#23)
 
-_Feature freeze at the end of Nov 8: anything unfinished goes to the team to decide (finish quickly or move to the stretch goal)._
+_Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 
 ### Week 4 — Pilot and demo, no new features (Nov 9–15)
 - [ ] Pilot support and bug fixes (#24)
@@ -76,8 +70,8 @@ _Feature freeze at the end of Nov 8: anything unfinished goes to the team to dec
 - [ ] Pitch deck, built from real interview numbers (#26)
 
 ### Business
-- [ ] 1–2 restaurant interviews testing hypotheses 1–4 (slow days, per-visit vs. flat fee, hosting club nights, trusting QR check-in); notes in the shared Drive folder (#27)
-- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder (#104)
+- [ ] 1–2 restaurant interviews (hypotheses 1–4, see `CLAUDE.md` → Business); notes in the shared Drive folder (#27)
+- [ ] At least one student interview (hypothesis 5, see `CLAUDE.md` → Business); notes in the shared Drive folder (#104)
 
 ---
 
