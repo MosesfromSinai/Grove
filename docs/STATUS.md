@@ -20,7 +20,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 
 | Person | Focus |
 |---|---|
-| Moses | Supabase (#6) and Vercel (#13) are done. Next: migrations (#7) by Oct 25 so Celso's sign-in isn't blocked, then CI (#12) and seed data (#8). Share keys through the password manager |
+| Moses | Supabase (#6) and Vercel (#13) are done. Next: migrations (#7) by Oct 25 so Celso's sign-in isn't blocked, then CI (#12) and seed data (#8). Invite everyone to the Supabase org |
 | Celso | Google sign-in, .edu check, profile creation, threat model (3 new rows to review) |
 | Edward | App shell, deal feed and deal page on mocks (theme done; see `/theme`) |
 | Adolfo | Dashboard layout, business onboarding, post-deal form on mocks |
@@ -29,6 +29,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 ## Blockers
 
 - **Everyone: review your team file.** Moses edited all five on 2026-10-24 (one-time exception, like setup) for the Activity 2 changes: new tasks, interview work, dependencies, and the week plan. Fix anything that's wrong in your own file.
+- **Everyone:** accept the Supabase org invite, then copy the Supabase URL and anon key into your `.env.local` (see README → Getting started). The service-role key stays with Moses.
 - Celso still needs to accept his GitHub invite; his issues stay unassigned until he does. **If he isn't active by Oct 26, Moses takes Google OAuth setup (#29)** so the Phase 1 gate isn't stuck.
 - Week 1 ends Oct 25 and most Week 1 tasks are open. Build on `mocks/`; don't wait on real tables.
 - Week 2 order for Moses (others build on mocks meanwhile): #101 and #102 first (Oct 26–27), then typed queries #16, then `redeem` / `redeem-pin` / `claim-club-night` / `set-pin`, then Realtime #17. Celso writes the rate-limit and PIN-hash helpers early in Week 2 so Moses's functions call them.
