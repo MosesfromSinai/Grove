@@ -1,9 +1,6 @@
 # Celso Lopez — Security and Auth
 
-> **Session reminder.** Full rules are in `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
-> - **Start:** pull `main`; read `CLAUDE.md`, `docs/STATUS.md`, and this file; catch up on teammates and their **Decision** lines in `docs/LOG.md`.
-> - **During:** tick tasks here as they finish; log decisions that affect others as **Decision** lines in your section of `docs/LOG.md`.
-> - **End:** add a dated Session log entry here and a line in your section of `docs/LOG.md`; commit them with your code.
+> Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
 _Last updated: 2026-10-24_
 
@@ -50,7 +47,7 @@ _Last updated: 2026-10-24_
 - [ ] `business_members` access: only staff of that business can call `staff-redeem` (#40)
 - [ ] Security test pass: try to redeem without being there, reuse a token, redeem twice in a day, read another business's stats, open a link-only deal off campus, claim the same club night twice; log results in the Security test log below (#41)
 
-_Feature freeze at the end of Nov 8: anything unfinished goes to the team to decide (finish quickly or move to the stretch goal)._
+_Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 
 ### Week 4 — Review, no new features (Nov 9–15)
 - [ ] Fix every failed test from #41, or record it as an accepted risk in the threat model (#42)
@@ -59,8 +56,8 @@ _Feature freeze at the end of Nov 8: anything unfinished goes to the team to dec
 
 ### Business
 - [ ] Competitor analysis in the shared Drive folder (Instagram, Yelp, Google Maps, coupon and student-discount apps); start from the Activity 2 competition table (#45)
-- [ ] 1–2 restaurant interviews testing hypotheses 1–4 (slow days, per-visit vs. flat fee, hosting club nights, trusting QR check-in); notes in the shared Drive folder (#46)
-- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder (#107)
+- [ ] 1–2 restaurant interviews (hypotheses 1–4, see `CLAUDE.md` → Business); notes in the shared Drive folder (#46)
+- [ ] At least one student interview (hypothesis 5, see `CLAUDE.md` → Business); notes in the shared Drive folder (#107)
 - [ ] Fill in your attendance cell on the effort table (#47)
 
 ---
