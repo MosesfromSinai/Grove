@@ -42,8 +42,9 @@ _Last updated: 2026-10-24_
 - [ ] Pin tap opens a bottom sheet: name, open/closed, distance, today's deal (#90)
 - [ ] Hide link-only deals from `deals_nearby` and the map (`visibility = 'public'` only) (#117)
 
-### Week 3 — Food trucks (Nov 2–8)
+### Week 3 — Food trucks and PWA install (Nov 2–8)
 - [ ] Food-truck location update ("I'm here now") (#94)
+- [ ] PWA `manifest.json` and app icons so Grove is installable without push (name, colors from the theme, icons in `public/`) (#119)
 
 _Feature freeze at the end of Nov 8: anything unfinished goes to the team to decide (finish quickly or move to the stretch goal)._
 
@@ -57,7 +58,7 @@ _Feature freeze at the end of Nov 8: anything unfinished goes to the team to dec
 - [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder (#118)
 
 ### Stretch goal (possible future implementation)
-- [ ] VAPID keys; `manifest.json`; `sw.js` service worker (#91)
+- [ ] VAPID keys; `sw.js` service worker for push (#91)
 - [ ] Subscription flow saving to `push_subscriptions` (#92)
 - [ ] `notify-deal`: when a deal goes live, push to subscribed students near the business (decide the radius, log it as a **Decision** in `LOG.md`) (#93)
 - [ ] Test push on iPhone (installed to home screen, iOS 16.4+) and Android (#95)
