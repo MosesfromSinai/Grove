@@ -344,5 +344,5 @@ Every error code needs a friendly message in the UI (Edward and Adolfo).
 ---
 
 ## Open questions
-- Staff-scan tokens: signed tokens with no table, or a short-lived `redemption_codes` table? (Moses + Celso)
+- Staff-scan tokens: signed tokens with no table, or a short-lived `redemption_codes` table? (Moses decides, Celso reviews, by Nov 1)
 - PIN attempts: how many tries before lockout? (Celso)
