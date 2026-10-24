@@ -10,6 +10,7 @@ _Last updated: 2026-10-24 by Moses_
 
 **Phase 1: Foundation** (week 1 of 4, Oct 19–25): sign-in, foundation, database.
 **Next gate:** Students can log in with a school Google account.
+**Production:** https://grove-jade.vercel.app (every PR also gets a preview link).
 
 Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove is, MVP scope, Week plan.
 
@@ -19,7 +20,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 
 | Person | Focus |
 |---|---|
-| Moses | **Today:** Supabase dev project (#6), then migrations (#7) by Oct 25 so Celso's sign-in isn't blocked. Then seed data, CI, Vercel. API contract is final; `mocks/` match it |
+| Moses | Supabase (#6) and Vercel (#13) are done. Next: migrations (#7) by Oct 25 so Celso's sign-in isn't blocked, then CI (#12) and seed data (#8). Share keys through the password manager |
 | Celso | Google sign-in, .edu check, profile creation, threat model (3 new rows to review) |
 | Edward | App shell, deal feed and deal page on mocks (theme done; see `/theme`) |
 | Adolfo | Dashboard layout, business onboarding, post-deal form on mocks |
