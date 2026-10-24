@@ -123,7 +123,7 @@ export const mockStaff = { id: "staff-marisol", business_id: "biz-opt" };
 // The signed-in owner for dashboard mocks (setPin, addStaff): owner of Orange Peel Tacos.
 export const mockOwner = { id: "owner-opt", business_id: "biz-opt" };
 
-export type MockMember = { business_id: string; user_id: string | null; email: string; role: "owner" | "staff" };
+type MockMember = { business_id: string; user_id: string | null; email: string; role: "owner" | "staff" };
 
 export const businessMembers: MockMember[] = [
   { business_id: "biz-opt", user_id: "owner-opt", email: "owner@orangepeeltacos.example", role: "owner" },
