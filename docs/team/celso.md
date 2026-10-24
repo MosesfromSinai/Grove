@@ -11,11 +11,11 @@ _Last updated: 2026-10-24_
 
 ## Role
 - **Engineering:** sign-in, student verification, database security rules, anti-fraud for redemptions, security testing. Reviews every change touching auth or RLS policies.
-- **Business:** competitor analysis; 1–2 customer interviews.
+- **Business:** competitor analysis; 1–2 restaurant interviews and at least one student interview.
 - **Design:** screen 1 (Sign in) on the [design canvas](https://claude.ai/artifact/9gApUhQQWpkU2FWTU27K1d). Tokens are in `CLAUDE.md` → Design reference.
 
 ## Owns
-`app/(auth)/`, `lib/auth/`, RLS policies in `supabase/migrations/` (Moses reviews), the threat model below.
+`app/(auth)/`, `lib/auth/`, RLS policies in `supabase/migrations/` (Moses reviews), the threat model below. You may edit the root routing in `app/page.tsx` for onboarding (Moses reviews).
 
 ## Depends on
 - **Moses:** tables (week 1) before RLS policies can be written; the redemption functions for rate limiting; `club_nights` and `claim-club-night` (week 2) for their RLS and claim rate limits.
@@ -24,36 +24,37 @@ _Last updated: 2026-10-24_
 - **Everyone:** Google sign-in by end of week 1 (Phase 1 gate).
 - **Moses:** `profiles` row created on sign-in.
 - **Adolfo:** business vs. student onboarding routing.
+- **Moses:** the rate-limit and PIN-hash helpers (early week 2) that `redeem`, `redeem-pin`, `set-pin`, and `claim-club-night` call.
 
 ---
 
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [ ] Set up Google OAuth in Google Cloud and Supabase Auth (#29)
-- [ ] Sign-in page (one button: "Sign in with your school Google account") (#30)
+- [ ] Set up Google OAuth in Google Cloud and Supabase Auth (needs the Supabase project, #6; if you aren't active by Oct 26, Moses takes this) (#29)
+- [ ] Sign-in page (canvas screen 1, one button: "Sign in with your school Google account"); business owners use the same Google sign-in with any account (#30)
 - [ ] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` (#31)
 - [ ] Database trigger to create a `profiles` row on first sign-in (#32)
-- [ ] Onboarding: route to student app or business onboarding (#33)
+- [ ] Onboarding: route to student app or business onboarding (root routing in `app/page.tsx`, Moses reviews) (#33)
 - [ ] Review the threat model below; add anything missing (#34)
 
 ### Week 2 — Lock down data (Oct 26–Nov 1)
-- [ ] RLS on every table, e.g. students read live deals and only their own redemptions; owners read only their own business's data; nobody inserts redemptions directly (only Edge Functions) (#35)
-- [ ] Hash `staff_pin`; never return it to the browser (#36)
-- [ ] Rate limits on `redeem` and `redeem-pin`; lockout after repeated bad PINs (#37)
+- [ ] RLS on every table, e.g. students select only public deals (link-only deals open only through `deal_by_id()`) and only their own redemptions; owners read only their own business's data; nobody inserts redemptions directly (only Edge Functions) (#35)
+- [ ] Hash `staff_pin`; never return it to the browser; write the PIN-hash helper early in week 2 so `redeem-pin` and `set-pin` use it (#36)
+- [ ] Rate limits on `redeem` and `redeem-pin`; lockout after repeated bad PINs (log the limit as a **Decision**); write the rate-limit helper early in week 2 so Moses's functions call it (#37)
 - [ ] Server-side sanity checks on location (reject impossible coordinates) (#38)
 - [ ] RLS for `club_nights`: businesses manage their own; students read open nights at their campus; only `claim-club-night` writes the claim columns; `claimed_by` never reaches the browser (#105)
 - [ ] Rate-limit club night claims (per student) in `claim-club-night` (#106)
+- [ ] Review the staff-scan token design with Moses (short-lived, signed, single use), agreed by Nov 1 (#39)
 
 ### Week 3 — Staff mode security (Nov 2–8)
-- [ ] Design staff-scan tokens with Moses (short-lived, signed, single use) (#39)
 - [ ] `business_members` access: only staff of that business can call `staff-redeem` (#40)
 - [ ] Security test pass: try to redeem without being there, reuse a token, redeem twice in a day, read another business's stats, open a link-only deal off campus, claim the same club night twice; log results in the Security test log below (#41)
 
 _Feature freeze at the end of Nov 8: anything unfinished goes to the team to decide (finish quickly or move to the stretch goal)._
 
 ### Week 4 — Review, no new features (Nov 9–15)
-- [ ] Fix findings from the test pass (#42)
+- [ ] Fix every failed test from #41, or record it as an accepted risk in the threat model (#42)
 - [ ] Check no secrets are in the repo or browser bundle (#43)
 - [ ] Competitor slide for the pitch (#44)
 
