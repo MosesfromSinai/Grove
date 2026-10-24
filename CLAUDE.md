@@ -70,7 +70,7 @@ Doc updates go in the same pull request as the code. **A session isn't finished 
 | Adolfo Magallanes | Business dashboard | `app/(business)`, `components/business` | Pilot outreach |
 | Hikaru Shimada | Maps and PWA install (push: stretch) | `app/(student)/map`, `components/map`, `lib/geo`, `public/manifest.json`, `public/icons/`, `deals_nearby` SQL; stretch: `lib/push`, `public/sw.js`, `notify-deal` | Lean Canvas, pricing |
 
-**Default owner:** Moses owns every file and folder not listed above (root config, `app/layout.tsx`, `app/page.tsx`, `app/theme/`, `components/ui/`, `lib/utils.ts`, `.github/`). Who edits each doc is in the File map below. Celso may edit the root routing in `app/page.tsx` for his onboarding task, with Moses reviewing.
+**Default owner:** Moses owns every file and folder not listed above (root config, `app/layout.tsx`, `app/page.tsx`, `app/theme/`, `components/ui/` (shared shadcn components; don't edit casually), `lib/utils.ts`, `.github/`). Who edits each doc is in the File map below. Celso may edit the root routing in `app/page.tsx` for his onboarding task, with Moses reviewing.
 
 Everyone does 1–2 restaurant interviews testing hypotheses 1–4 and at least one student interview for hypothesis 5 (see Business below).
 
