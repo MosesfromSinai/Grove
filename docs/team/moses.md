@@ -18,7 +18,7 @@ _Last updated: 2026-10-24_
 `supabase/migrations/`, `supabase/functions/redeem*`, `supabase/functions/issue-code`, `supabase/functions/staff-redeem`, `supabase/functions/claim-club-night`, `supabase/functions/set-pin`, `supabase/functions/add-staff`, `supabase/seed.sql`, `lib/supabase/`, `mocks/`, `docs/API_CONTRACT.md`, CI and Vercel setup, and every file not listed for someone else (root config, `app/layout.tsx`, `app/page.tsx`, `app/theme/`, `components/ui/`, `lib/utils.ts`, `.github/`).
 
 ## Depends on
-- **Celso:** sign-in and `profiles` creation (needed to know who the student is), RLS policies on your tables, RLS on `club_nights` and claim rate limits (week 2), and the rate-limit and PIN-hash helpers your functions call (early week 2).
+- **Celso:** sign-in and `profiles` creation (needed to know who the student is), RLS policies on your tables, RLS on `club_nights` and claim rate limits (week 2), the rate-limit and PIN-hash helpers your functions call (early week 2), and the `profiles` trigger (#32) that `add-staff` builds on to link invited staff (week 3).
 - **Hikaru:** `deals_nearby` SQL function (you review the migration).
 
 ## Others depend on you

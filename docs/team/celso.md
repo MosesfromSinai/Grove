@@ -22,9 +22,8 @@ _Last updated: 2026-10-24_
 
 ## Others depend on you
 - **Everyone:** Google sign-in by end of week 1 (Phase 1 gate).
-- **Moses:** `profiles` row created on sign-in.
+- **Moses:** `profiles` row created on sign-in (his `add-staff` links invited staff on their first sign-in, week 3), and the rate-limit and PIN-hash helpers (early week 2) that `redeem`, `redeem-pin`, `set-pin`, and `claim-club-night` call.
 - **Adolfo:** business vs. student onboarding routing.
-- **Moses:** the rate-limit and PIN-hash helpers (early week 2) that `redeem`, `redeem-pin`, `set-pin`, and `claim-club-night` call.
 
 ---
 
