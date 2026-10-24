@@ -5,7 +5,7 @@
 > - **During:** tick tasks here as they finish; log decisions that affect others as **Decision** lines in your section of `docs/LOG.md`.
 > - **End:** add a dated Session log entry here and a line in your section of `docs/LOG.md`; commit them with your code.
 
-_Last updated: 2026-10-20_
+_Last updated: 2026-10-24_
 
 ---
 
@@ -20,9 +20,12 @@ _Last updated: 2026-10-20_
 ## Depends on
 - **Celso:** sign-in and `profiles` creation (needed to know who the student is), RLS policies on your tables.
 - **Hikaru:** `deals_nearby` SQL function (you review the migration).
+- **Celso:** RLS on `club_nights` and rate limits on `claim-club-night` (week 2).
 
 ## Others depend on you
 Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and real tables by end of week 1. **This is the critical path.**
+- **Adolfo and Edward:** `club_nights`, the live-now check, and `claim-club-night` by end of week 2, for their week 3 club night screens.
+- **Edward and Hikaru:** the `visibility` column and `deal_status()` (week 2) to hide link-only deals and show repeating deals at the right times.
 
 ---
 
@@ -46,19 +49,22 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 - [x] Scaffold Next.js (App Router, TypeScript strict, Tailwind, shadcn/ui) with the folder layout from the README (#5)
 - [ ] Create Supabase dev project; enable PostGIS (#6)
 - [ ] Migrations for `campuses`, `profiles`, `businesses`, `business_members`, `deals`, `redemptions`, `push_subscriptions`, including the unique rule on `(student_id, deal_id, redeemed_on)` (#7)
-- [ ] `seed.sql` with UCR campus and invented sample businesses and deals (#8)
+- [ ] `seed.sql` with UCR campus and invented sample businesses and deals, plus one Mon–Wed repeating deal and one open club night (same as `mocks/`) (#8)
 - [x] `mocks/` matching `API_CONTRACT.md` (day 1–3) (#9)
-- [ ] Finalize `API_CONTRACT.md` with the team by Oct 21; change status from DRAFT (gaps filled 2026-10-20) (#10)
+- [x] Finalize `API_CONTRACT.md`; change status from DRAFT (final 2026-10-24, with repeat days, link-only deals, club nights) (#10)
 - [ ] `.env.example`; keys reach teammates only through `vercel env pull` (#11)
 - [ ] GitHub Actions: lint, type check, build (#12)
 - [ ] Connect Vercel; preview deploy per PR (#13)
 
-### Week 2 — Core loop (Oct 26–Nov 1)
+### Week 2 — Core loop and data (Oct 26–Nov 1)
 - [ ] `redeem` Edge Function: sticker belongs to business, deal live, within ~150 m (PostGIS `ST_DWithin`), daily limit, returns `ErrorCode` on failure (#14)
 - [ ] `redeem-pin` Edge Function (hashed PIN check, with Celso) (#15)
 - [ ] Typed queries in `lib/supabase/` for every function in the contract (#16)
 - [ ] Enable Realtime on `redemptions` for dashboards (#17)
 - [ ] Run the week-2 gate test: one printed sticker, two phones (#18)
+- [ ] Migration: `active_days`, `daily_start`, `daily_end`, `visibility` on `deals`; `timezone` on `campuses`; `club_nights` table
+- [ ] Live-now check with repeat days: one `deal_status()` SQL function used by `redeem`, `redeem-pin`, `issue-code`, `staff-redeem`, `deals_nearby`, and RLS
+- [ ] `claim-club-night` Edge Function: one claim per night (conditional update), creates the link-only deal, returns `ALREADY_CLAIMED` / `CLUB_NIGHT_EXPIRED` / `NOT_SIGNED_IN`
 
 ### Week 3 — Staff mode and stats (Nov 2–8)
 - [ ] Agree staff-scan token design with Celso; log it as a **Decision** in `LOG.md` (#19)
@@ -66,14 +72,17 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 - [ ] `getBusinessStats` SQL (per deal, per hour) (#21)
 - [ ] Sentry for app and functions (#22)
 
-### Week 4 — Pilot and demo (Nov 9–15)
+_Feature freeze at the end of Nov 8: anything unfinished goes to the team to decide (finish quickly or move to the stretch goal)._
+
+### Week 4 — Pilot and demo, no new features (Nov 9–15)
 - [ ] Production Supabase project; migrate; real campus data only (#23)
 - [ ] Pilot support and bug fixes (#24)
 - [ ] Demo script (sticker redemption live on stage) (#25)
 - [ ] Pitch deck (#26)
 
 ### Business
-- [ ] 1–2 customer interviews; notes in the shared Drive folder (#27)
+- [ ] 1–2 restaurant interviews testing hypotheses 1–4 (slow days, per-visit vs. flat fee, hosting club nights, trusting QR check-in); notes in the shared Drive folder (#27)
+- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder
 - [ ] Pitch deck built from real interview numbers (#28)
 
 ---
