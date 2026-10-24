@@ -27,7 +27,7 @@ Update files **as things happen**, not only at the end:
 - **Decision made:** if it affects someone else, add it right away as a line in the person's own section of `docs/LOG.md` (or Team, if made together), tagged **Decision** with who it affects: `- **2026-10-20:** **Decision** (affects Hikaru, Edward): getDealsNearby returns businesses with no deal; id is now deal_id.` Decisions that only affect the person go in their team file's notes.
 - **Table, column, or function input/output changed:** update `docs/API_CONTRACT.md` and `mocks/` in the same change. Moses reviews it; tell anyone it affects.
 - **New blocker:** add it to the person's file and to `docs/STATUS.md`.
-- **Feature works:** suggest a small PR and merge into `main`, and say why (see Git workflow).
+- **Feature works:** see Git workflow → Merge into `main` often.
 
 ### End
 Before stopping, update:
@@ -71,8 +71,6 @@ Doc updates go in the same pull request as the code. **A session isn't finished 
 | Hikaru Shimada | Maps and PWA install (push: stretch) | `app/(student)/map`, `components/map`, `lib/geo`, `public/manifest.json`, `public/icons/`, `deals_nearby` SQL; stretch: `lib/push`, `public/sw.js`, `notify-deal` | Lean Canvas, pricing |
 
 **Default owner:** Moses owns every file and folder not listed above (root config, `app/layout.tsx`, `app/page.tsx`, `app/theme/`, `components/ui/` (shared shadcn components; don't edit casually), `lib/utils.ts`, `.github/`). Who edits each doc is in the File map below. Celso may edit the root routing in `app/page.tsx` for his onboarding task, with Moses reviewing.
-
-Everyone does 1–2 restaurant interviews testing hypotheses 1–4 and at least one student interview for hypothesis 5 (see Business below).
 
 ## MVP scope
 
@@ -176,7 +174,6 @@ Use the Tailwind class name with any color utility (`bg-green`, `text-ink-muted`
 
 ## Git workflow (keep it light)
 
-- **Start of every session:** see Session protocol, step 1.
 - **One branch per feature**, named `name/feature` (e.g. `edward/deal-feed`). A feature usually covers a few related tasks. One branch open at a time, about 1–2 a week; merge and delete it before starting the next. No extra branches for experiments or doc-only changes; doc updates ride along with the code.
 - **Commits:** short, plain, present tense, under ~50 characters: `Add deal feed`, `Fix PIN lockout`. No body unless something truly needs explaining. No emojis or file-by-file summaries.
 - **No attribution:** no `Co-Authored-By` lines, "Generated with" lines, or AI mentions in commits, PRs, or branch names. Each person turns this off once in their own Claude Code settings (`~/.claude/settings.json` on their computer, not in the repo): `"attribution": { "commit": "", "pr": "" }`. The repo ignores `.claude/`.
