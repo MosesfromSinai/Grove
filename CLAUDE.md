@@ -2,7 +2,7 @@
 
 This file is the shared memory for every team member's AI sessions. Claude Code reads it automatically from the repo root. In claude.ai, paste or attach it at the start of each session along with the files listed under **Session protocol**. **All shared rules live here and only here.** Team files hold personal tasks, notes, and logs.
 
-_Last updated: 2026-10-20 by Moses_
+_Last updated: 2026-10-24 by Moses_
 
 ---
 
@@ -170,7 +170,7 @@ Use the Tailwind class name with any color utility (`bg-green`, `text-ink-muted`
 - **Shape:** cards 22–24px radius, buttons 14–18px, pills and chips fully rounded (999px). Soft shadow `0 2px 12px rgba(26,32,25,0.07)`. Classes: `rounded-card` (24px), `rounded-button` (16px), `rounded-pill`, `shadow-card`.
 - **Sizes:** phone screens 390×844; dashboard is fluid at 1440 wide and stacks on phones. Touch targets at least 44px.
 - **Icons:** inline stroke SVG icons (stroke width about 2), no emoji. Food illustrations are flat SVG on colored tiles.
-- **Not on the canvas yet** (build in the same style): the staff-scan screens (show-your-code, staff scanner) and the redemption mode selector.
+- **Not on the canvas yet** (build in the same style): the staff-scan screens (show-your-code, staff scanner), the redemption mode selector, the post-club-night form (dashboard), the claim-club-night screen (student app), and the repeat-days controls on the post-deal form (day checkboxes and daily start/end time).
 
 ## Git workflow (keep it light)
 
