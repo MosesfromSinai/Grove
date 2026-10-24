@@ -38,7 +38,7 @@ _Last updated: 2026-10-24_
 
 ### Week 2 — Live data, stickers, repeat days (Oct 26–Nov 1)
 - [ ] Wire onboarding, posting, and My deals to real tables (#73)
-- [ ] Repeat days and visibility on the post-deal form: day checkboxes, daily start/end time, public or link-only (while wiring it to real tables)
+- [ ] Repeat days and visibility on the post-deal form: day checkboxes, daily start/end time, public or link-only (while wiring it to real tables) (#112)
 - [ ] Printable sticker: QR of `grove.app/b/<qr_slug>` via `qrcode`, Grove branding, "Scan in the Grove app to redeem," download as PDF or PNG (#74)
 - [ ] Overview page: today's and this week's redemptions, active deals, live visit feed via Realtime (#75)
 
@@ -46,9 +46,9 @@ _Last updated: 2026-10-24_
 - [ ] Stats: redemptions per deal and busiest hours (Recharts) (#76)
 - [ ] Redemption settings: Sticker vs. Staff scan selector, show/reset store PIN (#77)
 - [ ] Staff scanner: camera via `html5-qrcode`, calls `staff-redeem`, green "Verified" or red "Not valid" with reason, "Scan next" (#78)
-- [ ] Post an open club night: date, time window, giveback text (e.g. "15% back to your club")
-- [ ] Club night results on the dashboard: claimed club name and verified visits per night
-- [ ] Deal link and QR download for flyers and group chats (`/deals/<id>`; it opens the deal only, never redeems)
+- [ ] Post an open club night: date, time window, giveback text (e.g. "15% back to your club") (#113)
+- [ ] Club night results on the dashboard: claimed club name and verified visits per night (#114)
+- [ ] Deal link and QR download for flyers and group chats (`/deals/<id>`; it opens the deal only, never redeems) (#115)
 
 _Feature freeze at the end of Nov 8: anything unfinished goes to the team to decide (finish quickly or move to the stretch goal)._
 
@@ -60,7 +60,7 @@ _Feature freeze at the end of Nov 8: anything unfinished goes to the team to dec
 ### Business
 - [ ] Pilot outreach: contact local businesses near UCR, track in the shared Drive folder, aim for 2–3 signed; first deal free for pilot restaurants (#82)
 - [ ] 1–2 restaurant interviews testing hypotheses 1–4 (slow days, per-visit vs. flat fee, hosting club nights, trusting QR check-in); notes in the shared Drive folder (#83)
-- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder
+- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder (#116)
 
 ---
 
