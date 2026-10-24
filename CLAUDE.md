@@ -89,12 +89,12 @@ Everyone does 1–2 restaurant interviews testing hypotheses 1–4 and at least 
 
 ## Week plan
 
-| Week | Focus |
-|---|---|
-| 1 (Oct 19–25) | Sign-in, foundation, database |
-| 2 (Oct 26–Nov 1) | Core loop, scan-to-redeem end to end, plus all the data work: repeat days, visibility, `club_nights`, live-now check, `claim-club-night`; link-only deals hidden from feed and map |
-| 3 (Nov 2–8) | Every remaining feature: staff scan, club night screens (post, claim, results), deal link and QR download, stats |
-| 4 (Nov 9–15) | **No new features.** Pilot at a real restaurant, phone testing, bug fixes, demo prep |
+| Week | Focus | Gate to pass |
+|---|---|---|
+| 1 (Oct 19–25) | Sign-in, foundation, database | Students can log in with a school Google account |
+| 2 (Oct 26–Nov 1) | Core loop, scan-to-redeem end to end, plus all the data work: repeat days, visibility, `club_nights`, live-now check, `claim-club-night`; link-only deals hidden from feed and map | First test redemption (one sticker, two phones); a link-only deal stays out of the feed and map |
+| 3 (Nov 2–8) | Every remaining feature: staff scan, club night screens (post, claim, results), deal link and QR download, stats | Staff-scan redemption works; a club claims a club night and a member redeems from its link |
+| 4 (Nov 9–15) | **No new features.** Pilot at a real restaurant, phone testing, bug fixes, demo prep | First real redemption at a business near UCR |
 
 **Feature freeze at the end of Nov 8.** Anything unfinished then goes to the team to decide: finish quickly or move to the stretch goal.
 
