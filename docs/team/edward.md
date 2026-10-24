@@ -5,7 +5,7 @@
 > - **During:** tick tasks here as they finish; log decisions that affect others as **Decision** lines in your section of `docs/LOG.md`.
 > - **End:** add a dated Session log entry here and a line in your section of `docs/LOG.md`; commit them with your code.
 
-_Last updated: 2026-10-19_
+_Last updated: 2026-10-24_
 
 ---
 
@@ -18,12 +18,13 @@ _Last updated: 2026-10-19_
 `app/(student)/` (except `map/`), `app/b/[slug]/`, `components/student/`, Tailwind theme config.
 
 ## Depends on
-- **Moses:** `mocks/` (day 1–3), real queries (end of week 1), `redeem` (week 2), `issue-code` (week 3).
+- **Moses:** `mocks/` (day 1–3), real queries (end of week 1), `redeem` (week 2), `claim-club-night` and `getOpenClubNights` (week 2, for your week 3 claim screen), `issue-code` (week 3).
 - **Celso:** signed-in student session.
 - **Hikaru:** map tab lives in your tab bar; agree on the deal card component so map bottom sheets and the feed match.
 
 ## Others depend on you
-- **Adolfo and Hikaru:** the theme (colors, type, card styles) in week 1.
+- **Hikaru:** the deal card component, so map bottom sheets and the feed match. (The theme is done; see `/theme`.)
+- **Adolfo:** the deal page at `/deals/<id>`, which his deal link and QR download point to.
 
 ---
 
@@ -36,7 +37,7 @@ _Last updated: 2026-10-19_
 - [ ] Deals feed on mocks: photo, business, title, distance, countdown, "UCR students only" tag (#51)
 - [ ] Deal detail page with the orange "Redeem in store" button (#52)
 
-### Week 2 — Sticker redemption (Oct 26–Nov 1)
+### Week 2 — Sticker redemption and link-only deals (Oct 26–Nov 1)
 - [ ] Scanner page with `html5-qrcode` (not the built-in detector; Safari lacks it) (#53)
 - [ ] Ask for location before scanning; clear message if denied, with the PIN backup link (#54)
 - [ ] Call `redeem`; show a friendly message for every `ErrorCode` (#55)
@@ -44,21 +45,29 @@ _Last updated: 2026-10-19_
 - [ ] Sticker landing page `/b/[slug]`: live deals, or "No deals right now, follow for alerts" (#57)
 - [ ] PIN entry screen calling `redeem-pin` (#58)
 - [ ] Swap mocks for real queries (#59)
+- [ ] Hide link-only deals from the feed and the sticker landing page (public deals only)
+- [ ] Open link-only deals from their link: `/deals/<id>` works for public and link-only deals
 
-### Week 3 — Staff mode and profile (Nov 2–8)
+### Week 3 — Staff mode, club nights, profile (Nov 2–8)
 - [ ] Show-your-code screen: QR from `issue-code`, refreshes every ~30 s with a countdown, screen stays bright (#60)
 - [ ] Switch to Redeemed screen when the staff scan lands (Realtime) (#61)
-- [ ] Profile: name, school, notification toggle, past redemptions, sign out (#62)
-- [ ] "Add to Home Screen" prompt (needed for iPhone push) (#63)
+- [ ] Profile: name, school, past redemptions, sign out (#62)
+- [ ] Claim a club night: list open club nights, type the club name, claim, then show the link and QR to share with members
 
-### Week 4 — Polish (Nov 9–15)
+_Feature freeze at the end of Nov 8: anything unfinished goes to the team to decide (finish quickly or move to the stretch goal)._
+
+### Week 4 — Polish, no new features (Nov 9–15)
 - [ ] Test on iPhone Safari and Android Chrome over HTTPS (#64)
 - [ ] Loading, empty, and offline states (#65)
 - [ ] Accessibility: contrast, tap targets, screen reader labels (#66)
 
 ### Business
 - [ ] Student survey: how students find food deals now, which apps they check, would they use Grove. Results in the shared Drive folder (#67)
-- [ ] 1–2 customer interviews; notes in the shared Drive folder (#68)
+- [ ] 1–2 restaurant interviews testing hypotheses 1–4 (slow days, per-visit vs. flat fee, hosting club nights, trusting QR check-in); notes in the shared Drive folder (#68)
+- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder
+
+### Stretch goal (possible future implementation)
+- [ ] "Add to Home Screen" prompt (needed for iPhone push) (#63)
 
 ---
 
