@@ -2,10 +2,13 @@
 // Same names, inputs, and return types, so swapping to the real ones is an import change.
 // State lives in memory and resets on page reload.
 
-import { dealStatus } from "../lib/supabase/deal-status";
+import { campusClock, dealStatus, liveUntil } from "../lib/supabase/deal-status";
 import type {
   BusinessPublic,
   BusinessStats,
+  ClaimClubNightResult,
+  ClubNight,
+  OpenClubNight,
   Deal,
   DealCard,
   DealDetail,
@@ -18,12 +21,14 @@ import type {
 } from "../lib/supabase/types";
 import {
   businesses,
+  clubNights,
   deals,
   mockStaff,
   mockStudent,
   orangePeelStats,
   redemptions,
   type MockBusiness,
+  type MockClubNight,
   type MockDeal,
   type MockRedemption,
 } from "./data";
@@ -57,7 +62,7 @@ function localDate(iso: string): string {
 }
 
 function toDeal(d: MockDeal): Deal {
-  return { ...d, status: dealStatus(d.starts_at, d.ends_at) };
+  return { ...d, status: dealStatus(d) };
 }
 
 function toBusinessPublic(b: MockBusiness): BusinessPublic {
@@ -135,7 +140,7 @@ export async function getDealsNearby(input: {
       distance_m,
       open_now: b.open_now,
     };
-    const live = deals.filter((d) => d.business_id === b.id && dealStatus(d.starts_at, d.ends_at) === "live");
+    const live = deals.filter((d) => d.business_id === b.id && d.visibility === "public" && dealStatus(d) === "live");
     for (const d of live) {
       rows.push({
         ...base,
@@ -145,6 +150,7 @@ export async function getDealsNearby(input: {
         discount_type: d.discount_type,
         discount_value: d.discount_value,
         ends_at: d.ends_at,
+        live_until: liveUntil(d) ?? "",
         students_only: d.students_only,
         photo_url: d.photo_url,
       });
@@ -158,6 +164,7 @@ export async function getDealsNearby(input: {
         discount_type: null,
         discount_value: null,
         ends_at: null,
+        live_until: null,
         students_only: null,
         photo_url: null,
       });
@@ -185,7 +192,7 @@ export async function getBusinessBySlug(input: {
   const liveDeals = deals
     .filter((d) => d.business_id === b.id)
     .map(toDeal)
-    .filter((d) => d.status === "live");
+    .filter((d) => d.status === "live" && d.visibility === "public");
   return delay({ business: toBusinessPublic(b), liveDeals });
 }
 
@@ -219,7 +226,10 @@ export async function getMyDeals(input: { businessId: string }): Promise<MyDeal[
   );
   const mine = deals
     .filter((d) => d.business_id === input.businessId)
-    .map((d) => ({ ...toDeal(d), redemption_count: counts.get(d.id) ?? 0 }))
+    .map((d) => ({
+      ...toDeal(d),
+      redemption_count: counts.get(d.id) ?? redemptions.filter((r) => r.deal_id === d.id).length,
+    }))
     .sort((a, b) => b.starts_at.localeCompare(a.starts_at));
   return delay(mine);
 }
@@ -236,7 +246,7 @@ export async function redeem(input: {
   if (!d) return delay({ ok: false, error: "DEAL_NOT_LIVE" });
   const b = businessById(d.business_id);
   if (b.qr_slug !== input.qr_slug) return delay({ ok: false, error: "WRONG_BUSINESS" });
-  if (dealStatus(d.starts_at, d.ends_at) !== "live") return delay({ ok: false, error: "DEAL_NOT_LIVE" });
+  if (dealStatus(d) !== "live") return delay({ ok: false, error: "DEAL_NOT_LIVE" });
   if (input.lat === null || input.lng === null) return delay({ ok: false, error: "LOCATION_REQUIRED" });
   if (distanceM(input.lat, input.lng, b.lat, b.lng) > REDEEM_RADIUS_M) return delay({ ok: false, error: "TOO_FAR" });
   if (redeemedToday(d.id)) return delay({ ok: false, error: "ALREADY_REDEEMED_TODAY" });
@@ -245,7 +255,7 @@ export async function redeem(input: {
 
 export async function redeemPin(input: { deal_id: string; business_id: string; pin: string }): Promise<RedeemResult> {
   const d = deals.find((x) => x.id === input.deal_id && x.business_id === input.business_id);
-  if (!d || dealStatus(d.starts_at, d.ends_at) !== "live") return delay({ ok: false, error: "DEAL_NOT_LIVE" });
+  if (!d || dealStatus(d) !== "live") return delay({ ok: false, error: "DEAL_NOT_LIVE" });
   if (businessById(d.business_id).staff_pin !== input.pin) return delay({ ok: false, error: "BAD_PIN" });
   if (redeemedToday(d.id)) return delay({ ok: false, error: "ALREADY_REDEEMED_TODAY" });
   return delay({ ok: true, redemption: record(d, "pin") });
@@ -255,7 +265,7 @@ const codes = new Map<string, { deal_id: string; expires: number }>();
 
 export async function issueCode(input: { deal_id: string }): Promise<IssueCodeResult> {
   const d = deals.find((x) => x.id === input.deal_id);
-  if (!d || dealStatus(d.starts_at, d.ends_at) !== "live") return delay({ ok: false, error: "DEAL_NOT_LIVE" });
+  if (!d || dealStatus(d) !== "live") return delay({ ok: false, error: "DEAL_NOT_LIVE" });
   if (redeemedToday(d.id)) return delay({ ok: false, error: "ALREADY_REDEEMED_TODAY" });
   const token = `mock-${Math.random().toString(36).slice(2, 12)}`;
   const expires = Date.now() + CODE_TTL_MS;
@@ -269,7 +279,7 @@ export async function staffRedeem(input: { token: string }): Promise<StaffRedeem
   const d = deals.find((x) => x.id === code.deal_id);
   if (!d) return delay({ ok: false, error: "CODE_EXPIRED" });
   if (d.business_id !== mockStaff.business_id) return delay({ ok: false, error: "NOT_STAFF" });
-  if (dealStatus(d.starts_at, d.ends_at) !== "live") return delay({ ok: false, error: "DEAL_NOT_LIVE" });
+  if (dealStatus(d) !== "live") return delay({ ok: false, error: "DEAL_NOT_LIVE" });
   if (redeemedToday(d.id)) return delay({ ok: false, error: "ALREADY_REDEEMED_TODAY" });
   codes.delete(input.token); // single use
   return delay({ ok: true, redemption: record(d, "staff_scan"), deal_title: d.title });
@@ -277,6 +287,82 @@ export async function staffRedeem(input: { token: string }): Promise<StaffRedeem
 
 export async function notifyDeal(input: { deal_id: string }): Promise<NotifyDealResult> {
   const d = deals.find((x) => x.id === input.deal_id);
-  if (!d || dealStatus(d.starts_at, d.ends_at) !== "live") return delay({ ok: false, error: "DEAL_NOT_LIVE" });
+  if (!d || dealStatus(d) !== "live") return delay({ ok: false, error: "DEAL_NOT_LIVE" });
   return delay({ ok: true, sent: 12 });
 }
+
+// ---------- Club nights ----------
+
+function clubNightStatus(c: MockClubNight): ClubNight["status"] {
+  if (c.claimed_club_name) return "claimed";
+  return Date.now() >= new Date(c.ends_at).getTime() ? "expired" : "open";
+}
+
+function toOpenClubNight(c: MockClubNight): OpenClubNight {
+  return {
+    id: c.id,
+    business_id: c.business_id,
+    business_name: businessById(c.business_id).name,
+    night_date: c.night_date,
+    start_time: c.start_time,
+    end_time: c.end_time,
+    giveback: c.giveback,
+  };
+}
+
+function toClubNight(c: MockClubNight): ClubNight {
+  return {
+    ...toOpenClubNight(c),
+    status: clubNightStatus(c),
+    claimed_club_name: c.claimed_club_name,
+    claimed_at: c.claimed_at,
+    deal_id: c.deal_id,
+    visit_count: c.deal_id ? redemptions.filter((r) => r.deal_id === c.deal_id).length : 0,
+  };
+}
+
+// Open club nights students can claim, soonest first.
+export async function getOpenClubNights(): Promise<OpenClubNight[]> {
+  const open = clubNights
+    .filter((c) => clubNightStatus(c) === "open")
+    .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+  return delay(open.map(toOpenClubNight));
+}
+
+// A business's club nights with verified visits, newest first.
+export async function getClubNights(input: { businessId: string }): Promise<ClubNight[]> {
+  const mine = clubNights
+    .filter((c) => c.business_id === input.businessId)
+    .sort((a, b) => b.starts_at.localeCompare(a.starts_at));
+  return delay(mine.map(toClubNight));
+}
+
+export async function claimClubNight(input: { club_night_id: string; club_name: string }): Promise<ClaimClubNightResult> {
+  const c = clubNights.find((x) => x.id === input.club_night_id);
+  if (!c || clubNightStatus(c) === "expired") return delay({ ok: false, error: "CLUB_NIGHT_EXPIRED" });
+  if (c.claimed_club_name) return delay({ ok: false, error: "ALREADY_CLAIMED" });
+  const club = input.club_name.trim();
+  const deal_id = `deal-${c.id}-${Date.now()}`;
+  deals.push({
+    id: deal_id,
+    business_id: c.business_id,
+    title: `${club} night`,
+    description: `${c.giveback} (to ${club}).`,
+    discount_type: null,
+    discount_value: null,
+    photo_url: null,
+    starts_at: c.starts_at,
+    ends_at: c.ends_at,
+    active_days: null,
+    daily_start: null,
+    daily_end: null,
+    visibility: "link_only",
+    students_only: true,
+    created_at: new Date().toISOString(),
+  });
+  Object.assign(c, { claimed_club_name: club, claimed_by: mockStudent.id, claimed_at: new Date().toISOString(), deal_id });
+  return delay({ ok: true, club_night: toClubNight(c), deal_id });
+}
+
+// Campus date and time right now, handy for showing "today" on club night screens.
+export const campusNow = () => campusClock(new Date());
