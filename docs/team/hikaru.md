@@ -1,4 +1,4 @@
-# Hikaru Shimada — Maps and Notifications
+# Hikaru Shimada — Maps and PWA Install
 
 > **Session reminder.** Full rules are in `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 > - **Start:** pull `main`; read `CLAUDE.md`, `docs/STATUS.md`, and this file; catch up on teammates and their **Decision** lines in `docs/LOG.md`.
@@ -10,21 +10,21 @@ _Last updated: 2026-10-24_
 ---
 
 ## Role
-- **Engineering:** map, location, "deals near me" queries and filters, food-truck locations, Web Push from subscription to sending.
-- **Business:** Lean Canvas, pricing, business model; 1–2 customer interviews.
-- **Design:** screens 2 (Alerts prompt) and 3 (Map) on the [design canvas](https://claude.ai/artifact/9gApUhQQWpkU2FWTU27K1d). Tokens are in `CLAUDE.md` → Design reference.
+- **Engineering:** map, location, "deals near me" queries and filters, food-truck locations, PWA install (manifest and icons). Web Push is a stretch goal.
+- **Business:** Lean Canvas, pricing, business model; 1–2 restaurant interviews and at least one student interview.
+- **Design:** screens 3 (Map) and 2 (Alerts prompt, a stretch goal with push) on the [design canvas](https://claude.ai/artifact/9gApUhQQWpkU2FWTU27K1d). Tokens are in `CLAUDE.md` → Design reference.
 
 ## Owns
-`app/(student)/map/`, `components/map/`, `lib/geo/`, `lib/push/`, `public/sw.js`, `public/manifest.json`, `supabase/functions/notify-deal`, the `deals_nearby` SQL function (Moses reviews the migration).
+`app/(student)/map/`, `components/map/`, `lib/geo/`, `public/manifest.json`, `public/icons/`, the `deals_nearby` SQL function (Moses reviews the migration). Stretch goal: `lib/push/`, `public/sw.js`, `supabase/functions/notify-deal`.
 
 ## Depends on
 - **Moses:** `mocks/`, tables (end of week 1); the `visibility` column and `deal_status()` (week 2).
 - **Edward:** deal card component. (The theme is done; the install prompt only matters for push, now a stretch goal.)
-- **Adolfo:** where the food-truck location button lives.
+- **Adolfo:** places your "I'm here now" button on the dashboard (week 3).
 
 ## Others depend on you
 - **Edward:** `getDealsNearby` for the feed (distance and open-now come from your query).
-- **Moses:** `ST_DWithin` pattern for the redemption distance check (share it).
+- **Adolfo:** the "I'm here now" button component (week 3), which he places on the dashboard.
 
 ---
 
@@ -43,13 +43,13 @@ _Last updated: 2026-10-24_
 - [ ] Hide link-only deals from `deals_nearby` and the map (`visibility = 'public'` only) (#117)
 
 ### Week 3 — Food trucks and PWA install (Nov 2–8)
-- [ ] Food-truck location update ("I'm here now") (#94)
+- [ ] Food-truck "I'm here now": a button component in `components/map/` that updates the business's `location`; Adolfo places it on the dashboard (#94)
 - [ ] PWA `manifest.json` and app icons so Grove is installable without push (name, colors from the theme, icons in `public/`) (#119)
 
 _Feature freeze at the end of Nov 8: anything unfinished goes to the team to decide (finish quickly or move to the stretch goal)._
 
 ### Week 4 — Polish, no new features (Nov 9–15)
-- [ ] Map performance with many pins; polish (#96)
+- [ ] Map stays smooth with 100 test pins; polish (#96)
 
 ### Business
 - [ ] Fill the blank Lean Canvas boxes: Key Metrics, Unfair Advantage, Channels, Cost Structure, Revenue Streams, Project Name (#97)
