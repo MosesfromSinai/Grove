@@ -1,9 +1,6 @@
 # Adolfo Magallanes — Business Dashboard
 
-> **Session reminder.** Full rules are in `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
-> - **Start:** pull `main`; read `CLAUDE.md`, `docs/STATUS.md`, and this file; catch up on teammates and their **Decision** lines in `docs/LOG.md`.
-> - **During:** tick tasks here as they finish; log decisions that affect others as **Decision** lines in your section of `docs/LOG.md`.
-> - **End:** add a dated Session log entry here and a line in your section of `docs/LOG.md`; commit them with your code.
+> Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
 _Last updated: 2026-10-24_
 
@@ -51,7 +48,7 @@ _Last updated: 2026-10-24_
 - [ ] Deal link and QR download for flyers and group chats (`/deals/<id>`; it opens the deal only, never redeems) (#115)
 - [ ] Staff list in settings: add staff by Google email (`add-staff`), see invited vs. active (`getStaff`), remove staff (#122)
 
-_Feature freeze at the end of Nov 8: anything unfinished goes to the team to decide (finish quickly or move to the stretch goal)._
+_Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 
 ### Week 4 — Pilot, no new features (Nov 9–15)
 - [ ] Onboard pilot businesses in person; print and place stickers (#79)
@@ -60,8 +57,8 @@ _Feature freeze at the end of Nov 8: anything unfinished goes to the team to dec
 
 ### Business
 - [ ] Pilot outreach: contact local businesses near UCR, track in the shared Drive folder, aim for 2–3 signed, at least one by Nov 6 for the Week 4 pilot; first deal free for pilot restaurants (#82)
-- [ ] 1–2 restaurant interviews testing hypotheses 1–4 (slow days, per-visit vs. flat fee, hosting club nights, trusting QR check-in); notes in the shared Drive folder (#83)
-- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder (#116)
+- [ ] 1–2 restaurant interviews (hypotheses 1–4, see `CLAUDE.md` → Business); notes in the shared Drive folder (#83)
+- [ ] At least one student interview (hypothesis 5, see `CLAUDE.md` → Business); notes in the shared Drive folder (#116)
 
 ---
 
