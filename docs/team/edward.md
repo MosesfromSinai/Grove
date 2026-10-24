@@ -10,12 +10,12 @@ _Last updated: 2026-10-24_
 ---
 
 ## Role
-- **Engineering:** every student screen except the map: feed, deal page, both redemption flows, Redeemed screen, profile, install prompt, sticker landing page. Also the shared Tailwind theme.
-- **Business:** student survey; 1–2 customer interviews.
-- **Design:** screens 4 (Deals feed), 5 (Deal detail), 6 (Scan), 7 (Redeemed), 8a/8b (No deals, Already used), and 9 (Profile) on the [design canvas](https://claude.ai/artifact/9gApUhQQWpkU2FWTU27K1d). The show-your-code screen isn't drawn yet; build it in the same style. Tokens are in `CLAUDE.md` → Design reference.
+- **Engineering:** every student screen except the map: feed, deal page, both redemption flows, Redeemed screen, profile, sticker landing page, club night claim screen (the install prompt is a stretch goal). Also the shared Tailwind theme.
+- **Business:** student survey; 1–2 restaurant interviews and at least one student interview.
+- **Design:** screens 4 (Deals feed), 5 (Deal detail), 6 (Scan), 7 (Redeemed), 8a/8b (No deals, Already used), and 9 (Profile) on the [design canvas](https://claude.ai/artifact/9gApUhQQWpkU2FWTU27K1d). The show-your-code and claim-club-night screens aren't drawn yet; build them in the same style. Tokens are in `CLAUDE.md` → Design reference.
 
 ## Owns
-`app/(student)/` (except `map/`), `app/b/[slug]/`, `components/student/`, Tailwind theme config.
+`app/(student)/` (except `map/`), `app/b/[slug]/`, `components/student/`, the theme in `app/globals.css`.
 
 ## Depends on
 - **Moses:** `mocks/` (day 1–3), real queries (end of week 1), `redeem` (week 2), `claim-club-night` and `getOpenClubNights` (week 2, for your week 3 claim screen), `issue-code` (week 3).
@@ -42,7 +42,7 @@ _Last updated: 2026-10-24_
 - [ ] Ask for location before scanning; clear message if denied, with the PIN backup link (#54)
 - [ ] Call `redeem`; show a friendly message for every `ErrorCode` (#55)
 - [ ] Redeemed screen: big green check, deal and business name, live ticking clock, moving animation (#56)
-- [ ] Sticker landing page `/b/[slug]`: live deals, or "No deals right now, follow for alerts" (#57)
+- [ ] Sticker landing page `/b/[slug]`: live public deals, or "No deals right now" (#57)
 - [ ] PIN entry screen calling `redeem-pin` (#58)
 - [ ] Swap mocks for real queries (#59)
 - [ ] Hide link-only deals from the feed and the sticker landing page (public deals only) (#108)
@@ -58,7 +58,7 @@ _Feature freeze at the end of Nov 8: anything unfinished goes to the team to dec
 
 ### Week 4 — Polish, no new features (Nov 9–15)
 - [ ] Test on iPhone Safari and Android Chrome over HTTPS (#64)
-- [ ] Loading, empty, and offline states (#65)
+- [ ] Loading, empty, and error messages on every student screen (no new offline features) (#65)
 - [ ] Accessibility: contrast, tap targets, screen reader labels (#66)
 
 ### Business
