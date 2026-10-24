@@ -34,7 +34,7 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 - [x] Link the existing Grove project board to the repo (Todo, In progress, In review, Done; auto-add on) (#3)
 - [x] Add teammates; collect GitHub usernames; set up `CODEOWNERS` (#4)
 - [x] Scaffold Next.js (App Router, TypeScript strict, Tailwind, shadcn/ui) with the folder layout from the README (#5)
-- [ ] Create Supabase dev project; enable PostGIS (#6)
+- [x] Create Supabase dev project; enable PostGIS (#6)
 - [ ] Migrations for `campuses`, `profiles`, `businesses`, `business_members`, `deals`, `redemptions`, including the unique rule on `(student_id, deal_id, redeemed_on)`; `push_subscriptions` waits for the push stretch goal, and repeat days and club nights are #101 (#7)
 - [ ] `seed.sql` with UCR campus and invented sample businesses and deals, plus one Mon–Wed repeating deal and one open club night (same as `mocks/`) (#8)
 - [x] `mocks/` matching `API_CONTRACT.md` (day 1–3) (#9)
