@@ -4,6 +4,8 @@ export type DealStatus = "scheduled" | "live" | "ended";
 export type DiscountType = "amount_off" | "percent_off" | "free_item" | "bogo";
 export type RedemptionMethod = "sticker" | "pin" | "staff_scan";
 export type RedemptionMode = "sticker" | "staff_scan";
+export type DealVisibility = "public" | "link_only"; // link_only: hidden from feed, map, and sticker page
+export type ClubNightStatus = "open" | "claimed" | "expired";
 
 export type Weekday = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
 // Local campus time, "HH:MM". A close earlier than the open means past midnight.
@@ -15,13 +17,17 @@ export type Deal = {
   business_id: string;
   title: string;
   description: string;
-  discount_type: DiscountType;
+  discount_type: DiscountType | null; // null: no student discount (club night deals)
   discount_value: number | null; // dollars for amount_off, percent for percent_off, null otherwise
   photo_url: string | null;
   starts_at: string; // ISO timestamp
-  ends_at: string; // ISO timestamp
+  ends_at: string | null; // ISO timestamp; null only for repeating deals that run until turned off
+  active_days: Weekday[] | null; // null: one window from starts_at to ends_at; set: repeats on these days
+  daily_start: string | null; // "HH:MM" campus time, set with active_days
+  daily_end: string | null; // "HH:MM" campus time, later than daily_start
+  visibility: DealVisibility;
   students_only: boolean;
-  status: DealStatus; // computed from starts_at/ends_at, never stored
+  status: DealStatus; // computed (see deal-status.ts), never stored
   created_at: string;
 };
 
@@ -65,9 +71,10 @@ export type DealCard =
       has_deal: true;
       deal_id: string;
       title: string;
-      discount_type: DiscountType;
+      discount_type: DiscountType | null;
       discount_value: number | null;
-      ends_at: string;
+      ends_at: string | null;
+      live_until: string; // when the current live window ends (use for countdowns)
       students_only: boolean;
       photo_url: string | null;
     })
@@ -78,6 +85,7 @@ export type DealCard =
       discount_type: null;
       discount_value: null;
       ends_at: null;
+      live_until: null;
       students_only: null;
       photo_url: null;
     });
@@ -100,6 +108,26 @@ export type BusinessStats = {
   total: number;
 };
 
+// What a student sees when choosing a club night to claim.
+export type OpenClubNight = {
+  id: string;
+  business_id: string;
+  business_name: string;
+  night_date: string; // "YYYY-MM-DD", campus time
+  start_time: string; // "HH:MM"
+  end_time: string; // "HH:MM"
+  giveback: string; // e.g. "15% back to your club"; paid outside the app
+};
+
+// What the business sees on its dashboard.
+export type ClubNight = OpenClubNight & {
+  status: ClubNightStatus; // computed, never stored
+  claimed_club_name: string | null;
+  claimed_at: string | null;
+  deal_id: string | null; // the link-only deal created on claim
+  visit_count: number; // verified redemptions of deal_id
+};
+
 export type ErrorCode =
   | "NOT_SIGNED_IN"
   | "NOT_VERIFIED_STUDENT"
@@ -111,10 +139,13 @@ export type ErrorCode =
   | "BAD_PIN"
   | "CODE_EXPIRED"
   | "NOT_STAFF"
-  | "RATE_LIMITED";
+  | "RATE_LIMITED"
+  | "ALREADY_CLAIMED"
+  | "CLUB_NIGHT_EXPIRED";
 
 export type Failure = { ok: false; error: ErrorCode };
 export type RedeemResult = { ok: true; redemption: Redemption } | Failure;
 export type IssueCodeResult = { ok: true; token: string; expires_at: string } | Failure;
 export type StaffRedeemResult = { ok: true; redemption: Redemption; deal_title: string } | Failure;
+export type ClaimClubNightResult = { ok: true; club_night: ClubNight; deal_id: string } | Failure;
 export type NotifyDealResult = { ok: true; sent: number } | Failure;
