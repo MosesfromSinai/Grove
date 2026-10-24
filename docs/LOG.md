@@ -19,11 +19,13 @@ At the start of every session, each person's Claude reads the other sections for
 ---
 
 ## Team
+- **2026-10-24:** **Decision** (affects everyone): Grove is a marketing company first (restaurants pay to bring in students, especially Mon–Wed). MVP adds repeat days, link-only deals, club nights (no club accounts; giveback paid outside the app), and a shareable deal link and QR (advertising only; redeeming still needs the counter sticker). Push moves to a stretch goal. Weeks 2–3 are front-loaded; feature freeze at the end of Nov 8 (`CLAUDE.md`).
 - **2026-10-19:** Assigned engineering and business roles (see `CLAUDE.md` → Team).
 - **2026-10-09:** Lean Canvas: Problem, Solution, UVP, Customer Segments filled.
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-10-24:** Updated the repo for Activity 2: `CLAUDE.md`, README, STATUS, all five team files, and the API contract (now final: repeat days, `visibility`, `club_nights`, `claim-club-night`), with `mocks/` to match. Synced GitHub issues and the board's week field.
 - **2026-10-20:** **Decision** (affects everyone): no password manager; everyone gets keys only by running `vercel env pull .env.local` after Moses invites them to Vercel and Supabase. Node 22 is pinned (`.nvmrc`, `package.json` engines). PRs need 1 teammate approval; `CODEOWNERS` requests reviewers but code-owner review isn't required yet.
 - **2026-10-20:** **Decision** (affects Celso, Adolfo, Hikaru, Edward): deal status is computed from `starts_at`/`ends_at`, not stored. "End now" sets `ends_at = now()`; cancelling a scheduled deal deletes it. RLS and `deals_nearby` check the time window.
 - **2026-10-20:** **Decision** (affects Adolfo, Edward, Hikaru): deals get `discount_type` (`amount_off`, `percent_off`, `free_item`, `bogo`) and `discount_value` (dollars or percent; null for free item and BOGO), matching the Post a deal form.
