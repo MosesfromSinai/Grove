@@ -34,3 +34,11 @@ AGENTS.md
 
 # personal Claude Code settings
 .claude/
+
+# editors
+.idea/
+*.swp
+
+# supabase cli local state
+supabase/.temp/
+supabase/.branches/
