@@ -49,7 +49,7 @@ _Last updated: 2026-10-24_
 - [ ] Post an open club night: date, time window, giveback text (e.g. "15% back to your club") (#113)
 - [ ] Club night results on the dashboard: claimed club name and verified visits per night (#114)
 - [ ] Deal link and QR download for flyers and group chats (`/deals/<id>`; it opens the deal only, never redeems) (#115)
-- [ ] Staff list in settings: add staff by Google email (`add-staff`), see invited vs. active (`getStaff`), remove staff
+- [ ] Staff list in settings: add staff by Google email (`add-staff`), see invited vs. active (`getStaff`), remove staff (#122)
 
 _Feature freeze at the end of Nov 8: anything unfinished goes to the team to decide (finish quickly or move to the stretch goal)._
 
