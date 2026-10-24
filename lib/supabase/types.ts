@@ -6,6 +6,7 @@ export type RedemptionMethod = "sticker" | "pin" | "staff_scan";
 export type RedemptionMode = "sticker" | "staff_scan";
 export type DealVisibility = "public" | "link_only"; // link_only: hidden from feed, map, and sticker page
 export type ClubNightStatus = "open" | "claimed" | "expired";
+export type MemberRole = "owner" | "staff";
 
 export type Weekday = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
 // Local campus time, "HH:MM". A close earlier than the open means past midnight.
@@ -128,6 +129,15 @@ export type ClubNight = OpenClubNight & {
   visit_count: number; // verified redemptions of deal_id
 };
 
+// A business_members row as the owner sees it in settings.
+export type StaffMember = {
+  business_id: string;
+  email: string;
+  user_id: string | null; // null until that email signs in for the first time
+  role: MemberRole;
+  status: "active" | "invited"; // computed: invited while user_id is null
+};
+
 export type ErrorCode =
   | "NOT_SIGNED_IN"
   | "NOT_VERIFIED_STUDENT"
@@ -141,11 +151,14 @@ export type ErrorCode =
   | "NOT_STAFF"
   | "RATE_LIMITED"
   | "ALREADY_CLAIMED"
-  | "CLUB_NIGHT_EXPIRED";
+  | "CLUB_NIGHT_EXPIRED"
+  | "NOT_OWNER";
 
 export type Failure = { ok: false; error: ErrorCode };
 export type RedeemResult = { ok: true; redemption: Redemption } | Failure;
 export type IssueCodeResult = { ok: true; token: string; expires_at: string } | Failure;
 export type StaffRedeemResult = { ok: true; redemption: Redemption; deal_title: string } | Failure;
 export type ClaimClubNightResult = { ok: true; club_night: ClubNight; deal_id: string } | Failure;
+export type SetPinResult = { ok: true; pin: string } | Failure; // the only time the PIN is ever returned
+export type AddStaffResult = { ok: true; member: StaffMember } | Failure;
 export type NotifyDealResult = { ok: true; sent: number } | Failure;

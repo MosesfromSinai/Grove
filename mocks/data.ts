@@ -120,6 +120,17 @@ export const mockStudent = {
 // The signed-in staff account for staff-scan mocks: staff at Orange Peel Tacos.
 export const mockStaff = { id: "staff-marisol", business_id: "biz-opt" };
 
+// The signed-in owner for dashboard mocks (setPin, addStaff): owner of Orange Peel Tacos.
+export const mockOwner = { id: "owner-opt", business_id: "biz-opt" };
+
+export type MockMember = { business_id: string; user_id: string | null; email: string; role: "owner" | "staff" };
+
+export const businessMembers: MockMember[] = [
+  { business_id: "biz-opt", user_id: "owner-opt", email: "owner@orangepeeltacos.example", role: "owner" },
+  { business_id: "biz-opt", user_id: "staff-marisol", email: "marisol@orangepeeltacos.example", role: "staff" },
+  { business_id: "biz-opt", user_id: null, email: "taylor@orangepeeltacos.example", role: "staff" },
+];
+
 export type MockRedemption = {
   id: string;
   deal_id: string;
