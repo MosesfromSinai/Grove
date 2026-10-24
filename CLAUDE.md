@@ -64,11 +64,13 @@ Doc updates go in the same pull request as the code. **A session isn't finished 
 
 | Person | Engineering | Owns (code) | Business |
 |---|---|---|---|
-| Moses Avila | Backend and redemption engine | `supabase/migrations`, `supabase/functions` (redeem, redeem-pin, issue-code, staff-redeem), `lib/supabase`, `mocks` | Pitch deck and demo |
+| Moses Avila | Backend and redemption engine | `supabase/migrations`, `supabase/functions` (redeem, redeem-pin, issue-code, staff-redeem, claim-club-night, set-pin, add-staff), `supabase/seed.sql`, `lib/supabase`, `mocks`, `docs/API_CONTRACT.md`, CI and Vercel setup, and every file not listed for someone else | Pitch deck and demo |
 | Celso Lopez | Security and auth | `app/(auth)`, `lib/auth`, RLS policies, threat model (in his team file) | Competitor analysis |
-| Edward Van | Student app | `app/(student)` except map, `app/b/[slug]`, `components/student`, theme | Student survey |
+| Edward Van | Student app | `app/(student)` except map, `app/b/[slug]`, `components/student`, theme (`app/globals.css`) | Student survey |
 | Adolfo Magallanes | Business dashboard | `app/(business)`, `components/business` | Pilot outreach |
-| Hikaru Shimada | Maps and notifications | `app/(student)/map`, `components/map`, `lib/geo`, `lib/push`, `public/sw.js`, `public/manifest.json`, `notify-deal`, `deals_nearby` SQL | Lean Canvas, pricing |
+| Hikaru Shimada | Maps and PWA install (push: stretch) | `app/(student)/map`, `components/map`, `lib/geo`, `public/manifest.json`, `public/icons/`, `deals_nearby` SQL; stretch: `lib/push`, `public/sw.js`, `notify-deal` | Lean Canvas, pricing |
+
+**Default owner:** Moses owns every file and folder not listed above (root config, `app/layout.tsx`, `app/page.tsx`, `app/theme/`, `components/ui/`, `lib/utils.ts`, `.github/`, `docs/` except team files). Celso may edit the root routing in `app/page.tsx` for his onboarding task, with Moses reviewing.
 
 Everyone does 1–2 restaurant interviews testing hypotheses 1–4 and at least one student interview for hypothesis 5 (see Business below).
 
@@ -81,7 +83,7 @@ Everyone does 1–2 restaurant interviews testing hypotheses 1–4 and at least 
 - **Club nights** (the simple version of the club fundraiser idea): a restaurant posts an open club night (date, time window, giveback in text, e.g. "15% back to your club"). Any signed-in student claims it for their club by typing the club name. No club accounts; one claim per club night; same-day claims are fine. Claiming creates a link-only deal the club shares with members, who redeem the normal way. The dashboard shows verified visits for that night. The giveback is paid outside the app. *Fallback if this slips:* we set up club nights by hand as one-date link-only deals.
 - **Shareable deal link and QR** on every deal, for flyers and group chats (see Redemption rules: two QR codes).
 
-**Stretch goal (possible future implementation):** Web Push notifications, and the Add to Home Screen prompt it needs on iPhone.
+**Stretch goal (possible future implementation):** Web Push notifications, the Add to Home Screen prompt it needs on iPhone, and email (Resend). The MVP sends no email.
 
 **Out (don't build or suggest now):** club accounts or verified club membership, tracking which channel brought each visit, payments/billing (Stripe), in-app giveback payouts, rewards points, squad deals, leaderboards, menu import, dish search, Instagram posting, Square/Toast integration, native apps.
 
@@ -109,7 +111,7 @@ Each person does 1–2 restaurant interviews (1–4) and at least one student in
 
 ## Stack
 
-Next.js 16 (App Router) + React + TypeScript PWA on Vercel, Node 22 (pinned in `.nvmrc` and `package.json` engines; run `nvm use`). Supabase for Postgres + PostGIS, Auth (Google), Storage, Edge Functions, Realtime. Mapbox GL JS. `qrcode` and `html5-qrcode` (Safari has no built-in QR reader). Web Push with VAPID (stretch goal). Tailwind + shadcn/ui. Recharts. Sentry. Resend.
+Next.js 16 (App Router) + React + TypeScript PWA on Vercel, Node 22 (pinned in `.nvmrc` and `package.json` engines; run `nvm use`). Supabase for Postgres + PostGIS, Auth (Google), Storage, Edge Functions, Realtime. Mapbox GL JS. `qrcode` and `html5-qrcode` (Safari has no built-in QR reader). Tailwind + shadcn/ui. Recharts. Sentry. Stretch goal only: Web Push with VAPID, Resend for email.
 
 ## Redemption rules
 
@@ -121,7 +123,7 @@ Next.js 16 (App Router) + React + TypeScript PWA on Vercel, Node 22 (pinned in `
 
 On success, the student's phone shows a big green Redeemed screen with a live clock and an animation (screenshots won't pass), and the cashier applies the discount by hand.
 
-If the sticker is scanned with no deal live, it opens the business page ("No deals right now, follow for alerts"). Scanned with a normal camera, it opens Grove to that business, so it doubles as advertising.
+If the sticker is scanned with no deal live, it opens the business page ("No deals right now"). Scanned with a normal camera, it opens Grove to that business, so it doubles as advertising.
 
 **Two QR codes, two jobs:**
 - **Deal link QR** (`/deals/<id>`, on flyers and in group chats): advertising only. It opens the deal in Grove. It never redeems, never shows a green screen, never applies a discount.
@@ -142,7 +144,7 @@ Link-only deals (including club night deals) redeem exactly the same way; having
 - Secrets: the repo is public. Every key and password lives only in `.env.local` (git-ignored). Never put a key in code, docs, issues, commit messages, or chat. Moses invites everyone to the Vercel and Supabase projects; get keys only by running `vercel env pull .env.local`, never from a teammate directly. `.env.example` lists the variable names with empty values. If a key is ever committed, rotate it immediately; deleting the commit isn't enough.
 - Build against `mocks/` until the real table or function exists. Mocks must match `docs/API_CONTRACT.md` exactly.
 - Every `ErrorCode` from a function gets a friendly message in the UI.
-- Mobile-first: design for a phone screen, then scale up for the dashboard. Camera, location, and push need HTTPS, so test on the Vercel preview.
+- Mobile-first: design for a phone screen, then scale up for the dashboard. Camera and location (and push, if built) need HTTPS, so test on the Vercel preview.
 - Design: follow the **Design reference** below. No UCR logos or official branding.
 
 ## Design reference
