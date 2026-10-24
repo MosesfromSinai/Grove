@@ -5,7 +5,7 @@
 > - **During:** tick tasks here as they finish; log decisions that affect others as **Decision** lines in your section of `docs/LOG.md`.
 > - **End:** add a dated Session log entry here and a line in your section of `docs/LOG.md`; commit them with your code.
 
-_Last updated: 2026-10-19_
+_Last updated: 2026-10-24_
 
 ---
 
@@ -18,7 +18,7 @@ _Last updated: 2026-10-19_
 `app/(auth)/`, `lib/auth/`, RLS policies in `supabase/migrations/` (Moses reviews), the threat model below.
 
 ## Depends on
-- **Moses:** tables (week 1) before RLS policies can be written; the redemption functions for rate limiting.
+- **Moses:** tables (week 1) before RLS policies can be written; the redemption functions for rate limiting; `club_nights` and `claim-club-night` (week 2) for their RLS and claim rate limits.
 
 ## Others depend on you
 - **Everyone:** Google sign-in by end of week 1 (Phase 1 gate).
@@ -42,20 +42,25 @@ _Last updated: 2026-10-19_
 - [ ] Hash `staff_pin`; never return it to the browser (#36)
 - [ ] Rate limits on `redeem` and `redeem-pin`; lockout after repeated bad PINs (#37)
 - [ ] Server-side sanity checks on location (reject impossible coordinates) (#38)
+- [ ] RLS for `club_nights`: businesses manage their own; students read open nights at their campus; only `claim-club-night` writes the claim columns; `claimed_by` never reaches the browser
+- [ ] Rate-limit club night claims (per student) in `claim-club-night`
 
 ### Week 3 — Staff mode security (Nov 2–8)
 - [ ] Design staff-scan tokens with Moses (short-lived, signed, single use) (#39)
 - [ ] `business_members` access: only staff of that business can call `staff-redeem` (#40)
-- [ ] Security test pass: try to redeem without being there, reuse a token, redeem twice in a day, read another business's stats; log results in the Security test log below (#41)
+- [ ] Security test pass: try to redeem without being there, reuse a token, redeem twice in a day, read another business's stats, open a link-only deal off campus, claim the same club night twice; log results in the Security test log below (#41)
 
-### Week 4 — Review (Nov 9–15)
+_Feature freeze at the end of Nov 8: anything unfinished goes to the team to decide (finish quickly or move to the stretch goal)._
+
+### Week 4 — Review, no new features (Nov 9–15)
 - [ ] Fix findings from the test pass (#42)
 - [ ] Check no secrets are in the repo or browser bundle (#43)
 - [ ] Competitor slide for the pitch (#44)
 
 ### Business
-- [ ] Competitor analysis in the shared Drive folder (Instagram, Yelp, Google Maps, coupon and student-discount apps) (#45)
-- [ ] 1–2 customer interviews; notes in the shared Drive folder (#46)
+- [ ] Competitor analysis in the shared Drive folder (Instagram, Yelp, Google Maps, coupon and student-discount apps); start from the Activity 2 competition table (#45)
+- [ ] 1–2 restaurant interviews testing hypotheses 1–4 (slow days, per-visit vs. flat fee, hosting club nights, trusting QR check-in); notes in the shared Drive folder (#46)
+- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder
 - [ ] Fill in your attendance cell on the effort table (#47)
 
 ---
@@ -74,6 +79,9 @@ Update the Status column as defenses are built.
 | Non-student signs up | .edu domain check, `verified_student` | Planned |
 | Reading another business's data | RLS on every table | Planned |
 | Leaked service-role or VAPID key | Server-only env vars, never committed; rotate if leaked | Planned |
+| Link-only deal shared off campus | Link only shows the deal; redeeming still needs a verified student, the counter sticker, ~150 m, a live window, and the daily limit | Planned |
+| Fake or duplicate club night claims | One claim per club night (conditional update), signed-in verified student, claim rate limit | Planned |
+| Claiming a club night for a club you're not in | Not checked: no club accounts in the MVP. **Accepted risk**; the restaurant sees the club name and visits | Accepted |
 
 ## Security test log
 Add a row for every test you run.
