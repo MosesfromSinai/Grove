@@ -2,6 +2,7 @@
 # Code-owner review isn't required yet; any teammate's approval merges.
 # Later lines win, so specific paths come after general ones.
 
+# Default: Moses owns everything not listed below.
 *                           @MosesfromSinai
 
 # Moses: backend, redemption engine, contract
@@ -25,11 +26,12 @@
 /app/(business)/            @GorillaAdolfo
 /components/business/       @GorillaAdolfo
 
-# Hikaru: maps and notifications
+# Hikaru: maps and PWA install (push is a stretch goal)
 /app/(student)/map/         @hika583
 /components/map/            @hika583
 /lib/geo/                   @hika583
 /lib/push/                  @hika583
 /public/sw.js               @hika583
 /public/manifest.json       @hika583
+/public/icons/              @hika583
 /supabase/functions/notify-deal/ @hika583 @MosesfromSinai
