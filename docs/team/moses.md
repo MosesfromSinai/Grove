@@ -45,7 +45,7 @@ Repo `MosesfromSinai/Grove` (public), the ruleset on `main`, the Grove board (pr
 - [ ] `seed.sql` with UCR campus and invented sample businesses and deals, plus one Mon–Wed repeating deal and one open club night (same as `mocks/`) (#8)
 - [x] `mocks/` matching `API_CONTRACT.md` (day 1–3) (#9)
 - [x] Finalize `API_CONTRACT.md`; change status from DRAFT (final 2026-10-24, with repeat days, link-only deals, club nights) (#10)
-- [ ] `.env.example`; keys reach teammates only through `vercel env pull` (#11)
+- [x] `.env.example`; keys reach teammates only through `vercel env pull` (#11)
 - [ ] GitHub Actions: lint, type check, build (#12)
 - [ ] Connect Vercel; preview deploy per PR; add every `.env.example` variable in Vercel and invite the team so `vercel env pull` works (#13)
 
