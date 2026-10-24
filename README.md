@@ -2,7 +2,9 @@
 
 **Where food finds its campus.**
 
-Grove is a campus marketing platform. Locally owned restaurants and food trucks near a college campus post deals, and Grove puts them in front of verified students nearby. Students redeem in store by scanning a QR code, so businesses can see exactly which customers Grove brought in.
+Grove is a marketing company for locally owned restaurants and food trucks near a college campus. Restaurants pay us to bring in students, especially on slow days (Mon–Wed). We reach students through campus channels (clubs, flyers, tabling) and our app. The app runs the deals and proves every visit: students redeem in store by scanning the counter sticker, so restaurants see exactly which customers Grove brought in.
+
+Pricing (still being validated in interviews): per verified visit (~$0.50–1, monthly cap) plus a flat fee for bigger events like club nights. First deal free for pilot restaurants.
 
 We are launching at UC Riverside. Built for CS 175 (Entrepreneurship in Computing), Fall 2026.
 
@@ -24,14 +26,17 @@ We are launching at UC Riverside. Built for CS 175 (Entrepreneurship in Computin
 
 ## MVP features
 
-1. **Deal posting:** businesses post deals from a dashboard.
-2. **Deal feed and map:** students browse nearby deals with filters (open now, has deals, distance).
+1. **Deal posting:** businesses post deals from a dashboard. A deal can repeat on chosen days in a daily window (e.g. Mon–Wed, 2–5 PM), and can be public or link-only.
+2. **Deal feed and map:** students browse nearby public deals with filters (open now, has deals, distance).
 3. **.edu verification:** Google sign-in plus a school email check.
 4. **Scan to redeem:** two modes, chosen by each business (below).
-5. **Business dashboard:** redemptions per deal and by hour, live visit feed.
-6. **Push notifications:** students nearby get an alert when a deal is posted.
+5. **Club nights:** a restaurant posts an open club night with a giveback (e.g. "15% back to your club"); a student claims it for their club by typing the club name, and members redeem through the club's link-only deal. The giveback is paid outside the app.
+6. **Shareable deal link and QR:** for flyers and group chats. It only opens the deal; redeeming still needs the counter sticker.
+7. **Business dashboard:** redemptions per deal and by hour, club night visits, live visit feed.
 
-**Out of scope for the MVP:** rewards points, squad deals, club fundraisers, leaderboards, menu import and dish search, Instagram posting, payment-system (Square, Toast) links, billing, native apps.
+**Stretch goal (possible future implementation):** push notifications.
+
+**Out of scope for the MVP:** club accounts or verified club membership, tracking which channel brought each visit, payments and billing, in-app giveback payouts, rewards points, squad deals, leaderboards, menu import and dish search, Instagram posting, payment-system (Square, Toast) links, native apps.
 
 ### Redemption modes
 
@@ -53,7 +58,7 @@ We are launching at UC Riverside. Built for CS 175 (Entrepreneurship in Computin
 | Database, auth, storage, server functions | Supabase (Postgres + PostGIS, Auth, Storage, Edge Functions, Realtime) |
 | Map | Mapbox GL JS |
 | QR | `qrcode` (generate stickers), `html5-qrcode` (scan in browser) |
-| Notifications | Web Push (VAPID) |
+| Notifications | Web Push (VAPID), stretch goal |
 | Email | Resend |
 | UI | Tailwind CSS + shadcn/ui, Recharts for charts |
 | Errors | Sentry |
@@ -95,7 +100,7 @@ Values live in Vercel and arrive through `vercel env pull`. `.env.example` lists
 
 ### Testing on a phone
 
-Camera and location only work over HTTPS. Use the Vercel preview link from your pull request, or run `npx ngrok http 3000`. On iPhone, push notifications only work after adding Grove to the home screen (iOS 16.4+).
+Camera and location only work over HTTPS. Use the Vercel preview link from your pull request, or run `npx ngrok http 3000`. If push (a stretch goal) is built, on iPhone it only works after adding Grove to the home screen (iOS 16.4+).
 
 ---
 
@@ -135,9 +140,11 @@ grove/
 
 | Phase | Gate to pass |
 |---|---|
-| 1. Foundation (Oct 19–25) | Students can log in |
-| 2. Core loop (Oct 26–Nov 1) | First test redemption (one sticker, two phones) |
-| 3. Staff mode, push, stats (Nov 2–8) | Staff-scan redemption works; test push arrives on iPhone and Android |
-| 4. Pilot and polish (Nov 9–15) | First real redemption at a business near UCR |
+| 1. Foundation (Oct 19–25): sign-in, foundation, database | Students can log in |
+| 2. Core loop and data (Oct 26–Nov 1): scan-to-redeem end to end; repeat days, visibility, club nights in the database | First test redemption (one sticker, two phones); a link-only deal stays out of the feed and map |
+| 3. Every remaining feature (Nov 2–8): staff scan, club night screens, deal link and QR, stats | Staff-scan redemption works; a club claims a club night and a member redeems from its link |
+| 4. Pilot and demo (Nov 9–15): no new features | First real redemption at a business near UCR |
+
+**Feature freeze at the end of Nov 8.** Anything unfinished then goes to the team to decide: finish quickly or move to the stretch goal, so Week 4 stays light.
 
 Demo date: **TBD**. Week dates assume a demo around Nov 16–20; re-date this table and the team files once it's set. Task-level detail is in `docs/team/<name>.md`.
