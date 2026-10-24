@@ -4,6 +4,7 @@
 
 import { campusClock, dealStatus, liveUntil } from "../lib/supabase/deal-status";
 import type {
+  AddStaffResult,
   BusinessPublic,
   BusinessStats,
   ClaimClubNightResult,
@@ -17,12 +18,16 @@ import type {
   NotifyDealResult,
   RedeemResult,
   Redemption,
+  SetPinResult,
+  StaffMember,
   StaffRedeemResult,
 } from "../lib/supabase/types";
 import {
+  businessMembers,
   businesses,
   clubNights,
   deals,
+  mockOwner,
   mockStaff,
   mockStudent,
   orangePeelStats,
@@ -362,6 +367,36 @@ export async function claimClubNight(input: { club_night_id: string; club_name: 
   });
   Object.assign(c, { claimed_club_name: club, claimed_by: mockStudent.id, claimed_at: new Date().toISOString(), deal_id });
   return delay({ ok: true, club_night: toClubNight(c), deal_id });
+}
+
+// ---------- Business settings (owner only) ----------
+
+function toStaffMember(m: (typeof businessMembers)[number]): StaffMember {
+  return { ...m, status: m.user_id ? "active" : "invited" };
+}
+
+// Sets a new random 4-digit PIN and returns it once. The real function stores only the hash.
+export async function setPin(input: { business_id: string }): Promise<SetPinResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  const pin = String(Math.floor(Math.random() * 10_000)).padStart(4, "0");
+  businessById(input.business_id).staff_pin = pin;
+  return delay({ ok: true, pin });
+}
+
+// Adds a staff member by Google email; they become active on their first sign-in.
+export async function addStaff(input: { business_id: string; email: string }): Promise<AddStaffResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  const email = input.email.trim().toLowerCase();
+  let m = businessMembers.find((x) => x.business_id === input.business_id && x.email === email);
+  if (!m) {
+    m = { business_id: input.business_id, user_id: null, email, role: "staff" };
+    businessMembers.push(m);
+  }
+  return delay({ ok: true, member: toStaffMember(m) });
+}
+
+export async function getStaff(input: { businessId: string }): Promise<StaffMember[]> {
+  return delay(businessMembers.filter((m) => m.business_id === input.businessId).map(toStaffMember));
 }
 
 // Campus date and time right now, handy for showing "today" on club night screens.
