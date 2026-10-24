@@ -20,7 +20,7 @@ We are launching at UC Riverside. Built for CS 175 (Entrepreneurship in Computin
 | Celso Lopez | Security and auth |
 | Edward Van | Student app |
 | Adolfo Magallanes | Business dashboard |
-| Hikaru Shimada | Maps and notifications |
+| Hikaru Shimada | Maps and PWA install (push: stretch) |
 
 ---
 
@@ -34,7 +34,7 @@ We are launching at UC Riverside. Built for CS 175 (Entrepreneurship in Computin
 6. **Shareable deal link and QR:** for flyers and group chats. It only opens the deal; redeeming still needs the counter sticker.
 7. **Business dashboard:** redemptions per deal and by hour, club night visits, live visit feed.
 
-**Stretch goal (possible future implementation):** push notifications.
+**Stretch goal (possible future implementation):** push notifications and email.
 
 **Out of scope for the MVP:** club accounts or verified club membership, tracking which channel brought each visit, payments and billing, in-app giveback payouts, rewards points, squad deals, leaderboards, menu import and dish search, Instagram posting, payment-system (Square, Toast) links, native apps.
 
@@ -59,7 +59,7 @@ We are launching at UC Riverside. Built for CS 175 (Entrepreneurship in Computin
 | Map | Mapbox GL JS |
 | QR | `qrcode` (generate stickers), `html5-qrcode` (scan in browser) |
 | Notifications | Web Push (VAPID), stretch goal |
-| Email | Resend |
+| Email | Resend, stretch goal (the MVP sends no email) |
 | UI | Tailwind CSS + shadcn/ui, Recharts for charts |
 | Errors | Sentry |
 | Project tracking | GitHub Projects |
@@ -93,10 +93,13 @@ Values live in Vercel and arrive through `vercel env pull`. `.env.example` lists
 | `NEXT_PUBLIC_SUPABASE_URL` | Browser and server |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser and server |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server and Edge Functions only |
+| `NEXT_PUBLIC_SITE_URL` | Deal-link QR codes and the sign-in redirect |
 | `NEXT_PUBLIC_MAPBOX_TOKEN` | Map |
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Push subscription |
-| `VAPID_PRIVATE_KEY` | Sending push |
-| `RESEND_API_KEY` | Email |
+| `NEXT_PUBLIC_SENTRY_DSN` | Error reporting |
+| `SENTRY_AUTH_TOKEN` | Source map upload at build time only |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Push subscription (stretch goal) |
+| `VAPID_PRIVATE_KEY` | Sending push (stretch goal) |
+| `RESEND_API_KEY` | Email (stretch goal) |
 
 ### Testing on a phone
 
@@ -123,17 +126,20 @@ grove/
 │   ├── supabase/           # Moses: clients and typed queries
 │   ├── auth/               # Celso
 │   ├── geo/                # Hikaru
-│   └── push/               # Hikaru
+│   └── push/               # Hikaru (stretch)
 ├── mocks/                  # Moses: shared fake data, same shape as real tables
 ├── supabase/
 │   ├── migrations/         # Moses (Celso: RLS policies; Hikaru: deals_nearby)
-│   ├── functions/          # Moses: redeem, redeem-pin, issue-code, staff-redeem; Hikaru: notify-deal
+│   ├── functions/          # Moses: redeem, redeem-pin, issue-code, staff-redeem, claim-club-night, set-pin, add-staff; Hikaru: notify-deal (stretch)
 │   └── seed.sql            # Sample data for local and dev databases
 ├── public/
 │   ├── manifest.json       # Hikaru: PWA install settings
-│   └── sw.js               # Hikaru: service worker for push
+│   ├── icons/              # Hikaru: app icons
+│   └── sw.js               # Hikaru: service worker for push (stretch)
 └── docs/                   # Project context and logs (see below)
 ```
+
+Anything not marked here (root config, `app/layout.tsx`, `app/page.tsx`, `app/theme/`, `components/ui/`, `lib/utils.ts`, `.github/`) belongs to Moses.
 ---
 
 ## Roadmap
