@@ -18,7 +18,7 @@ _Last updated: 2026-10-24_
 `app/(student)/` (except `map/`), `app/b/[slug]/`, `components/student/`, the theme in `app/globals.css`.
 
 ## Depends on
-- **Moses:** `mocks/` (day 1–3), real queries (end of week 1), `redeem` (week 2), `claim-club-night` and `getOpenClubNights` (week 2, for your week 3 claim screen), `issue-code` (week 3).
+- **Moses:** `mocks/` (day 1–3), real queries (#16, week 2), `redeem` (week 2), `claim-club-night` and `getOpenClubNights` (week 2, for your week 3 claim screen), `issue-code` (week 3).
 - **Celso:** signed-in student session.
 - **Hikaru:** map tab lives in your tab bar; agree on the deal card component so map bottom sheets and the feed match.
 
