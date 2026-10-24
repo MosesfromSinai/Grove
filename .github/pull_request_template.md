@@ -9,4 +9,4 @@ Closes #
 - [ ] `API_CONTRACT.md` + `mocks/`, `STATUS.md`: updated if affected
 - [ ] Lint, type check, build pass; no secrets committed
 - [ ] No `Co-Authored-By` lines or AI-related text in commits or this PR
-- [ ] Tested on a phone if it uses camera, location, or push
+- [ ] Tested on a phone if it uses camera or location
