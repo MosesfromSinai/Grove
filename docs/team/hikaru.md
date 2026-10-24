@@ -40,7 +40,7 @@ _Last updated: 2026-10-24_
 - [ ] `deals_nearby` PostGIS function (radius, open now from `hours`, has deals; live now via `deal_status()`, so repeating deals show only in their window) (#88)
 - [ ] Wire map and filters to real data (#89)
 - [ ] Pin tap opens a bottom sheet: name, open/closed, distance, today's deal (#90)
-- [ ] Hide link-only deals from `deals_nearby` and the map (`visibility = 'public'` only)
+- [ ] Hide link-only deals from `deals_nearby` and the map (`visibility = 'public'` only) (#117)
 
 ### Week 3 — Food trucks (Nov 2–8)
 - [ ] Food-truck location update ("I'm here now") (#94)
@@ -54,7 +54,7 @@ _Feature freeze at the end of Nov 8: anything unfinished goes to the team to dec
 - [ ] Fill the blank Lean Canvas boxes: Key Metrics, Unfair Advantage, Channels, Cost Structure, Revenue Streams, Project Name (#97)
 - [ ] Pricing questions for interviews (per verified visit, ~$0.50–1 with a monthly cap, vs. a flat fee for club nights; first deal free for pilots); summarize answers (#98)
 - [ ] 1–2 restaurant interviews testing hypotheses 1–4 (slow days, per-visit vs. flat fee, hosting club nights, trusting QR check-in); notes in the shared Drive folder (#99)
-- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder
+- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder (#118)
 
 ### Stretch goal (possible future implementation)
 - [ ] VAPID keys; `manifest.json`; `sw.js` service worker (#91)
