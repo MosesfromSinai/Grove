@@ -25,6 +25,7 @@ At the start of every session, each person's Claude reads the other sections for
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-10-24:** **Decision** (affects everyone): health check fixes. Moses owns every unlisted file (Celso may edit root routing for onboarding); Hikaru's role is maps and PWA install (push stretch) and he builds the "I'm here now" button Adolfo places; Moses owns the staff-token design (#19, Celso reviews by Nov 1); new `set-pin` (week 2) and `add-staff` (week 3) functions, `deal_by_id()` for link-only deals; Resend moved to stretch; production Supabase moved to week 3; if Celso isn't active by Oct 26, Moses takes #29. Added `.env.example` and a Done-when line on every open issue.
 - **2026-10-24:** Split the PWA manifest and app icons out of push (#91) into #119 (Hikaru, week 3), so Grove is installable without push.
 - **2026-10-24:** Updated the repo for Activity 2: `CLAUDE.md`, README, STATUS, all five team files, and the API contract (now final: repeat days, `visibility`, `club_nights`, `claim-club-night`), with `mocks/` to match. Synced GitHub issues and the board's week field.
 - **2026-10-20:** **Decision** (affects everyone): no password manager; everyone gets keys only by running `vercel env pull .env.local` after Moses invites them to Vercel and Supabase. Node 22 is pinned (`.nvmrc`, `package.json` engines). PRs need 1 teammate approval; `CODEOWNERS` requests reviewers but code-owner review isn't required yet.
