@@ -1,9 +1,6 @@
 # Edward Van — Student App
 
-> **Session reminder.** Full rules are in `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
-> - **Start:** pull `main`; read `CLAUDE.md`, `docs/STATUS.md`, and this file; catch up on teammates and their **Decision** lines in `docs/LOG.md`.
-> - **During:** tick tasks here as they finish; log decisions that affect others as **Decision** lines in your section of `docs/LOG.md`.
-> - **End:** add a dated Session log entry here and a line in your section of `docs/LOG.md`; commit them with your code.
+> Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
 _Last updated: 2026-10-24_
 
@@ -54,7 +51,7 @@ _Last updated: 2026-10-24_
 - [ ] Profile: name, school, past redemptions, sign out (#62)
 - [ ] Claim a club night: list open club nights, type the club name, claim, then show the link and QR to share with members (#110)
 
-_Feature freeze at the end of Nov 8: anything unfinished goes to the team to decide (finish quickly or move to the stretch goal)._
+_Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 
 ### Week 4 — Polish, no new features (Nov 9–15)
 - [ ] Test on iPhone Safari and Android Chrome over HTTPS (#64)
@@ -63,8 +60,8 @@ _Feature freeze at the end of Nov 8: anything unfinished goes to the team to dec
 
 ### Business
 - [ ] Student survey: how students find food deals now, which apps they check, would they use Grove. Results in the shared Drive folder (#67)
-- [ ] 1–2 restaurant interviews testing hypotheses 1–4 (slow days, per-visit vs. flat fee, hosting club nights, trusting QR check-in); notes in the shared Drive folder (#68)
-- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder (#111)
+- [ ] 1–2 restaurant interviews (hypotheses 1–4, see `CLAUDE.md` → Business); notes in the shared Drive folder (#68)
+- [ ] At least one student interview (hypothesis 5, see `CLAUDE.md` → Business); notes in the shared Drive folder (#111)
 
 ### Stretch goal (possible future implementation)
 - [ ] "Add to Home Screen" prompt (needed for iPhone push) (#63)
