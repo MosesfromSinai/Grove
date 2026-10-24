@@ -11,18 +11,9 @@ _Last updated: 2026-10-24 by Moses_
 **Phase 1: Foundation** (week 1 of 4, Oct 19–25): sign-in, foundation, database.
 **Next gate:** Students can log in with a school Google account.
 
-**Direction (Activity 2):** Grove is a marketing company first. Restaurants pay us to bring in students, especially on slow days (Mon–Wed). New in the MVP: repeating deals, link-only deals, club nights, and a shareable deal link and QR. Push notifications moved to a stretch goal. See `CLAUDE.md` → What Grove is, MVP scope, Week plan.
+Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove is, MVP scope, Week plan.
 
-## Week plan
-
-| Week | Focus |
-|---|---|
-| 1 (Oct 19–25) | Sign-in, foundation, database |
-| 2 (Oct 26–Nov 1) | Core loop plus all the data work: `redeem`, `redeem-pin`, repeat days, visibility, `club_nights`, live-now check, `claim-club-night`; repeat days and visibility on the post-deal form; link-only deals hidden from feed and map, opened from their link |
-| 3 (Nov 2–8) | Every remaining feature: staff scan, club night screens (post, claim, results), deal link and QR download, stats |
-| 4 (Nov 9–15) | No new features: pilot at a real restaurant, phone testing, bug fixes, demo prep |
-
-**Feature freeze at the end of Nov 8.** Anything unfinished then goes to the team to decide: finish quickly or move to the stretch goal.
+**Feature freeze at the end of Nov 8** (see `CLAUDE.md` → Week plan).
 
 ## This week's focus
 
@@ -46,17 +37,15 @@ _Last updated: 2026-10-24 by Moses_
 | Decision | Owner | Needed by |
 |---|---|---|
 | Pricing: per verified visit (~$0.50–1, monthly cap) plus a flat fee for club nights; first deal free for pilots. Still to be validated | Hikaru (with everyone's interviews) | Before the pitch deck |
-| MVP demo date | Team | Next sync |
+| MVP demo date (week dates assume a demo around Nov 16–20; re-date the plan once it's set) | Team | Next sync |
 | PIN lockout limit (tries before lockout) | Celso | Week 2 |
 | Final name ("Grove" may be trademarked) | Team | Before slides are final |
 | Staff-scan token design (signed token vs. table) | Moses (Celso reviews) | Nov 1 |
 | Which campus channels to pursue (clubs, fraternities, student ambassadors); none confirmed | Team | Before club night outreach |
 
-Push targeting radius is no longer open: push is a stretch goal.
-
 ## Business status
 
-- Part 3 interviews test five hypotheses (see `CLAUDE.md` → Business). Each person: 1–2 restaurant interviews (hypotheses 1–4) and at least one student interview (hypothesis 5). **0 done so far.** Notes go in the shared Drive folder.
+- Interviews (five hypotheses, see `CLAUDE.md` → Business): **0 done so far.**
 - Lean Canvas: Problem, Solution, UVP, Customer Segments filled. Key Metrics, Unfair Advantage, Channels, Cost Structure, Revenue Streams, and Project Name still blank.
 - Pilot businesses signed: **0.** Offer: first deal free. Target: at least one signed by Nov 6 for the Week 4 pilot.
 - Effort table: Celso's attendance cell is blank.
