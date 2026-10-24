@@ -14,7 +14,7 @@ What each person got done, **grouped by person**, newest first within each secti
 - Only decisions that affect someone else are logged, as a line in your own section tagged **Decision** with who it affects: `- **2026-10-20:** **Decision** (affects Hikaru, Edward): getDealsNearby returns businesses with no deal; id is now deal_id.` Decisions made together at a sync go under **Team**.
 - If you disagree, raise it with the person who decided or at the weekly sync.
 
-At the start of every session, each person's Claude reads the other sections for entries since that person's last session and summarizes them, so everyone stays current and can ask teammates about their work. It also tells that person about every **Decision** line that affects them.
+How each session catches up on this file: `CLAUDE.md` → Session protocol, step 3.
 
 ---
 
