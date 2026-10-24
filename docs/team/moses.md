@@ -41,7 +41,7 @@ Repo `MosesfromSinai/Grove` (public), the ruleset on `main`, the Grove board (pr
 - [x] Add teammates; collect GitHub usernames; set up `CODEOWNERS` (#4)
 - [x] Scaffold Next.js (App Router, TypeScript strict, Tailwind, shadcn/ui) with the folder layout from the README (#5)
 - [ ] Create Supabase dev project; enable PostGIS (#6)
-- [ ] Migrations for `campuses`, `profiles`, `businesses`, `business_members`, `deals`, `redemptions`, `push_subscriptions`, including the unique rule on `(student_id, deal_id, redeemed_on)`; `push_subscriptions` waits for the push stretch goal, and repeat days and club nights are #101 (#7)
+- [ ] Migrations for `campuses`, `profiles`, `businesses`, `business_members`, `deals`, `redemptions`, including the unique rule on `(student_id, deal_id, redeemed_on)`; `push_subscriptions` waits for the push stretch goal, and repeat days and club nights are #101 (#7)
 - [ ] `seed.sql` with UCR campus and invented sample businesses and deals, plus one Mon–Wed repeating deal and one open club night (same as `mocks/`) (#8)
 - [x] `mocks/` matching `API_CONTRACT.md` (day 1–3) (#9)
 - [x] Finalize `API_CONTRACT.md`; change status from DRAFT (final 2026-10-24, with repeat days, link-only deals, club nights) (#10)
