@@ -45,14 +45,14 @@ _Last updated: 2026-10-24_
 - [ ] Sticker landing page `/b/[slug]`: live deals, or "No deals right now, follow for alerts" (#57)
 - [ ] PIN entry screen calling `redeem-pin` (#58)
 - [ ] Swap mocks for real queries (#59)
-- [ ] Hide link-only deals from the feed and the sticker landing page (public deals only)
-- [ ] Open link-only deals from their link: `/deals/<id>` works for public and link-only deals
+- [ ] Hide link-only deals from the feed and the sticker landing page (public deals only) (#108)
+- [ ] Open link-only deals from their link: `/deals/<id>` works for public and link-only deals (#109)
 
 ### Week 3 — Staff mode, club nights, profile (Nov 2–8)
 - [ ] Show-your-code screen: QR from `issue-code`, refreshes every ~30 s with a countdown, screen stays bright (#60)
 - [ ] Switch to Redeemed screen when the staff scan lands (Realtime) (#61)
 - [ ] Profile: name, school, past redemptions, sign out (#62)
-- [ ] Claim a club night: list open club nights, type the club name, claim, then show the link and QR to share with members
+- [ ] Claim a club night: list open club nights, type the club name, claim, then show the link and QR to share with members (#110)
 
 _Feature freeze at the end of Nov 8: anything unfinished goes to the team to decide (finish quickly or move to the stretch goal)._
 
@@ -64,7 +64,7 @@ _Feature freeze at the end of Nov 8: anything unfinished goes to the team to dec
 ### Business
 - [ ] Student survey: how students find food deals now, which apps they check, would they use Grove. Results in the shared Drive folder (#67)
 - [ ] 1–2 restaurant interviews testing hypotheses 1–4 (slow days, per-visit vs. flat fee, hosting club nights, trusting QR check-in); notes in the shared Drive folder (#68)
-- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder
+- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder (#111)
 
 ### Stretch goal (possible future implementation)
 - [ ] "Add to Home Screen" prompt (needed for iPhone push) (#63)
