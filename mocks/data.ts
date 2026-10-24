@@ -1,7 +1,8 @@
 // Invented sample data, matching the design canvas. Times are relative to page load
 // so countdowns and live/scheduled/ended states always look right.
 
-import type { DiscountType, Hours, RedemptionMethod, RedemptionMode } from "../lib/supabase/types";
+import { campusClock } from "../lib/supabase/deal-status";
+import type { DealVisibility, DiscountType, Hours, RedemptionMethod, RedemptionMode, Weekday } from "../lib/supabase/types";
 
 const MIN = 60_000;
 const HOUR = 60 * MIN;
@@ -22,7 +23,7 @@ const everyDay = (open: string, close: string): Hours => ({
 export const UCR_CENTER = { lat: 33.9737, lng: -117.3281 };
 
 export const campuses = [
-  { id: "campus-ucr", name: "UC Riverside", email_domain: "ucr.edu", ...UCR_CENTER },
+  { id: "campus-ucr", name: "UC Riverside", email_domain: "ucr.edu", timezone: "America/Los_Angeles", ...UCR_CENTER },
 ];
 
 export type MockBusiness = {
@@ -56,17 +57,28 @@ export type MockDeal = {
   business_id: string;
   title: string;
   description: string;
-  discount_type: DiscountType;
+  discount_type: DiscountType | null;
   discount_value: number | null;
   photo_url: string | null;
   starts_at: string;
-  ends_at: string;
+  ends_at: string | null;
+  active_days: Weekday[] | null;
+  daily_start: string | null;
+  daily_end: string | null;
+  visibility: DealVisibility;
   students_only: boolean;
   created_at: string;
 };
 
-const deal = (d: Omit<MockDeal, "photo_url" | "created_at"> & { photo_url?: string | null }): MockDeal => ({
+type DealInput = Omit<MockDeal, "photo_url" | "created_at" | "active_days" | "daily_start" | "daily_end" | "visibility"> &
+  Partial<Pick<MockDeal, "photo_url" | "active_days" | "daily_start" | "daily_end" | "visibility">>;
+
+const deal = (d: DealInput): MockDeal => ({
   photo_url: null,
+  active_days: null,
+  daily_start: null,
+  daily_end: null,
+  visibility: "public",
   created_at: at(new Date(d.starts_at).getTime() - now - DAY),
   ...d,
 });
@@ -79,6 +91,11 @@ export const deals: MockDeal[] = [
   deal({ id: "deal-owl-gyoza", business_id: "biz-owl", title: "Half-off gyoza with any ramen", description: "Order any ramen and get a side of gyoza at half price.", discount_type: "percent_off", discount_value: 50, starts_at: at(-3 * HOUR), ends_at: at(80 * MIN), students_only: false }),
   deal({ id: "deal-pep-slice", business_id: "biz-pep", title: "$5 slice + drink", description: "Any slice plus a fountain drink for $5.", discount_type: "amount_off", discount_value: 3, starts_at: at(-1 * HOUR), ends_at: at(200 * MIN), students_only: false }),
   deal({ id: "deal-bob-milktea", business_id: "biz-bob", title: "Buy one milk tea, 2nd half off", description: "Second milk tea of equal or lesser price is half off.", discount_type: "percent_off", discount_value: 50, starts_at: at(-1 * HOUR), ends_at: at(260 * MIN), students_only: true }),
+  // Repeats Mon–Wed, 2–5 PM campus time, until the owner turns it off (live only inside the window)
+  deal({ id: "deal-ver-slowday", business_id: "biz-ver", title: "$3 off any bowl", description: "Mon to Wed, 2 to 5 PM.", discount_type: "amount_off", discount_value: 3, starts_at: at(-10 * DAY), ends_at: null, active_days: ["mon", "tue", "wed"], daily_start: "14:00", daily_end: "17:00", students_only: true }),
+  // Link-only club night deals (created by claimClubNight; no student discount)
+  deal({ id: "deal-opt-chess-night", business_id: "biz-opt", title: "Chess Club night", description: "$1 per student back to Chess Club.", discount_type: null, discount_value: null, starts_at: at(-1 * HOUR), ends_at: at(2 * HOUR), visibility: "link_only", students_only: true }),
+  deal({ id: "deal-opt-film-night", business_id: "biz-opt", title: "Film Club night", description: "15% back to Film Club.", discount_type: null, discount_value: null, starts_at: at(-2 * DAY - 3 * HOUR), ends_at: at(-2 * DAY), visibility: "link_only", students_only: true }),
   // Scheduled
   deal({ id: "deal-opt-latenight", business_id: "biz-opt", title: "Late-night BOGO tacos", description: "Buy one taco, get one free, 8 to 11 PM.", discount_type: "bogo", discount_value: null, starts_at: at(3 * DAY), ends_at: at(3 * DAY + 3 * HOUR), students_only: true }),
   // Ended
@@ -118,6 +135,37 @@ export const redemptions: MockRedemption[] = [
   { id: "red-3", deal_id: "deal-bob-milktea-old", business_id: "biz-bob", student_id: mockStudent.id, redeemed_at: at(-6 * DAY - 2 * HOUR), method: "sticker" },
   { id: "red-4", deal_id: "deal-saf-drink-old", business_id: "biz-saf", student_id: mockStudent.id, redeemed_at: at(-11 * DAY - 2 * HOUR), method: "pin" },
   { id: "red-5", deal_id: "deal-pep-slice-old", business_id: "biz-pep", student_id: mockStudent.id, redeemed_at: at(-14 * DAY - 2 * HOUR), method: "sticker" },
+];
+
+// Other students' visits to the past Film Club night, so club night results have numbers.
+for (let i = 1; i <= 18; i++) {
+  redemptions.push({ id: `red-film-${i}`, deal_id: "deal-opt-film-night", business_id: "biz-opt", student_id: `student-${i}`, redeemed_at: at(-2 * DAY - 3 * HOUR + i * 8 * MIN), method: "sticker" });
+}
+
+export type MockClubNight = {
+  id: string;
+  business_id: string;
+  night_date: string;
+  start_time: string;
+  end_time: string;
+  giveback: string;
+  claimed_club_name: string | null;
+  claimed_by: string | null;
+  claimed_at: string | null;
+  deal_id: string | null;
+  starts_at: string; // night_date + start_time as an instant, for mock time checks
+  ends_at: string; // night_date + end_time as an instant
+};
+
+const clubNight = (c: Omit<MockClubNight, "night_date" | "start_time" | "end_time">): MockClubNight => {
+  const start = campusClock(new Date(c.starts_at));
+  return { ...c, night_date: start.date, start_time: start.time, end_time: campusClock(new Date(c.ends_at)).time };
+};
+
+export const clubNights: MockClubNight[] = [
+  clubNight({ id: "cn-pep-open", business_id: "biz-pep", giveback: "15% back to your club", claimed_club_name: null, claimed_by: null, claimed_at: null, deal_id: null, starts_at: at(3 * DAY), ends_at: at(3 * DAY + 3 * HOUR) }),
+  clubNight({ id: "cn-opt-chess", business_id: "biz-opt", giveback: "$1 per student", claimed_club_name: "Chess Club", claimed_by: "student-jordan", claimed_at: at(-5 * HOUR), deal_id: "deal-opt-chess-night", starts_at: at(-1 * HOUR), ends_at: at(2 * HOUR) }),
+  clubNight({ id: "cn-opt-film", business_id: "biz-opt", giveback: "15% back to your club", claimed_club_name: "Film Club", claimed_by: "student-7", claimed_at: at(-4 * DAY), deal_id: "deal-opt-film-night", starts_at: at(-2 * DAY - 3 * HOUR), ends_at: at(-2 * DAY) }),
 ];
 
 // Canned dashboard numbers for Orange Peel Tacos, matching the Stats and My deals screens.

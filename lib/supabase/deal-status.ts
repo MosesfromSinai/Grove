@@ -49,8 +49,8 @@ export function dealStatus(deal: DealTiming, now: Date = new Date(), timeZone: s
 // When the current live window ends, for countdowns. Null if the deal isn't live.
 export function liveUntil(deal: DealTiming, now: Date = new Date(), timeZone: string = CAMPUS_TZ): string | null {
   if (dealStatus(deal, now, timeZone) !== "live") return null;
+  if (!deal.active_days || !deal.daily_end) return deal.ends_at;
   const ends = deal.ends_at ? new Date(deal.ends_at).getTime() : Infinity;
-  if (!deal.active_days || !deal.daily_end) return new Date(ends).toISOString();
   const left = (minutes(deal.daily_end) - minutes(campusClock(now, timeZone).time)) * 60_000;
   return new Date(Math.min(ends, now.getTime() + left)).toISOString();
 }
