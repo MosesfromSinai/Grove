@@ -14,18 +14,18 @@ Grove is a marketing company for locally owned restaurants and food trucks near 
 
 **Requirements:** Node.js 22 (pinned in `.nvmrc`; with [nvm](https://github.com/nvm-sh/nvm), run `nvm install` then `nvm use`), Git, the [Supabase CLI](https://supabase.com/docs/guides/cli), and Docker (only if you run Supabase locally).
 
-**Keys:** Moses shares them through a password manager (Vercel is on the Hobby plan, so teammates can't be added there). Paste them into your own `.env.local`; never send keys in chat, email, or issues.
+**Keys:** accept the Supabase org invite, then copy the Supabase URL and anon key yourself from the dashboard (grove-dev → Project Settings → API Keys → Legacy). Leave `SUPABASE_SERVICE_ROLE_KEY` empty; it stays with Moses. Any other key you need comes from Moses by one-time link (onetimesecret.com). Never send keys in chat, email, or issues.
 
 ```bash
 git clone git@github.com:MosesfromSinai/Grove.git grove
 cd grove
 nvm use                      # Node 22
 npm install
-cp .env.example .env.local   # then paste the values from the password manager; .env.local is git-ignored
+cp .env.example .env.local   # then fill in the URL and anon key; .env.local is git-ignored
 npm run dev                  # http://localhost:3000
 ```
 
-When a key changes, Moses updates the password manager and you update `.env.local`. Before pushing, run `npm run lint`, `npm run typecheck`, and `npm run build`.
+When a key changes, copy it again from the dashboard (or Moses sends a one-time link). Before pushing, run `npm run lint`, `npm run typecheck`, and `npm run build`.
 
 **Environment variables:** `.env.example` lists every variable and what it's for, with empty values. Set `NEXT_PUBLIC_SITE_URL=http://localhost:3000` locally.
 
