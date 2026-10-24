@@ -44,8 +44,8 @@ One row per signed-in user. Created on first sign-in.
 | address | text | |
 | hours | jsonb | `{ "mon": [["11:00","22:00"]], ... }` |
 | logo_url | text | Supabase Storage |
-| qr_slug | text, unique | Permanent sticker link: `/b/<qr_slug>` |
-| staff_pin | text | 4 digits, stored hashed |
+| qr_slug | text, unique | Permanent sticker link: `/b/<qr_slug>`. Set by the database on insert (from the name, plus a short suffix if taken); never edited |
+| staff_pin | text | 4 digits, stored hashed. Set only by `set-pin`; never returned by any query |
 | redemption_mode | text | `sticker` (default) or `staff_scan` |
 | is_truck | boolean | |
 
@@ -54,8 +54,11 @@ Links owner and staff accounts to a business. Needed for staff-scan mode and for
 | Column | Type | Notes |
 |---|---|---|
 | business_id | uuid → businesses | |
-| user_id | uuid → profiles | |
+| user_id | uuid → profiles | Null while invited; filled when that email signs in for the first time |
+| email | text | Google email the owner added (lowercase) |
 | role | text | `owner` or `staff` |
+
+The owner's row is created with the business. Staff rows come from `add-staff`. Owners remove staff by deleting the row (RLS: owners of that business only).
 
 ### `deals`
 | Column | Type | Notes |
@@ -84,6 +87,8 @@ SQL uses one `deal_status(deal, now)` function; TypeScript uses `dealStatus()` i
 - **End now** (or turning off a repeating deal) sets `ends_at = now()`. **Cancel** on a scheduled deal with no redemptions deletes it.
 - Check constraints: `ends_at > starts_at` when set; `ends_at` null only if `active_days` is set; `active_days`, `daily_start`, `daily_end` all set or all null; `daily_end > daily_start`.
 - **Deal link:** every deal opens at `/deals/<id>`, and Adolfo's dashboard offers it as a link and a QR for flyers and group chats. It's advertising only: it opens the deal in Grove and never redeems. Link-only deals rely on the id being unguessable (uuid).
+- **Who reads link-only deals:** RLS lets students select only `public` deals from the table, so link-only deals can't be listed. `getDeal` calls a `deal_by_id(id)` SQL function (security definer) that returns one deal of either visibility by id; that's how a link opens.
+- **Writes:** businesses insert and update their own deals directly (RLS: members of that business). Status and visibility rules above still apply.
 
 ### `redemptions`
 The billing record: one row per verified visit.
@@ -139,13 +144,14 @@ Moses owns `lib/supabase/` and writes the wrappers; the owner listed writes the 
 | Function | Input | Returns | Used by |
 |---|---|---|---|
 | `getDealsNearby` | `{ lat, lng, radiusM, openNow?, hasDeals? }` | `DealCard[]`: one row per live **public** deal (link-only deals never appear), plus one row (`has_deal: false`) per business with no live deal; `hasDeals: true` drops those. Sorted by distance. Calls Hikaru's `deals_nearby` SQL function | Edward (feed, `hasDeals: true`), Hikaru (map: group by `business_id`; orange pin if any row has a deal, green otherwise) |
-| `getDeal` | `{ id }` | `DealDetail \| null`, public or link-only (this is how a deal link opens) | Edward |
+| `getDeal` | `{ id }` | `DealDetail \| null`, public or link-only, via `deal_by_id()` (this is how a deal link opens) | Edward |
 | `getBusinessBySlug` | `{ slug }` | `{ business: BusinessPublic, liveDeals: Deal[] } \| null`, live public deals only | Edward (sticker landing) |
 | `getMyRedemptions` | none | `Redemption[]`, newest first | Edward |
 | `getBusinessStats` | `{ businessId, from, to }` | `BusinessStats` | Adolfo |
 | `getMyDeals` | `{ businessId }` | `MyDeal[]`, newest start first, both visibilities | Adolfo |
 | `getOpenClubNights` | none | `OpenClubNight[]`, open nights at the student's campus, soonest first | Edward (claim screen) |
 | `getClubNights` | `{ businessId }` | `ClubNight[]` with `visit_count`, newest first | Adolfo (club night results) |
+| `getStaff` | `{ businessId }` | `StaffMember[]` (owner and staff, active or invited) | Adolfo (staff list) |
 
 ```ts
 type DealStatus = "scheduled" | "live" | "ended";
@@ -255,6 +261,14 @@ type OpenClubNight = {
   giveback: string;
 };
 
+type StaffMember = {
+  business_id: string;
+  email: string;
+  user_id: string | null;
+  role: "owner" | "staff";
+  status: "active" | "invited";  // computed: invited while user_id is null
+};
+
 type ClubNight = OpenClubNight & {
   status: ClubNightStatus;
   claimed_club_name: string | null;
@@ -277,9 +291,13 @@ All return either `{ ok: true, ... }` or `{ ok: false, error: ErrorCode }`. `lib
 | `issue-code` (staff mode) — `issueCode()` | `{ deal_id }` | `{ token, expires_at }` | Moses |
 | `staff-redeem` — `staffRedeem()` | `{ token }` | `{ redemption: Redemption, deal_title }` | Moses |
 | `claim-club-night` — `claimClubNight()` | `{ club_night_id, club_name }` | `{ club_night: ClubNight, deal_id }` (share `/deals/<deal_id>` with members) | Moses |
+| `set-pin` — `setPin()` | `{ business_id }` (owner only) | `{ pin }`: a new random 4-digit PIN, returned this once and stored hashed. Used at onboarding and for "Reset PIN" | Moses |
+| `add-staff` — `addStaff()` | `{ business_id, email }` (owner only) | `{ member: StaffMember }`; status `invited` until that email signs in | Moses |
 | `notify-deal` — `notifyDeal()` | `{ deal_id }`, called when a deal goes live. **Stretch goal** | `{ sent: number }` | Hikaru |
 
 `redeem` checks in this order: `WRONG_BUSINESS`, `DEAL_NOT_LIVE`, `LOCATION_REQUIRED`, `TOO_FAR` (over 150 m), `ALREADY_REDEEMED_TODAY`.
+
+`set-pin` and `add-staff` errors: `NOT_SIGNED_IN`, `NOT_OWNER`.
 
 `claim-club-night` errors: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT`, `CLUB_NIGHT_EXPIRED`, `ALREADY_CLAIMED` (one claim per club night; the claim is a single conditional update, so two claims at once can't both win), `RATE_LIMITED` (Celso).
 
@@ -304,7 +322,8 @@ type ErrorCode =
   | "NOT_STAFF"
   | "RATE_LIMITED"
   | "ALREADY_CLAIMED"
-  | "CLUB_NIGHT_EXPIRED";
+  | "CLUB_NIGHT_EXPIRED"
+  | "NOT_OWNER";
 ```
 
 Every error code needs a friendly message in the UI (Edward and Adolfo).
@@ -318,7 +337,9 @@ Every error code needs a friendly message in the UI (Edward and Adolfo).
 - Use `MOCK_POSITIONS.atOrangePeelTacos` as the location to pass the 150 m check; your real location will return `TOO_FAR`.
 - "$3 off any bowl" at Verde Bowl repeats Mon–Wed 2–5 PM, so it's only in the feed then.
 - Club nights: Pepper Tree Pizza Co. has one **open** night (claim it with `claimClubNight()`); Orange Peel Tacos has a **claimed** Chess Club night live right now (link-only deal `deal-opt-chess-night`, opens with `getDeal()`, never in the feed) and a past Film Club night with 18 visits.
-- Every mock PIN is `1234`. The mock staff account works at Orange Peel Tacos, so `staffRedeem()` on any other business's code returns `NOT_STAFF`.
+- Every mock PIN starts as `1234`; `setPin()` replaces it for Orange Peel Tacos. The mock staff account works at Orange Peel Tacos, so `staffRedeem()` on any other business's code returns `NOT_STAFF`.
+- The mock owner owns Orange Peel Tacos: `setPin()` and `addStaff()` for any other business return `NOT_OWNER`. `getStaff()` shows an owner, an active staff member, and an invited one.
+- Test helpers (not in the real API): `MOCK_POSITIONS`, `UCR_CENTER`, `campusNow()`.
 
 ---
 
