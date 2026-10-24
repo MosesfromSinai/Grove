@@ -110,7 +110,7 @@ A restaurant posts an open night; one student claims it for a club by typing the
 | start_time | time | Campus time |
 | end_time | time | Later than `start_time` |
 | giveback | text | Free text, e.g. "15% back to your club" or "$1 per student". Paid outside the app |
-| claimed_club_name | text | Null until claimed; trimmed, 1–60 characters |
+| claimed_club_name | text | Null until claimed; trimmed (the claim screen requires a name) |
 | claimed_by | uuid → profiles | Student who claimed it; never sent to the browser |
 | claimed_at | timestamptz | |
 | deal_id | uuid → deals | The link-only deal created on claim |
