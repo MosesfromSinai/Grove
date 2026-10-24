@@ -28,7 +28,7 @@ _Last updated: 2026-10-24 by Moses_
 
 | Person | Focus |
 |---|---|
-| Moses | Supabase project, migrations, seed data, CI, Vercel. API contract is final (with repeat days, link-only, club nights); `mocks/` match it |
+| Moses | **Today:** Supabase dev project (#6), then migrations (#7) by Oct 25 so Celso's sign-in isn't blocked. Then seed data, CI, Vercel. API contract is final; `mocks/` match it |
 | Celso | Google sign-in, .edu check, profile creation, threat model (3 new rows to review) |
 | Edward | App shell, deal feed and deal page on mocks (theme done; see `/theme`) |
 | Adolfo | Dashboard layout, business onboarding, post-deal form on mocks |
@@ -37,7 +37,9 @@ _Last updated: 2026-10-24 by Moses_
 ## Blockers
 
 - **Everyone: review your team file.** Moses edited all five on 2026-10-24 (one-time exception, like setup) for the Activity 2 changes: new tasks, interview work, dependencies, and the week plan. Fix anything that's wrong in your own file.
-- Celso still needs to accept his GitHub invite; his issues stay unassigned until he does.
+- Celso still needs to accept his GitHub invite; his issues stay unassigned until he does. **If he isn't active by Oct 26, Moses takes Google OAuth setup (#29)** so the Phase 1 gate isn't stuck.
+- Week 1 ends Oct 25 and most Week 1 tasks are open. Build on `mocks/`; don't wait on real tables.
+- Week 2 order for Moses (others build on mocks meanwhile): #101 and #102 first (Oct 26–27), then typed queries #16, then `redeem` / `redeem-pin` / `claim-club-night` / `set-pin`, then Realtime #17. Celso writes the rate-limit and PIN-hash helpers early in Week 2 so Moses's functions call them.
 
 ## Open decisions
 
@@ -45,8 +47,9 @@ _Last updated: 2026-10-24 by Moses_
 |---|---|---|
 | Pricing: per verified visit (~$0.50–1, monthly cap) plus a flat fee for club nights; first deal free for pilots. Still to be validated | Hikaru (with everyone's interviews) | Before the pitch deck |
 | MVP demo date | Team | Next sync |
+| PIN lockout limit (tries before lockout) | Celso | Week 2 |
 | Final name ("Grove" may be trademarked) | Team | Before slides are final |
-| Staff-scan token design (signed token vs. table) | Moses + Celso | Start of week 3 |
+| Staff-scan token design (signed token vs. table) | Moses (Celso reviews) | Nov 1 |
 | Which campus channels to pursue (clubs, fraternities, student ambassadors); none confirmed | Team | Before club night outreach |
 
 Push targeting radius is no longer open: push is a stretch goal.
@@ -55,5 +58,5 @@ Push targeting radius is no longer open: push is a stretch goal.
 
 - Part 3 interviews test five hypotheses (see `CLAUDE.md` → Business). Each person: 1–2 restaurant interviews (hypotheses 1–4) and at least one student interview (hypothesis 5). **0 done so far.** Notes go in the shared Drive folder.
 - Lean Canvas: Problem, Solution, UVP, Customer Segments filled. Key Metrics, Unfair Advantage, Channels, Cost Structure, Revenue Streams, and Project Name still blank.
-- Pilot businesses signed: **0.** Offer: first deal free.
+- Pilot businesses signed: **0.** Offer: first deal free. Target: at least one signed by Nov 6 for the Week 4 pilot.
 - Effort table: Celso's attendance cell is blank.
