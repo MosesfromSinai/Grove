@@ -58,14 +58,14 @@ Repo `MosesfromSinai/Grove` (public), the ruleset on `main`, the Grove board (pr
 - [ ] Migration: `active_days`, `daily_start`, `daily_end`, `visibility` on `deals`; `timezone` on `campuses`; `club_nights` table (#101)
 - [ ] Live-now check with repeat days: one `deal_status()` SQL function used by `redeem`, `redeem-pin`, `issue-code`, `staff-redeem`, `deals_nearby`, and RLS (#102)
 - [ ] `claim-club-night` Edge Function: one claim per night (conditional update), creates the link-only deal, returns `ALREADY_CLAIMED` / `CLUB_NIGHT_EXPIRED` / `NOT_SIGNED_IN` (#103)
-- [ ] `set-pin` Edge Function (owner only; random 4-digit PIN returned once, stored hashed with Celso's helper) and the database default for `qr_slug` on new businesses
+- [ ] `set-pin` Edge Function (owner only; random 4-digit PIN returned once, stored hashed with Celso's helper) and the database default for `qr_slug` on new businesses (#120)
 - [ ] Agree staff-scan token design with Celso by Nov 1; log it as a **Decision** in `LOG.md` (#19)
 
 ### Week 3 — Staff mode and stats (Nov 2–8)
 - [ ] `issue-code` (token refreshes ~every 30 s) and `staff-redeem` (staff of that business only) (#20)
 - [ ] `getBusinessStats` SQL (per deal, per hour) (#21)
 - [ ] Sentry for app and functions (#22)
-- [ ] `add-staff` Edge Function and `getStaff` query (owner adds staff by Google email; an invited email becomes active on its first sign-in)
+- [ ] `add-staff` Edge Function and `getStaff` query (owner adds staff by Google email; an invited email becomes active on its first sign-in) (#121)
 - [ ] Production Supabase project; migrate; real campus data only; ready before the Week 4 pilot (#23)
 
 _Feature freeze at the end of Nov 8: anything unfinished goes to the team to decide (finish quickly or move to the stretch goal)._
