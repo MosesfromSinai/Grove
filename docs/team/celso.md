@@ -42,8 +42,8 @@ _Last updated: 2026-10-24_
 - [ ] Hash `staff_pin`; never return it to the browser (#36)
 - [ ] Rate limits on `redeem` and `redeem-pin`; lockout after repeated bad PINs (#37)
 - [ ] Server-side sanity checks on location (reject impossible coordinates) (#38)
-- [ ] RLS for `club_nights`: businesses manage their own; students read open nights at their campus; only `claim-club-night` writes the claim columns; `claimed_by` never reaches the browser
-- [ ] Rate-limit club night claims (per student) in `claim-club-night`
+- [ ] RLS for `club_nights`: businesses manage their own; students read open nights at their campus; only `claim-club-night` writes the claim columns; `claimed_by` never reaches the browser (#105)
+- [ ] Rate-limit club night claims (per student) in `claim-club-night` (#106)
 
 ### Week 3 — Staff mode security (Nov 2–8)
 - [ ] Design staff-scan tokens with Moses (short-lived, signed, single use) (#39)
@@ -60,7 +60,7 @@ _Feature freeze at the end of Nov 8: anything unfinished goes to the team to dec
 ### Business
 - [ ] Competitor analysis in the shared Drive folder (Instagram, Yelp, Google Maps, coupon and student-discount apps); start from the Activity 2 competition table (#45)
 - [ ] 1–2 restaurant interviews testing hypotheses 1–4 (slow days, per-visit vs. flat fee, hosting club nights, trusting QR check-in); notes in the shared Drive folder (#46)
-- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder
+- [ ] At least one student interview for hypothesis 5 (students try Grove when a deal reaches them through a club or fraternity they're in); notes in the shared Drive folder (#107)
 - [ ] Fill in your attendance cell on the effort table (#47)
 
 ---
