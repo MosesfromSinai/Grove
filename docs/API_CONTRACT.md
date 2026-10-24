@@ -301,11 +301,11 @@ All return either `{ ok: true, ... }` or `{ ok: false, error: ErrorCode }`. `lib
 
 `claim-club-night` errors: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT`, `CLUB_NIGHT_EXPIRED`, `ALREADY_CLAIMED` (one claim per club night; the claim is a single conditional update, so two claims at once can't both win), `RATE_LIMITED` (Celso).
 
-### What changes for redeem (Activity 2)
+### Redeem with repeat days and link-only deals
+The two-QR rule and the redemption checks are in `CLAUDE.md` → Redemption rules. What that means for the functions:
 - **Live now follows repeat days.** `DEAL_NOT_LIVE` uses `deal_status()`, so a Mon–Wed 2–5 PM deal fails outside that window. Same for `redeem-pin`, `issue-code`, and `staff-redeem`.
 - **Daily limit is unchanged:** one redemption per student per deal per campus date, so a repeating deal can be redeemed once on each day it runs.
-- **Link-only deals redeem exactly like public ones.** No visibility check: anyone with the link still needs a verified student, the counter sticker, ~150 m, a live window, and the daily limit.
-- **Two QR codes:** the deal link QR only opens the deal. Redeeming still only happens by scanning the counter sticker inside Grove.
+- **No visibility check in `redeem`:** link-only deals go through the same checks as public ones.
 - **Club night deals have no discount.** The Redeemed screen shows the deal title (e.g. "Chess Club night") and no discount line; the visit counts for the club.
 
 ```ts
@@ -346,4 +346,3 @@ Every error code needs a friendly message in the UI (Edward and Adolfo).
 ## Open questions
 - Staff-scan tokens: signed tokens with no table, or a short-lived `redemption_codes` table? (Moses + Celso)
 - PIN attempts: how many tries before lockout? (Celso)
-- Push targeting radius: stretch goal, decide only if push is picked back up. (Hikaru)
