@@ -88,9 +88,10 @@ _Record things only you need to remember (gotchas, commands, links). Decisions t
 - `main` is protected by the "protect main" ruleset (not classic branch protection): PR + 1 approval, plus the required CI check "Lint, typecheck, build". Admins bypass.
 - Query grove-dev without the DB password: `npx supabase db query --linked "<sql>"` (or `-f file.sql`). Refresh the seed's live deals with `npx supabase db query --linked -f supabase/seed.sql`; it clears its own rows first.
 - `supabase db reset` (local) needs Docker Desktop running; `supabase start -x studio,...` keeps it light.
+- Check invite status with `gh api repos/MosesfromSinai/Grove/invitations`, not the collaborators list: on a public repo that lists pending invitees too, with `read`.
 
 ## Blockers
-- Celso accepted his GitHub invite but has no commits, log lines, or assigned issues yet. If he isn't active by Oct 26, Moses takes Google OAuth setup (#29) so the Phase 1 gate isn't stuck.
+- Celso hasn't accepted his GitHub invite (pending since Oct 20, write access), so his 22 issues (#29–#47, #105–#107) can't be assigned yet. Assign them once he accepts. If he isn't active by Oct 26, Moses takes Google OAuth setup (#29) so the sign-in gate isn't stuck.
 
 ---
 
@@ -98,9 +99,9 @@ _Record things only you need to remember (gotchas, commands, links). Decisions t
 _Newest at the top. One entry per session._
 
 ### 2026-10-25
-- **Did:** Core table migrations (#7) and repeat days, visibility, campus timezone, `club_nights` (#101, pulled forward so the seed has a club night), pushed to grove-dev and checked against the contract; RLS on every table, no policies yet. CI workflow (#12) passes on GitHub and is a required check on `main`. `seed.sql` (#8) with UCR, the eight canvas businesses, 15 deals including the Mon–Wed repeat, and one open club night, applied to grove-dev.
+- **Did:** Core table migrations (#7) and repeat days, visibility, campus timezone, `club_nights` (#101, pulled forward so the seed has a club night), pushed to grove-dev and checked against the contract; RLS on every table, no policies yet. CI workflow (#12) passes on GitHub and is a required check on `main`. `seed.sql` (#8) with UCR, the eight canvas businesses, 15 deals including the Mon–Wed repeat, and one open club night, applied to grove-dev. Merged PR #123; Sprint 1 is done. Found Celso's invite is still pending (it was misread as accepted earlier), so his issues stay unassigned.
 - **Next:** `deal_status()` (#102), then typed queries (#16), then `redeem` (#14). Take #29 on Oct 26 if Celso still isn't active.
-- **Blockers:** No RLS policies yet, so only the service role can read the tables (Celso).
+- **Blockers:** No RLS policies yet, so only the service role can read the tables (Celso). Celso's GitHub invite is still pending.
 
 ### 2026-10-20 (theme)
 - **Did:** Built Edward's theme task (#48) on `main`: Grove tokens in `app/globals.css`, Bricolage Grotesque + Figtree in the root layout, shadcn mapped to Grove colors, `/theme` preview page. Updated the review rule in `CLAUDE.md`.
