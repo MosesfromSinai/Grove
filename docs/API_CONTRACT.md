@@ -302,7 +302,7 @@ All return either `{ ok: true, ... }` or `{ ok: false, error: ErrorCode }`. `lib
 
 `set-pin` and `add-staff` errors: `NOT_SIGNED_IN`, `NOT_OWNER`.
 
-`claim-club-night` errors: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT`, `CLUB_NIGHT_EXPIRED`, `ALREADY_CLAIMED` (one claim per club night; the claim is a single conditional update, so two claims at once can't both win), `RATE_LIMITED` (Celso).
+`claim-club-night` errors: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT`, `CLUB_NIGHT_EXPIRED`, `ALREADY_CLAIMED` (one claim per club night; the claim is a single conditional update, so two claims at once can't both win), `RATE_LIMITED` (Celso). An unknown night is `CLUB_NIGHT_EXPIRED`. The club name is trimmed and cut to 60 characters; a blank name is a bad request (HTTP 400, the wrapper throws), so the claim screen requires one.
 
 ### Redeem with repeat days and link-only deals
 The two-QR rule and the redemption checks are in `CLAUDE.md` → Redemption rules. What that means for the functions:
