@@ -6,7 +6,7 @@ The shapes everyone builds against. Frontend work uses `mocks/` that match this 
 **Rule:** any change here goes in a pull request reviewed by the people it affects, plus a line in `docs/LOG.md`.
 **Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together.
 
-_Last updated: 2026-10-24_
+_Last updated: 2026-10-26_
 
 ---
 
@@ -83,11 +83,11 @@ The owner's row is created with the business. Staff rows come from `add-staff`. 
 - **One-time deal** (`active_days` null): `live`.
 - **Repeating deal:** `live` only when today (campus time) is in `active_days` and the time is in `[daily_start, daily_end)`; `scheduled` otherwise. Example: Mon–Wed 2–5 PM is live Monday at 3 PM and `scheduled` Monday at 6 PM or Thursday.
 
-SQL uses one `deal_status(deal, now)` function; TypeScript uses `dealStatus()` in `lib/supabase/deal-status.ts`. `redeem`, `redeem-pin`, `issue-code`, `staff-redeem`, `deals_nearby`, and RLS all use the same rule.
+SQL uses one `deal_status(d deals, at_time timestamptz default now())` function returning `scheduled`, `live`, or `ended`; TypeScript uses `dealStatus()` in `lib/supabase/deal-status.ts`. `redeem`, `redeem-pin`, `issue-code`, `staff-redeem`, `deals_nearby`, and RLS all use the same rule.
 - **End now** (or turning off a repeating deal) sets `ends_at = now()`. **Cancel** on a scheduled deal with no redemptions deletes it.
 - Check constraints: `ends_at > starts_at` when set; `ends_at` null only if `active_days` is set; `active_days`, `daily_start`, `daily_end` all set or all null; `daily_end > daily_start`.
 - **Deal link:** every deal opens at `/deals/<id>`, and Adolfo's dashboard offers it as a link and a QR for flyers and group chats. It's advertising only: it opens the deal in Grove and never redeems. Link-only deals rely on the id being unguessable (uuid).
-- **Who reads link-only deals:** RLS lets students select only `public` deals from the table, so link-only deals can't be listed. `getDeal` calls a `deal_by_id(id)` SQL function (security definer) that returns one deal of either visibility by id; that's how a link opens.
+- **Who reads link-only deals:** RLS lets students select only `public` deals from the table, so link-only deals can't be listed. `getDeal` calls a `deal_by_id(id)` SQL function (security definer) that returns the `deals` row of either visibility by id (no rows if it doesn't exist); that's how a link opens.
 - **Writes:** businesses insert and update their own deals directly (RLS: members of that business). Status and visibility rules above still apply.
 
 ### `redemptions`
