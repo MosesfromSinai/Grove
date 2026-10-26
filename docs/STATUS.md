@@ -22,7 +22,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 | Person | Focus |
 |---|---|
 | Moses | Sprint 1 done: Supabase (#6), Vercel (#13), tables (#7, #101), CI (#12), seed data (#8). Next: `deal_status()` (#102), then typed queries (#16), then `redeem` (#14). Backup for Google OAuth (#29) |
-| Celso | Not started (GitHub invite still pending). Week 1: Google OAuth (#29), sign-in, .edu check, profile trigger. Week 2: RLS on every table (#35), PIN-hash and rate-limit helpers |
+| Celso | #29, #30, #33 done (OAuth clients, sign-in page, root routing). Next: ping Moses for #32 (profiles trigger), then #34 (threat model), then week 2: #35 (RLS), #36 (PIN hash), #37 (rate limits) |
 | Edward | Finish the app shell and deal feed on mocks, then the scanner, `redeem` call, and Redeemed screen |
 | Adolfo | Dashboard layout in progress (`adolfo/dashboard-foundation`), then onboarding, the post-deal form with repeat days and visibility, and the sticker |
 | Hikaru | Finish the map on mocks, then `deals_nearby` (tables and seed are on grove-dev) |
@@ -31,7 +31,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 
 - **Everyone: review your team file.** Moses edited all five on 2026-10-24 (one-time exception, like setup) for the Activity 2 changes: new tasks, interview work, dependencies, and the week plan. Fix anything that's wrong in your own file.
 - **Everyone:** accept the Supabase org invite, then copy the Supabase URL and anon key into your `.env.local` (see README → Getting started). The service-role key stays with Moses.
-- **Celso hasn't accepted his GitHub invite** (pending since Oct 20, write access), so his 22 issues can't be assigned to him and he can't push branches. Moses assigns them once he accepts. **If he isn't active by Oct 26, Moses takes Google OAuth setup (#29)** so the sign-in gate isn't stuck.
+- **Celso:** .edu check in `/auth/callback` needs a public-read RLS policy on `campuses` (allow anon `SELECT`) before `verified_student` is set. Also needs Moses's profiles trigger migration (#32). Both required before the sign-in gate can be called fully passed.
 - **Celso:** every table has RLS on and no policies, so the browser (anon and signed-in users) reads nothing until policies land. Includes hiding `businesses.staff_pin` and `club_nights.claimed_by`. The profile trigger can insert into `profiles` as is.
 - **Everyone:** CI ("Lint, typecheck, build") now runs on every PR and must pass to merge. Run `npm run lint && npm run typecheck && npm run build` before pushing.
 - Real tables and seed data are on grove-dev, but keep building on `mocks/` until typed queries (#16) and RLS policies exist.

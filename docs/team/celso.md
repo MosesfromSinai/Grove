@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-10-24_
+_Last updated: 2026-10-26_
 
 ---
 
@@ -27,11 +27,11 @@ _Last updated: 2026-10-24_
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [ ] Set up Google OAuth in Google Cloud and Supabase Auth (needs the Supabase project, #6; if you aren't active by Oct 26, Moses takes this) (#29)
-- [ ] Sign-in page (canvas screen 1, one button: "Sign in with your school Google account"); business owners use the same Google sign-in with any account (#30)
-- [ ] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` (#31)
+- [x] Set up Google OAuth in Google Cloud and Supabase Auth (needs the Supabase project, #6; if you aren't active by Oct 26, Moses takes this) (#29)
+- [x] Sign-in page (canvas screen 1, one button: "Sign in with your school Google account"); business owners use the same Google sign-in with any account (#30)
+- [x] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` — scaffolded in callback; needs RLS read policy on `campuses` (#31)
 - [ ] Database trigger to create a `profiles` row on first sign-in (#32)
-- [ ] Onboarding: route to student app or business onboarding (root routing in `app/page.tsx`, Moses reviews) (#33)
+- [x] Onboarding: route to student app or business onboarding (root routing in `app/page.tsx`, Moses reviews) (#33)
 - [ ] Review the threat model below; add anything missing (#34)
 
 ### Week 2 — Lock down data (Oct 26–Nov 1)
@@ -95,6 +95,11 @@ _Record things only you need to remember. Decisions that affect others go in `do
 
 ## Session log
 _Newest at the top. One entry per session._
+
+### 2026-10-26
+- **Did:** Google OAuth setup (#29): installed `@supabase/ssr` + `@supabase/supabase-js`; created `lib/supabase/client.ts` (browser) and `lib/supabase/server.ts` (SSR); added `proxy.ts` (Next.js 16 session-refresh + unauthenticated redirect); created `/auth/callback` route handler (exchanges code, runs .edu check, routes by role); built the sign-in page (`/sign-in`, canvas screen 1) with Google OAuth button; updated `app/page.tsx` to route by role. Also covers #30 (sign-in page) and #33 (onboarding routing). .edu check (#31) is scaffolded but needs Moses or me to add a public-read RLS policy on `campuses`. Profile trigger (#32) is Moses's migration.
+- **Next:** #32 (ping Moses for the profiles trigger migration), then #34 (threat model review), then week 2: #35 (RLS on every table), #36 (PIN hash), #37 (rate limits).
+- **Blockers:** .edu check (#31) and callback routing (#33) are fully wired but won't run until the `campuses` and `profiles` RLS policies exist (#35). Sign-in flow itself works once Moses configures Google OAuth in the Supabase Auth dashboard (grove-dev → Authentication → Providers → Google) and sets the redirect URL to `{SITE_URL}/auth/callback`.
 
 ### 2026-10-19
 - **Did:** Assigned role.
