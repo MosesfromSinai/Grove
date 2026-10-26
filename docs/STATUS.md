@@ -21,7 +21,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 
 | Person | Focus |
 |---|---|
-| Moses | Sprint 1 done. Next: `deal_status()` (#102), then typed queries (#16), then `redeem` (#14). Merge open PRs in order as fixes land (below) |
+| Moses | Done: `deal_status()`, typed queries (#16), `redeem` (#14), `claim-club-night` (#103), Realtime (#17), all on grove-dev. Next: `redeem-pin` (#15) and `set-pin` (#120) once #128 lands; agree staff-scan tokens (#19) with Celso by Nov 1; gate test (#18) |
 | Celso | Fix #127 (enable Google in Supabase Auth, #29) and the #128 security holes; then #38, #106, #39 |
 | Edward | Rework #129 onto `mocks/` and the contract; then the scanner, `redeem` call, and Redeemed screen |
 | Adolfo | Merge main into #126 after #127 lands, trim contract and docs; then repeat days and visibility on the post-deal form (#112) |
@@ -34,7 +34,7 @@ Moses re-checks each PR when its author pushes fixes. It merges when CI passes a
 | Order | PR | Waiting on |
 |---|---|---|
 | 1 | #127 Celso, Google sign-in | Google enabled in Supabase Auth and sign-in working on its preview; .edu check moved into `handle_new_user()`; PWA paths public; callback moved; Closes #30 only |
-| 2 | #128 Celso, RLS and PIN helpers | Security fixes (PIN functions service-role only, `profiles` updates `full_name` only, open club nights only, `owner_id` hidden, attempt-based redeem limit) plus a test script; Moses re-runs the security checks on a local database before merging |
+| 2 | #128 Celso, RLS and PIN helpers | Security fixes (PIN functions service-role only, `profiles` updates `full_name` only, open club nights only, `owner_id` hidden, attempt-based redeem limit) plus a test script; also: migrations renamed after the newest on main, students read deals they redeemed, `lat`/`lng` granted, `redemptions.student_location` hidden. Moses re-runs the security checks on a local database before merging |
 | 3 | #126 Adolfo, dashboard foundation | Merge main after #127 (conflicts block CI); trim contract and docs; tests in vitest; canvas check |
 | 4 | #129 Edward, student shell and feed | Rebuild on `mocks/` and the contract; no typed-code redeem; remove files outside his area; design tokens; docs |
 
@@ -45,10 +45,10 @@ Moses re-checks each PR when its author pushes fixes. It merges when CI passes a
 - **Everyone: review your team file.** Moses edited all five on 2026-10-24 (one-time exception, like setup) for the Activity 2 changes: new tasks, interview work, dependencies, and the week plan. Fix anything that's wrong in your own file.
 - **Everyone:** accept the Supabase org invite, then copy the Supabase URL and anon key into your `.env.local` (see README → Getting started). The service-role key stays with Moses.
 - **Sign-in gate:** waits on #127. Celso enables Google in Supabase Auth (#29); nothing that requires sign-in merges until it works on the preview.
-- **RLS:** every table on grove-dev still has RLS on and no policies, so the browser reads nothing until #128 merges with its security fixes.
+- **RLS:** every table on grove-dev still has RLS on and no policies, so the browser reads nothing until #128 merges with its security fixes. Until then, real wrappers return nothing for signed-in users.
 - **Everyone:** CI ("Lint, typecheck, build") runs on every PR and must pass to merge; it now runs `npm test` (vitest) too. Run `npm run lint && npm run typecheck && npm test && npm run build` before pushing.
-- Real tables and seed data are on grove-dev, but keep building on `mocks/` until typed queries (#16) and RLS policies exist.
-- Week 2 order for Moses (others build on mocks meanwhile): #102 first (Oct 26–27; #101 is done), then typed queries #16, then `redeem` / `redeem-pin` / `claim-club-night` / `set-pin`, then Realtime #17. Celso writes the rate-limit and PIN-hash helpers early in Week 2 so Moses's functions call them.
+- **Everyone:** import data functions from `@/lib/supabase` (not `@/mocks`). It serves mocks until `NEXT_PUBLIC_DATA_SOURCE=supabase`, which flips once #128 lands. Same names and types, so nothing else changes.
+- **Gate test (#18):** `redeem` is deployed and tested on grove-dev. The one-sticker, two-phone test waits on sign-in (#127, Google enabled), RLS (#128), and the scanner on real data (#129). `redeem-pin` and `set-pin` wait on #128's PIN helpers.
 
 ## Open decisions
 
