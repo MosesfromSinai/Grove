@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
   const { club_night_id, club_name } = await readJson(req);
   if (!isUuid(club_night_id)) return json({ ok: false, error: "CLUB_NIGHT_EXPIRED" });
   // The claim screen requires a name, so a blank one is a bad request (the wrapper throws).
-  const club = typeof club_name === "string" ? club_name.trim().slice(0, 60) : "";
+  const club = typeof club_name === "string" ? club_name.trim().slice(0, 60).trim() : "";
   if (!club) return json({ error: "club_name is required" }, 400);
   // TODO(#106): return RATE_LIMITED from Celso's per-student claim limit once it lands.
 
