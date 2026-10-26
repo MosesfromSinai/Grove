@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "test:business": "node --test tests/business-post-deal.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

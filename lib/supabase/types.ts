@@ -55,6 +55,32 @@ export type MyDeal = Deal & {
   redemption_count: number;
 };
 
+// Sprint 1 posting supports a single public time window. Repeat days come later.
+export type CreateDealInput = Pick<Deal,
+  "business_id" | "title" | "description" | "photo_url" | "starts_at" | "students_only"
+> & {
+  ends_at: string;
+  discount_type: DiscountType;
+  discount_value: number | null;
+};
+
+export type CreateDealErrors = Partial<Record<keyof CreateDealInput, string>>;
+export type CreateDealResult =
+  | { ok: true; deal: MyDeal }
+  | { ok: false; error: "NOT_OWNER" }
+  | { ok: false; error: "INVALID_DEAL"; fields: CreateDealErrors };
+
+export type DealMutationInput = { business_id: string; deal_id: string };
+export type DealMutationError =
+  | "NOT_OWNER"
+  | "DEAL_NOT_FOUND"
+  | "DEAL_NOT_LIVE"
+  | "DEAL_NOT_SCHEDULED"
+  | "DEAL_HAS_REDEMPTIONS"
+  | "DEAL_IN_USE";
+export type EndDealResult = { ok: true; deal: MyDeal } | { ok: false; error: DealMutationError };
+export type CancelDealResult = { ok: true; deal_id: string } | { ok: false; error: DealMutationError };
+
 type NearbyBusiness = {
   business_id: string;
   business_name: string;

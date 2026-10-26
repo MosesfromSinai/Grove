@@ -3,12 +3,18 @@
 // State lives in memory and resets on page reload.
 
 import { campusClock, dealStatus, liveUntil } from "../lib/supabase/deal-status";
+import { validateCreateDealInput } from "../lib/supabase/deal-input";
 import type {
   AddStaffResult,
   BusinessPublic,
   BusinessStats,
   ClaimClubNightResult,
   ClubNight,
+  CreateDealInput,
+  CreateDealResult,
+  DealMutationInput,
+  EndDealResult,
+  CancelDealResult,
   OpenClubNight,
   Deal,
   DealCard,
@@ -68,6 +74,16 @@ function localDate(iso: string): string {
 
 function toDeal(d: MockDeal): Deal {
   return { ...d, status: dealStatus(d) };
+}
+
+function toMyDeal(d: MockDeal): MyDeal {
+  const historical = d.business_id === "biz-opt"
+    ? orangePeelStats.last30.perDeal.find(([id]) => id === d.id)?.[1]
+    : undefined;
+  return {
+    ...toDeal(d),
+    redemption_count: historical ?? redemptions.filter(r => r.deal_id === d.id).length,
+  };
 }
 
 function toBusinessPublic(b: MockBusiness): BusinessPublic {
@@ -226,17 +242,60 @@ export async function getBusinessStats(input: {
 }
 
 export async function getMyDeals(input: { businessId: string }): Promise<MyDeal[]> {
-  const counts = new Map<string, number>(
-    input.businessId === "biz-opt" ? orangePeelStats.last30.perDeal.map(([id, n]) => [id, n]) : [],
-  );
   const mine = deals
     .filter((d) => d.business_id === input.businessId)
-    .map((d) => ({
-      ...toDeal(d),
-      redemption_count: counts.get(d.id) ?? redemptions.filter((r) => r.deal_id === d.id).length,
-    }))
+    .map(toMyDeal)
     .sort((a, b) => b.starts_at.localeCompare(a.starts_at));
   return delay(mine);
+}
+
+// ---------- Business writes ----------
+
+export async function createDeal(input: CreateDealInput): Promise<CreateDealResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  const result = validateCreateDealInput(input);
+  if (!result.ok) return delay({ ok: false, error: "INVALID_DEAL", fields: result.fields });
+  const deal: MockDeal = {
+    ...result.value,
+    id: crypto.randomUUID(),
+    active_days: null,
+    daily_start: null,
+    daily_end: null,
+    visibility: "public",
+    created_at: new Date().toISOString(),
+  };
+  deals.push(deal);
+  return delay({ ok: true, deal: { ...toDeal(deal), redemption_count: 0 } });
+}
+
+// Re-check the current clock and store at mutation time, not the UI snapshot.
+export async function endDeal(input: DealMutationInput): Promise<EndDealResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  const deal = deals.find(d => d.id === input.deal_id && d.business_id === input.business_id);
+  if (!deal) return delay({ ok: false, error: "DEAL_NOT_FOUND" });
+  const now = new Date();
+  const status = dealStatus(deal, now);
+  const started = new Date(deal.starts_at).getTime() < now.getTime();
+  if (!started || status === "ended" || (status !== "live" && !deal.active_days)) {
+    return delay({ ok: false, error: "DEAL_NOT_LIVE" });
+  }
+  deal.ends_at = now.toISOString();
+  return delay({ ok: true, deal: toMyDeal(deal) });
+}
+
+export async function cancelDeal(input: DealMutationInput): Promise<CancelDealResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  const index = deals.findIndex(d => d.id === input.deal_id && d.business_id === input.business_id);
+  if (index < 0) return delay({ ok: false, error: "DEAL_NOT_FOUND" });
+  const deal = deals[index];
+  if (dealStatus(deal) !== "scheduled") return delay({ ok: false, error: "DEAL_NOT_SCHEDULED" });
+  if (toMyDeal(deal).redemption_count > 0 || redemptions.some(r => r.deal_id === deal.id)) {
+    return delay({ ok: false, error: "DEAL_HAS_REDEMPTIONS" });
+  }
+  // Preserve the existing club_nights -> deals reference; no cascading cleanup.
+  if (clubNights.some(night => night.deal_id === deal.id)) return delay({ ok: false, error: "DEAL_IN_USE" });
+  deals.splice(index, 1);
+  return delay({ ok: true, deal_id: deal.id });
 }
 
 // ---------- Edge Functions ----------

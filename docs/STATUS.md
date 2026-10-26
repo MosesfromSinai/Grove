@@ -4,6 +4,8 @@ The project's live memory. Read this first every session. Overwrite it (don't ap
 
 _Last updated: 2026-10-25 by Adolfo_
 
+> Branch sync note: fetched `origin/main` at `d999191`; it has 16 commits not integrated into this checkout. Its project status is now Phase 2, with tables/seed/CI delivered and real browser access still blocked by missing RLS policies/typed queries. The project-wide snapshot below predates those updates; use [upstream STATUS](https://github.com/MosesfromSinai/Grove/blob/main/docs/STATUS.md) for current teammate status until the branch is synchronized. The local Adolfo entry is current. No upstream merge has been performed.
+
 ---
 
 ## Current phase
@@ -23,10 +25,13 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 | Moses | Supabase (#6) and Vercel (#13) are done. Next: migrations (#7) by Oct 25 so Celso's sign-in isn't blocked, then CI (#12) and seed data (#8). Invite everyone to the Supabase org |
 | Celso | Google sign-in, .edu check, profile creation, threat model (3 new rows to review) |
 | Edward | App shell, deal feed and deal page on mocks (theme done; see `/theme`) |
-| Adolfo | #69 dashboard layout reviewed and accepted on `adolfo/dashboard-foundation`; lint, typecheck, build, responsive and navigation checks passed. Commit/push authorized, then #71 on mocks; stop for review before #72 and #70 |
+| Adolfo | #69 pushed as `51dfd63` on `adolfo/dashboard-foundation`. #71/#72 reviewed and sanity-audited; lint, typecheck, build, 14 regression groups, responsive/behavioral and accessibility checks passed. Publishing #71/#72, then #70 onboarding on mocks. Upstream sync/shared API review pending |
 | Hikaru | Map with mock pins, filter chips, location permission handling |
 
 ## Blockers
+
+- Shared API review (Moses): the #71/#72 business adapter, mock writes, validation, types, contract additions, and test script are local proposals pending review. Real auth/RLS/Storage wiring remains #73; the current dashboard is a sample-only preview.
+- Branch sync: reconcile the newer upstream guidance, CI, STATUS, and LOG before integration. Preserve uncommitted #71/#72 work; synchronization requires the existing commit/merge approvals.
 
 - **Everyone: review your team file.** Moses edited all five on 2026-10-24 (one-time exception, like setup) for the Activity 2 changes: new tasks, interview work, dependencies, and the week plan. Fix anything that's wrong in your own file.
 - **Everyone:** accept the Supabase org invite, then copy the Supabase URL and anon key into your `.env.local` (see README → Getting started). The service-role key stays with Moses.

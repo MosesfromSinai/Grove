@@ -2,11 +2,11 @@
 
 The shapes everyone builds against. Frontend work uses `mocks/` that match this file exactly, then swaps in real queries once the tables and functions exist.
 
-**Owner:** Moses. **Status:** Final (2026-10-24), including the Activity 2 changes: repeat days, link-only deals, club nights. Later changes still follow the rule below.
+**Owner:** Moses. **Status:** Existing table/query contract is final (2026-10-24), including repeat days, link-only deals, and club nights. The Sprint 1 business-write additions below are proposals pending Moses's review. Later changes still follow the rule below.
 **Rule:** any change here goes in a pull request reviewed by the people it affects, plus a line in `docs/LOG.md`.
 **Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together.
 
-_Last updated: 2026-10-24_
+_Last updated: 2026-10-25 (Adolfo: Sprint 1 business-write wrapper proposals for Moses review)_
 
 ---
 
@@ -277,6 +277,55 @@ type ClubNight = OpenClubNight & {
   visit_count: number;  // verified redemptions of deal_id
 };
 ```
+
+---
+
+## Business writes (Sprint 1 mock adapter)
+
+`lib/supabase/business.ts` exports mock-backed `createDeal`, `getMyDeals`, `endDeal`, and `cancelDeal`; replace the adapter with authenticated Supabase access in #73. Moses owns this boundary, the types, and mocks; these additions are proposed with #71/#72 for his review. No table shape or Edge Function changes.
+
+`createDeal(input: CreateDealInput): Promise<CreateDealResult>` creates one **public, one-time** deal for the mock owner's business. Repeat days and visibility controls remain #112. Inputs cannot set id, created time, computed status, visibility, or redemption count.
+
+```ts
+type CreateDealInput = Pick<Deal,
+  "business_id" | "title" | "description" | "photo_url" | "starts_at" | "students_only"
+> & {
+  ends_at: string;
+  discount_type: DiscountType;
+  discount_value: number | null;
+};
+type CreateDealErrors = Partial<Record<keyof CreateDealInput, string>>;
+type CreateDealResult =
+  | { ok: true; deal: MyDeal }
+  | { ok: false; error: "NOT_OWNER" }
+  | { ok: false; error: "INVALID_DEAL"; fields: CreateDealErrors };
+```
+
+- Trimmed title and description are required. Numeric discounts must be finite, positive, and use at most two decimal places; percent off is at most 100. Free item and BOGO require a null value.
+- `starts_at` and `ends_at` must be ISO timestamps with an explicit `Z` or numeric offset and valid calendar dates; end must be after start and in the future. The form converts UC Riverside wall time (`America/Los_Angeles`) to ISO independently of the device timezone, rejecting nonexistent/ambiguous daylight-saving times. Past starts are allowed for posting a currently live deal.
+- Optional photos are raster JPG/PNG/WebP, up to 5 MB (5 × 1024 × 1024 decoded bytes). **Mock-only:** `photo_url` holds the uploaded image's data URL in memory, not a Supabase Storage URL; the wrapper checks base64 structure and decoded size, and the form checks that the photo decodes before saving. #73 must upload to Storage and save its URL. No photo is written into the repository.
+- Success returns a UUID, computed `status`, and `redemption_count: 0`. `getMyDeals` and `getDeal` read the newly inserted deal; no independent UI store is used. State resets on a full page reload, as with the existing mocks.
+- Failures never insert a deal. `NOT_OWNER` and `INVALID_DEAL` have friendly messages and field feedback in the form. `INVALID_DEAL` is a write-validation result, not a new Edge Function error code.
+
+### Deal management (#72, mock adapter)
+
+The same business adapter also exports `getMyDeals`, `endDeal`, and `cancelDeal`. New write signatures (proposed for Moses review):
+
+```ts
+type DealMutationInput = { business_id: string; deal_id: string };
+type DealMutationError = "NOT_OWNER" | "DEAL_NOT_FOUND" | "DEAL_NOT_LIVE"
+  | "DEAL_NOT_SCHEDULED" | "DEAL_HAS_REDEMPTIONS" | "DEAL_IN_USE";
+type EndDealResult = { ok: true; deal: MyDeal } | { ok: false; error: DealMutationError };
+type CancelDealResult = { ok: true; deal_id: string } | { ok: false; error: DealMutationError };
+// endDeal(input: DealMutationInput): Promise<EndDealResult>
+// cancelDeal(input: DealMutationInput): Promise<CancelDealResult>
+```
+
+- Both recheck ownership, business/deal association, and current status when called. Unknown/foreign ids do not mutate data. Failures use the wrapper-specific codes above; the Edge Function error union is unchanged.
+- `endDeal` sets `ends_at` to now, preserving the row, all redemptions, and its count. It accepts a live deal or an already-started repeating deal between daily windows. Future deals and ended deals are rejected; `ends_at > starts_at` is preserved.
+- `cancelDeal` deletes only a currently scheduled deal with no redemptions. It checks both existing mock historical totals and actual redemption rows. Club-night references are protected (`DEAL_IN_USE`); no cascade or club-night editing is added.
+- The UI labels `live` as Active and `ended` as Expired. No stored status or new table column is introduced. Both visibilities appear, with a Link only badge. Counts retain the existing mock history totals where provided, otherwise count fixture redemption rows.
+- The list reloads on activation/focus and checks statuses every 15 seconds while visible. Writes refresh it and reject stale actions. End/cancel changes are visible to the existing deal/feed/redemption queries and reset on full reload.
 
 ---
 
