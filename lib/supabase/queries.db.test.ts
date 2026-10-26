@@ -5,6 +5,7 @@ import { execSync } from "node:child_process";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { Database } from "./database.types";
+import type { Redemption } from "./types";
 import {
   getBusinessBySlug,
   getBusinessStats,
@@ -15,6 +16,7 @@ import {
   getOpenClubNights,
   getStaff,
   setClient,
+  subscribeToRedemptions,
 } from "./queries";
 
 const OPT = "b0000000-0000-4000-8000-000000000001";
@@ -77,6 +79,23 @@ describe.skipIf(!process.env.SUPABASE_DB_TESTS)("queries on the local seed", () 
     const staff = await getStaff({ businessId: OPT });
     expect(staff.map((m) => `${m.role}:${m.status}`).sort()).toEqual(["owner:active", "staff:active", "staff:invited"]);
   });
+
+  test("subscribeToRedemptions hears a new visit within 5 seconds", async () => {
+    const heard = new Promise<Redemption>((resolve) => {
+      const stop = subscribeToRedemptions({ businessId: OPT }, (r) => {
+        stop();
+        resolve(r);
+      });
+    });
+    await new Promise((r) => setTimeout(r, 1500)); // let the channel join
+    const started = Date.now();
+    const insert = await service.from("redemptions").insert({ deal_id: BURRITO, business_id: OPT, student_id: studentId, redeemed_on: "2026-10-27", method: "pin" });
+    expect(insert.error).toBeNull();
+    const r = await heard;
+    expect(Date.now() - started).toBeLessThan(5000);
+    expect(r).toMatchObject({ deal_title: "$2 off any burrito", business_name: "Orange Peel Tacos", method: "pin" });
+    expect(r).not.toHaveProperty("student_location");
+  }, 10_000);
 
   test("blocked until #88: deals_nearby doesn't exist yet", async () => {
     await expect(getDealsNearby({ lat: 33.9737, lng: -117.3281, radiusM: 3000 })).rejects.toThrow();
