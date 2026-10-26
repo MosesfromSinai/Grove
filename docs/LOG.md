@@ -25,6 +25,12 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-10-25:** **Decision** (affects everyone): CI ("Lint, typecheck, build") is a required check on `main`; a PR can't merge until it passes (`.github/workflows/ci.yml`, #12).
+- **2026-10-25:** **Decision** (affects Celso): every table has RLS on with no policies; RLS policies (including hiding `staff_pin` and `club_nights.claimed_by`) are Celso's next step before the app reads real data.
+- **2026-10-25:** Seed data on grove-dev: UCR (with timezone), the eight canvas businesses, 15 deals including the Mon–Wed 2–5 PM repeat at Verde Bowl, and one open club night at Pepper Tree Pizza Co.; re-runnable (`supabase/seed.sql`, #8).
+- **2026-10-25:** CI workflow runs lint, typecheck, and build on Node from `.nvmrc` for every PR and push to `main` (`.github/workflows/ci.yml`, #12).
+- **2026-10-25:** `club_nights` migration with every contract check, pulled forward from Week 2 so the seed has a club night (`supabase/migrations/20261025000100_club_nights.sql`, #101).
+- **2026-10-25:** Core table migrations on grove-dev, matching the contract: `campuses` (with `timezone`), `profiles`, `businesses`, `business_members`, `deals` (with repeat days and `visibility`), `redemptions` with the `(student_id, deal_id, redeemed_on)` unique rule (`supabase/migrations/20261025000000_core_tables.sql`, #7).
 - **2026-10-24:** **Decision** (affects everyone): no password manager. Teammates copy the Supabase URL and anon key from the dashboard (grove-dev → Project Settings → API Keys → Legacy) after accepting the Supabase org invite; the service-role key stays with Moses; anything else goes by one-time link (onetimesecret.com), never chat or email. Replaces the earlier password-manager rule.
 - **2026-10-24:** **Decision** (affects everyone): Vercel is on the Hobby plan, so teammates can't be added or run `vercel env pull`. Moses shares secrets through a password manager; paste them into your own `.env.local`. Replaces the Oct 20 "keys only via `vercel env pull`" rule. Vercel connected (#13): production https://grove-jade.vercel.app, preview links on every PR.
 - **2026-10-24:** Created the Supabase dev project `grove-dev` (us-west-1) with PostGIS 3.3.7, ran `supabase init` and `supabase link`, and committed `supabase/config.toml` (#6).

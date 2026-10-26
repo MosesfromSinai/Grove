@@ -2,7 +2,7 @@
 
 The project's live memory. Read this first every session. Overwrite it (don't append) whenever the current state changes, so it always describes **now**. History goes in `LOG.md`, not here.
 
-_Last updated: 2026-10-24 by Moses_
+_Last updated: 2026-10-25 by Moses_
 
 ---
 
@@ -20,7 +20,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 
 | Person | Focus |
 |---|---|
-| Moses | Supabase (#6) and Vercel (#13) are done. Next: migrations (#7) by Oct 25 so Celso's sign-in isn't blocked, then CI (#12) and seed data (#8). Invite everyone to the Supabase org |
+| Moses | Week 1 done: tables (#7, plus #101), CI (#12), and seed data (#8) are on grove-dev and `main`. Next: `deal_status()` (#102), typed queries (#16) |
 | Celso | Google sign-in, .edu check, profile creation, threat model (3 new rows to review) |
 | Edward | App shell, deal feed and deal page on mocks (theme done; see `/theme`) |
 | Adolfo | Dashboard layout, business onboarding, post-deal form on mocks |
@@ -30,9 +30,11 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 
 - **Everyone: review your team file.** Moses edited all five on 2026-10-24 (one-time exception, like setup) for the Activity 2 changes: new tasks, interview work, dependencies, and the week plan. Fix anything that's wrong in your own file.
 - **Everyone:** accept the Supabase org invite, then copy the Supabase URL and anon key into your `.env.local` (see README → Getting started). The service-role key stays with Moses.
-- Celso still needs to accept his GitHub invite; his issues stay unassigned until he does. **If he isn't active by Oct 26, Moses takes Google OAuth setup (#29)** so the Phase 1 gate isn't stuck.
-- Week 1 ends Oct 25 and most Week 1 tasks are open. Build on `mocks/`; don't wait on real tables.
-- Week 2 order for Moses (others build on mocks meanwhile): #101 and #102 first (Oct 26–27), then typed queries #16, then `redeem` / `redeem-pin` / `claim-club-night` / `set-pin`, then Realtime #17. Celso writes the rate-limit and PIN-hash helpers early in Week 2 so Moses's functions call them.
+- Celso accepted his GitHub invite but hasn't started (no commits, log lines, or assigned issues). **If he isn't active by Oct 26, Moses takes Google OAuth setup (#29)** so the Phase 1 gate isn't stuck.
+- **Celso:** every table has RLS on and no policies, so the browser (anon and signed-in users) reads nothing until policies land. Includes hiding `businesses.staff_pin` and `club_nights.claimed_by`. The profile trigger can insert into `profiles` as is.
+- **Everyone:** CI ("Lint, typecheck, build") now runs on every PR and must pass to merge. Run `npm run lint && npm run typecheck && npm run build` before pushing.
+- Real tables and seed data are on grove-dev, but keep building on `mocks/` until typed queries (#16) and RLS policies exist.
+- Week 2 order for Moses (others build on mocks meanwhile): #102 first (Oct 26–27; #101 is done), then typed queries #16, then `redeem` / `redeem-pin` / `claim-club-night` / `set-pin`, then Realtime #17. Celso writes the rate-limit and PIN-hash helpers early in Week 2 so Moses's functions call them.
 
 ## Open decisions
 
