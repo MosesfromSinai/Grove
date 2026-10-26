@@ -25,6 +25,15 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-10-26:** **Decision** (affects everyone): screens import data functions from `@/lib/supabase`. It serves `mocks/` by default and the real Supabase wrappers when `NEXT_PUBLIC_DATA_SOURCE=supabase` (after Celso's RLS lands); a compile-time check keeps both signatures identical (#131).
+- **2026-10-26:** **Decision** (affects Hikaru): `businesses` has generated `lat`/`lng` columns, and `deals_nearby(lat, lng, radius_m, open_now, has_deals)` returning `DealCard` rows is in the contract for #88 (#131).
+- **2026-10-26:** **Decision** (affects Adolfo): new `subscribeToRedemptions({ businessId }, onRedemption)` for the live visit feed (#75), on mocks and real data; reuse `openNow()` from `lib/supabase/deal-status.ts` (#131, #135).
+- **2026-10-26:** **Decision** (affects Celso): four more must-fixes on #128: rename migrations after the newest on main, let students read deals they redeemed, grant `lat`/`lng`, and hide `redemptions.student_location` with a column grant (Realtime follows column grants).
+- **2026-10-26:** Realtime on `redemptions` plus `subscribeToRedemptions()` in contract, types, mocks, and wrappers; applied to grove-dev (#17, PR #135).
+- **2026-10-26:** `claim-club-night` deployed to grove-dev: `claim_club_night()` makes one conditional update and creates the link-only deal; tests include a two-student race (#103, PRs #133, #134).
+- **2026-10-26:** `redeem` deployed to grove-dev: `redeem_sticker()` runs the contract's checks and `record_redemption()` inserts in one transaction; pgTAP and served-function tests (#14, PR #132).
+- **2026-10-26:** Typed queries for every contract function in `lib/supabase/queries.ts`, the mock/real switch in `lib/supabase/index.ts`, `openNow()`, generated DB types, and `npm run test:db` (#16, PR #131).
+- **2026-10-26:** `deal_status()` and `deal_by_id()` on grove-dev, with the same 9 examples in pgTAP and vitest (#102, PR #130).
 - **2026-10-26:** **Decision** (affects Edward): `claim-club-night` answers a blank club name with HTTP 400, so `claimClubNight()` throws. The claim screen must require a name and show a generic error if the claim throws.
 - **2026-10-26:** **Decision** (affects Edward): every redemption requires a verified student (`NOT_VERIFIED_STUDENT` otherwise), so `students_only` is display-only (the "UCR students only" tag).
 - **2026-10-26:** **Decision** (affects everyone): merged Hikaru's map (#125); vitest with `npm test` in CI is the team test runner. Requested changes on #126, #127, #128, #129 with fix prompts; merge order is #127, #128, #126, #129 (STATUS → Open PRs).
