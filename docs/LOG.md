@@ -25,6 +25,7 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-10-26:** **Decision** (affects Edward): `claim-club-night` answers a blank club name with HTTP 400, so `claimClubNight()` throws. The claim screen must require a name and show a generic error if the claim throws.
 - **2026-10-26:** **Decision** (affects Edward): every redemption requires a verified student (`NOT_VERIFIED_STUDENT` otherwise), so `students_only` is display-only (the "UCR students only" tag).
 - **2026-10-26:** **Decision** (affects everyone): merged Hikaru's map (#125); vitest with `npm test` in CI is the team test runner. Requested changes on #126, #127, #128, #129 with fix prompts; merge order is #127, #128, #126, #129 (STATUS → Open PRs).
 - **2026-10-26:** Removed the PR template (descriptions are now 1–3 lines plus `Closes #` lines), reviewed open PRs #125–#129 (RLS and PIN-function holes in #128 confirmed on a local database), and assigned Celso's 22 issues now that he has accepted his invite.
