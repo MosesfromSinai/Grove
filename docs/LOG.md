@@ -69,4 +69,6 @@ _Nothing logged yet._
 _Nothing logged yet._
 
 ## Hikaru
-_Nothing logged yet._
+- **2026-10-25:** Synced latest main and prepared `hikaru/map-foundation` for team review. Fixed real-map keyboard focus on selection; added Mapbox lifecycle and location-race regression tests plus `npm test` in the required CI job. #84 and real-map verification for #85 remain blocked on the restricted token.
+- **2026-10-25:** Implemented the Week 1 map at `/map` on `hikaru/map-foundation`: grouped orange/green mock pins, combinable filters (#86), and location with campus fallback (#87). Mapbox wiring is in place, with a labeled pin preview until #84 supplies a restricted token; #85 remains open for actual-map and canvas verification. Four data tests and local browser checks cover filtering and synthetic location outcomes (`components/map/README.md`).
+- **2026-10-25:** **Decision** (affects Edward, Moses): map defaults to a 3 km search radius; Walking distance narrows it to 800 m in a straight line, explicitly labeled as proximity rather than a route. The API contract and mocks are unchanged.

@@ -2,7 +2,7 @@
 
 The project's live memory. Read this first every session. Overwrite it (don't append) whenever the current state changes, so it always describes **now**. History goes in `LOG.md`, not here.
 
-_Last updated: 2026-10-25 by Moses_
+_Last updated: 2026-10-25 by Hikaru_
 
 ---
 
@@ -25,9 +25,11 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 | Celso | Not started (GitHub invite still pending). Week 1: Google OAuth (#29), sign-in, .edu check, profile trigger. Week 2: RLS on every table (#35), PIN-hash and rate-limit helpers |
 | Edward | Finish the app shell and deal feed on mocks, then the scanner, `redeem` call, and Redeemed screen |
 | Adolfo | Dashboard layout in progress (`adolfo/dashboard-foundation`), then onboarding, the post-deal form with repeat days and visibility, and the sticker |
-| Hikaru | Finish the map on mocks, then `deals_nearby` (tables and seed are on grove-dev) |
+| Hikaru | `/map` on `hikaru/map-foundation`: mock pin preview, combined filters (#86), location and campus fallback (#87). #85 awaits Mapbox token/canvas verification, then `deals_nearby` after Moses lands `deal_status()` |
 
 ## Blockers
+
+- **Hikaru (#84–85):** restricted Mapbox token still needs creation and transfer to Moses for Vercel. The preview works without tiles; actual Mapbox rendering, canvas screen 3 comparison, and HTTPS phone location testing are pending. Edward can integrate `/map` into the student shell.
 
 - **Everyone: review your team file.** Moses edited all five on 2026-10-24 (one-time exception, like setup) for the Activity 2 changes: new tasks, interview work, dependencies, and the week plan. Fix anything that's wrong in your own file.
 - **Everyone:** accept the Supabase org invite, then copy the Supabase URL and anon key into your `.env.local` (see README → Getting started). The service-role key stays with Moses.
