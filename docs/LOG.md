@@ -25,6 +25,7 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-10-26:** Removed the PR template (descriptions are now 1–3 lines plus `Closes #` lines), reviewed open PRs #125–#129 (RLS and PIN-function holes in #128 confirmed on a local database), and assigned Celso's 22 issues now that he has accepted his invite.
 - **2026-10-25:** **Decision** (affects everyone): CI ("Lint, typecheck, build") is a required check on `main`; a PR can't merge until it passes (`.github/workflows/ci.yml`, #12).
 - **2026-10-25:** **Decision** (affects Celso): every table has RLS on with no policies; RLS policies (including hiding `staff_pin` and `club_nights.claimed_by`) are Celso's next step before the app reads real data.
 - **2026-10-25:** Seed data on grove-dev: UCR (with timezone), the eight canvas businesses, 15 deals including the Mon–Wed 2–5 PM repeat at Verde Bowl, and one open club night at Pepper Tree Pizza Co.; re-runnable (`supabase/seed.sql`, #8).
