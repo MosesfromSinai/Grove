@@ -4,7 +4,7 @@ The shapes everyone builds against. Frontend work uses `mocks/` that match this 
 
 **Owner:** Moses. **Status:** Final (2026-10-24), including the Activity 2 changes: repeat days, link-only deals, club nights. Later changes still follow the rule below.
 **Rule:** any change here goes in a pull request reviewed by the people it affects, plus a line in `docs/LOG.md`.
-**Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together.
+**Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together. Screens import from `lib/supabase` (`index.ts`), which serves `mocks/` or the real wrappers in `queries.ts` depending on `NEXT_PUBLIC_DATA_SOURCE`; a compile-time check keeps their signatures identical.
 
 _Last updated: 2026-10-26_
 
@@ -41,6 +41,7 @@ One row per signed-in user. Created on first sign-in.
 | name | text | |
 | campus_id | uuid → campuses | |
 | location | geography(Point) | Food trucks update this daily |
+| lat, lng | double precision | Generated from `location`; read-only. API reads use these instead of the PostGIS value |
 | address | text | |
 | hours | jsonb | `{ "mon": [["11:00","22:00"]], ... }` |
 | logo_url | text | Supabase Storage |
@@ -140,6 +141,8 @@ Stretch goal (possible future implementation); not built for the MVP.
 ## Queries (in `lib/supabase/`)
 
 Moses owns `lib/supabase/` and writes the wrappers; the owner listed writes the SQL behind it.
+
+`getDealsNearby` calls `deals_nearby(lat float8, lng float8, radius_m int, open_now boolean default false, has_deals boolean default false)`, which returns `DealCard` rows (columns named exactly as the type, `live_until` from the current window). Hikaru writes it (#88).
 
 | Function | Input | Returns | Used by |
 |---|---|---|---|
