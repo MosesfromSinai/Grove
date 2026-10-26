@@ -27,11 +27,11 @@ _Last updated: 2026-10-26_
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [ ] Set up Google OAuth in Google Cloud and Supabase Auth (needs the Supabase project, #6; if you aren't active by Oct 26, Moses takes this) (#29)
-- [ ] Sign-in page (canvas screen 1, one button: "Sign in with your school Google account"); business owners use the same Google sign-in with any account (#30)
-- [ ] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` (#31)
-- [ ] Database trigger to create a `profiles` row on first sign-in (#32)
-- [ ] Onboarding: route to student app or business onboarding (root routing in `app/page.tsx`, Moses reviews) (#33)
+- [x] Set up Google OAuth in Google Cloud and Supabase Auth (needs the Supabase project, #6; if you aren't active by Oct 26, Moses takes this) (#29)
+- [x] Sign-in page (canvas screen 1, one button: "Sign in with your school Google account"); business owners use the same Google sign-in with any account (#30)
+- [x] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` (#31)
+- [x] Database trigger to create a `profiles` row on first sign-in (#32)
+- [x] Onboarding: route to student app or business onboarding (root routing in `app/page.tsx`, Moses reviews) (#33)
 - [x] Review the threat model below; add anything missing (#34)
 
 ### Week 2 — Lock down data (Oct 26–Nov 1)
@@ -102,9 +102,9 @@ _Record things only you need to remember. Decisions that affect others go in `do
 _Newest at the top. One entry per session._
 
 ### 2026-10-26 (session 2)
-- **Did:** RLS policies on every table (#35, #105): `is_business_member` and `is_business_owner` security-definer helpers; column-level REVOKE on `businesses.staff_pin` and `club_nights.claimed_by`; all row-level policies for campuses, profiles, businesses, business_members, deals, redemptions, club_nights. bcrypt PIN helpers via pgcrypto (`hash_pin`, `verify_pin`, `is_pin_rate_limited`, `record_pin_attempt`, `is_redeem_rate_limited`) plus typed TS wrappers for Moses in `supabase/functions/_shared/pin.ts` (#36, #37). Threat model reviewed and updated (#34). Excluded `supabase/functions/` from `tsconfig.json` so Deno imports don't break CI.
+- **Did:** RLS policies on every table (#35, #105): `is_business_member` and `is_business_owner` security-definer helpers; column-level REVOKE on `businesses.staff_pin` and `club_nights.claimed_by`; all row-level policies for campuses, profiles, businesses, business_members, deals, redemptions, club_nights. bcrypt PIN helpers via pgcrypto (`hash_pin`, `verify_pin`, `is_pin_rate_limited`, `record_pin_attempt`, `is_redeem_rate_limited`) plus typed TS wrappers for Moses in `supabase/functions/_shared/pin.ts` (#36, #37). Threat model reviewed and updated (#34). Excluded `supabase/functions/` from `tsconfig.json` so Deno imports don't break CI. Profiles trigger on `auth.users` insert: creates profiles row, sets role (business if email is in business_members, else student), links pending staff invites (#32). Sprint 1 complete.
 - **Next:** #38 (location sanity checks, server-side), #106 (rate-limit club night claims in `claim-club-night`), #39 (staff-scan token design review with Moses by Nov 1).
-- **Blockers:** #35 policies are live but won't fully function until Moses merges #29 (OAuth) and #32 (profiles trigger). Also need Moses to configure Google OAuth in the Supabase dashboard and add the redirect URL.
+- **Blockers:** Moses needs to configure Google OAuth in the Supabase dashboard and set redirect URL to `{SITE_URL}/auth/callback` before sign-in works end to end.
 
 ### 2026-10-26 (session 1)
 - **Did:** Google OAuth setup (#29): installed `@supabase/ssr` + `@supabase/supabase-js`; created Supabase browser + server clients; `proxy.ts` session refresh; `/auth/callback` route; sign-in page; root routing. Closes #29, #30, #33. (PR #127)

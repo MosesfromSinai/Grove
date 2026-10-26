@@ -59,6 +59,7 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-12:** Updated the Grove Tech Stack Plan (Claude Docs) for sticker redemption and both modes.
 
 ## Celso
+- **2026-10-26:** Profiles trigger on `auth.users`: creates profiles row on first sign-in, sets role (business if email is in business_members, else student), links pending staff invites. Sprint 1 complete. Closes #32.
 - **2026-10-26:** RLS policies on all tables: `is_business_member`/`is_business_owner` helpers, column-level REVOKE for `staff_pin` and `claimed_by`, all row-level policies. bcrypt PIN helpers (`hash_pin`, `verify_pin`, `is_pin_rate_limited`, `record_pin_attempt`, `is_redeem_rate_limited`) + TS wrappers in `_shared/pin.ts`. Threat model updated. Closes #34, #35, #36, #37, #105.
 - **2026-10-26:** **Decision** (affects Moses): PIN lockout is 5 failures in 15 minutes. Call `is_pin_rate_limited` before attempting, `record_pin_attempt` after. Use `_shared/pin.ts` wrappers in `redeem-pin` and `set-pin`.
 - **2026-10-26:** **Decision** (affects Moses): .edu check in `/auth/callback` needs a public-read RLS policy on `campuses` (anon can SELECT); that policy is now in #35 migration. Callback on PR #127 works once both PRs merge.
