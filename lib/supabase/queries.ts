@@ -207,6 +207,41 @@ export async function getMyDeals(input: { businessId: string }): Promise<MyDeal[
   return rows.map(({ redemptions, ...d }) => ({ ...toDeal(d), redemption_count: redemptions[0]?.count ?? 0 }));
 }
 
+// ---------- Live updates ----------
+
+// Live visits for a business dashboard (#17). RLS sends members only their business's visits,
+// and the column grants keep student_location out of the payload.
+export function subscribeToRedemptions(
+  input: { businessId: string },
+  onRedemption: (r: Redemption) => void,
+): () => void {
+  const channel = db()
+    .channel(`redemptions:${input.businessId}:${crypto.randomUUID()}`)
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "redemptions", filter: `business_id=eq.${input.businessId}` },
+      async (payload) => {
+        const r = payload.new as Tables<"redemptions">;
+        const { data: deal } = await db().from("deals").select("title, businesses(name)").eq("id", r.deal_id).maybeSingle();
+        onRedemption({
+          id: r.id,
+          deal_id: r.deal_id,
+          business_id: r.business_id,
+          student_id: r.student_id,
+          redeemed_at: r.redeemed_at,
+          redeemed_on: r.redeemed_on,
+          method: r.method as Redemption["method"],
+          deal_title: deal?.title ?? "",
+          business_name: deal?.businesses?.name ?? "",
+        });
+      },
+    )
+    .subscribe();
+  return () => {
+    void db().removeChannel(channel);
+  };
+}
+
 // ---------- Club nights ----------
 
 type ClubNightRow = Pick<
