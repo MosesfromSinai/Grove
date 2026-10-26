@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import { dealStatus } from "./deal-status";
-import type { Weekday } from "./types";
+import { dealStatus, openNow } from "./deal-status";
+import type { Hours, Weekday } from "./types";
 
 // Same examples as supabase/tests/deal_status.test.sql, so both rules stay identical.
 // 2026-10-26 is a Monday and 2026-10-29 a Thursday; -07:00 is campus time (PDT).
@@ -37,4 +37,17 @@ test.each([
   ["ended from ends_at on", "2026-10-26T16:00:00-07:00", "ended"],
 ])("one-time deal: %s", (_, now, expected) => {
   expect(dealStatus(oneTime, at(now))).toBe(expected);
+});
+
+const hours: Hours = { mon: [["11:00", "21:00"]], tue: [["17:00", "01:00"]] };
+
+test.each([
+  ["inside the day's hours", "2026-10-26T12:00:00-07:00", true],
+  ["at closing time", "2026-10-26T21:00:00-07:00", false],
+  ["on a day with no hours", "2026-10-28T12:00:00-07:00", false],
+  ["before a late opening", "2026-10-27T16:59:00-07:00", false],
+  ["after midnight on a late night", "2026-10-28T00:30:00-07:00", true],
+  ["once the late night closes", "2026-10-28T01:00:00-07:00", false],
+])("openNow %s", (_, now, expected) => {
+  expect(openNow(hours, at(now))).toBe(expected);
 });
