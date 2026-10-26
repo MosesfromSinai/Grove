@@ -57,7 +57,10 @@ _Nothing logged yet._
 _Nothing logged yet._
 
 ## Adolfo
-_Nothing logged yet._
+- **2026-10-25:** Adolfo authorized committing and pushing #69, then implementing #71. Added `.gitignore` rules for local tools/state, AWS credentials, browser auth state, test reports, and logs (shared root file owned by Moses). No PR, merge, deployment, or #71 publication authorized.
+- **2026-10-25:** Adolfo reviewed and accepted the local #69 dashboard layout ("looks good"); marked the task complete in `docs/team/adolfo.md`. Exact canvas matching was not independently verified. Work remains uncommitted; awaiting go-ahead for #71.
+- **2026-10-25:** Implemented a local dashboard layout preview for #69: desktop sidebar, stacked navigation on smaller screens, active links, overview layout, and labeled future-page placeholders (`app/(business)/dashboard/`, `components/business/`). Lint, typecheck, production build, responsive checks at 320–1440px, navigation, keyboard access, and phone/desktop accessibility scans passed. Exact canvas comparison remains pending because artifact access failed; #69 is left unchecked for review. No commit or publication; #70–#72 remain unfinished.
+- **2026-10-25:** **Decision** (affects Celso): `/dashboard` is the business dashboard entry route. It currently contains only a public sample layout preview; business membership checks must guard real data when auth and backend wiring are added.
 
 ## Hikaru
 _Nothing logged yet._

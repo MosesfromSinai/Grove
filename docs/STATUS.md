@@ -2,7 +2,7 @@
 
 The project's live memory. Read this first every session. Overwrite it (don't append) whenever the current state changes, so it always describes **now**. History goes in `LOG.md`, not here.
 
-_Last updated: 2026-10-24 by Moses_
+_Last updated: 2026-10-25 by Adolfo_
 
 ---
 
@@ -23,7 +23,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 | Moses | Supabase (#6) and Vercel (#13) are done. Next: migrations (#7) by Oct 25 so Celso's sign-in isn't blocked, then CI (#12) and seed data (#8). Invite everyone to the Supabase org |
 | Celso | Google sign-in, .edu check, profile creation, threat model (3 new rows to review) |
 | Edward | App shell, deal feed and deal page on mocks (theme done; see `/theme`) |
-| Adolfo | Dashboard layout, business onboarding, post-deal form on mocks |
+| Adolfo | #69 dashboard layout reviewed and accepted on `adolfo/dashboard-foundation`; lint, typecheck, build, responsive and navigation checks passed. Commit/push authorized, then #71 on mocks; stop for review before #72 and #70 |
 | Hikaru | Map with mock pins, filter chips, location permission handling |
 
 ## Blockers

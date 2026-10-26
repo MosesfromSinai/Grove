@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-10-24_
+_Last updated: 2026-10-25_
 
 ---
 
@@ -28,7 +28,7 @@ _Last updated: 2026-10-24_
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [ ] Dashboard layout (desktop sidebar, phone and tablet friendly) (#69)
+- [x] Dashboard layout (desktop sidebar, phone and tablet friendly) (#69) — reviewed and accepted by Adolfo; commit and push authorized
 - [ ] Business onboarding: name, address (sets `location`), hours, logo upload, food-truck toggle; first PIN via `setPin()` (#70)
 - [ ] Post-deal form: title, description, discount, start/end, photo, "UCR students only" (#71)
 - [ ] My deals list: active, scheduled, expired, with redemption counts; End now and Cancel (mocks) (#72)
@@ -65,10 +65,27 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 ## Notes and decisions
 _Record things only you need to remember. Decisions that affect others go in `docs/LOG.md` as **Decision** lines._
 
+- Sprint 1 review order: #69, #71, #72, then #70. Stop after each stage; commits and publishing require Adolfo's explicit approval.
+- Adolfo authorized committing and pushing #69 (including relevant `.gitignore` rules), then implementing #71. This does not authorize committing/pushing #71 or opening a PR, merging, or deploying.
+- #69 preview lives at `/dashboard` on `adolfo/dashboard-foundation`. Navigation destinations are labeled placeholders; overview metrics and visit feed belong to #75. The sample business is not an authenticated business session.
+- Review: Adolfo accepted the local #69 layout ("looks good"). Preview: `http://127.0.0.1:3000/dashboard`; resize to phone/tablet/desktop, follow all five navigation links, and use Tab then Enter on "Skip to content."
+- Checks passed on Node 22.23.4: `npm run lint`, `npm run typecheck`, and `npm run build`. Browser checks passed at 320, 390, 768, 1024, and 1440px (no horizontal overflow; navigation targets at least 44px), all navigation destinations and return links, skip-link focus, and navigation without JavaScript. WCAG A/AA scans at 390 and 1440px reported no violations; no browser page errors. Desktop, tablet, and phone screenshots were inspected.
+- The initial sandboxed build failed downloading the existing Google Fonts in `app/layout.tsx`; the network-enabled build passed. No source-code check failures remain. The temporary browser harness and screenshots are outside the repository at `D:/CS175/.tools/dashboard-check/`; no test dependencies or lockfile changes were added to Grove.
+- Preview restart (PowerShell from the repo): add `D:/CS175/.tools/node-v22.23.4-win-x64` to this shell's PATH if Node 22 is unavailable, then `npm run start -- --hostname 127.0.0.1`. Rebuild first after code edits.
+- The design artifact content could not be retrieved (web access failed; direct content request was challenged). Existing Grove tokens and documented screen descriptions guide the layout. Adolfo accepted the preview; exact canvas matching was not independently verified.
+- Mocks currently provide reads, `setPin`, and staff operations, but no deal create/update/delete or business onboarding save wrappers. Coordinate any additions to `mocks/` or `lib/supabase/` with Moses before the later stages; keep the contract aligned.
+
 ---
 
 ## Session log
 _Newest at the top. One entry per session._
+
+### 2026-10-25
+- **Did:** Inspected the clean checkout, fetched origin, confirmed main was current, and created `adolfo/dashboard-foundation`. Read project guidance, teammate decisions, contract, mocks, and GitHub #69–#72 acceptance criteria. Implemented only #69's dashboard shell and navigation placeholders using the existing theme. Lint, type checking, production build, responsive/behavioral checks, and accessibility scans passed; inspected screenshots and left the local production preview running. Updated only my team file, my LOG section, and the Adolfo status entry. Nothing committed or published.
+- **Review:** Adolfo accepted the #69 layout ("looks good"); marked the local task complete. No commit, publishing, or next-stage implementation authorized by that feedback.
+- **Authorization:** Adolfo subsequently authorized committing and pushing #69, then implementing #71. Added ignores for local tools, assistant state, AWS credentials, browser auth state, test reports, and logs; existing env/build/dependency ignores remain in place.
+- **Next:** Commit and push the accepted #69 work, then implement and test #71 and stop for review. #72 and #70 follow separately; #71 commit/push requires explicit approval.
+- **Blockers:** None for the accepted layout. Exact canvas matching was not independently verified because artifact content access failed. The old repo-creation blocker is resolved.
 
 ### 2026-10-19
 - **Did:** Assigned role.
