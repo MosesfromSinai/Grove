@@ -36,11 +36,11 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 - [x] Scaffold Next.js (App Router, TypeScript strict, Tailwind, shadcn/ui) with the folder layout from the README (#5)
 - [x] Create Supabase dev project; enable PostGIS (#6)
 - [x] Migrations for `campuses`, `profiles`, `businesses`, `business_members`, `deals`, `redemptions`, including the unique rule on `(student_id, deal_id, redeemed_on)`; `push_subscriptions` waits for the push stretch goal, and repeat days and club nights are #101 (#7)
-- [ ] `seed.sql` with UCR campus and invented sample businesses and deals, plus one Mon–Wed repeating deal and one open club night (same as `mocks/`) (#8)
+- [x] `seed.sql` with UCR campus and invented sample businesses and deals, plus one Mon–Wed repeating deal and one open club night (same as `mocks/`) (#8)
 - [x] `mocks/` matching `API_CONTRACT.md` (day 1–3) (#9)
 - [x] Finalize `API_CONTRACT.md`; change status from DRAFT (final 2026-10-24, with repeat days, link-only deals, club nights) (#10)
 - [x] `.env.example`; teammates copy the URL and anon key from the Supabase dashboard; other keys go by one-time link (#11)
-- [ ] GitHub Actions: lint, type check, build (#12)
+- [x] GitHub Actions: lint, type check, build (#12)
 - [x] Connect Vercel; preview deploy per PR; set the env vars in Vercel and teammates copy their Supabase keys from the dashboard; the service-role key stays with Moses (Hobby plan: teammates can't be added) (#13)
 
 ### Week 2 — Core loop and data (Oct 26–Nov 1)
