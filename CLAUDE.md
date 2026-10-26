@@ -140,7 +140,7 @@ Link-only deals (including club night deals) redeem exactly the same way; having
 - Security lives in the database (Row Level Security), not only in the UI. Only Edge Functions insert into `redemptions`.
 - `SUPABASE_SERVICE_ROLE_KEY` is only used in Edge Functions and server code, never in the browser.
 - Secrets: the repo is public. Every key and password lives only in `.env.local` (git-ignored). Never put a key in code, docs, issues, commit messages, chat, or email. After accepting the Supabase org invite, copy the Supabase URL and anon key yourself from the dashboard (grove-dev → Project Settings → API Keys → Legacy). The `service_role` key stays with Moses only; teammates leave that line empty. If a secret has to be sent, use a one-time link (onetimesecret.com). New keys (e.g. Hikaru's Mapbox token) go to Moses by one-time link, and he adds them to Vercel (Hobby plan: only Moses has access). PR preview links still work for everyone. `.env.example` lists the variable names with empty values. If a key is ever committed, rotate it immediately; deleting the commit isn't enough.
-- Build against `mocks/` until the real table or function exists. Mocks must match `docs/API_CONTRACT.md` exactly.
+- Import data functions from `@/lib/supabase`, never `@/mocks` directly: it serves `mocks/` until `NEXT_PUBLIC_DATA_SOURCE=supabase`, then the real wrappers, with the same names and types. Mocks must match `docs/API_CONTRACT.md` exactly.
 - Every `ErrorCode` from a function gets a friendly message in the UI.
 - Mobile-first: design for a phone screen, then scale up for the dashboard. Camera and location (and push, if built) need HTTPS, so test on the Vercel preview.
 - Design: follow the **Design reference** below. No UCR logos or official branding.
