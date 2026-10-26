@@ -155,6 +155,7 @@ Moses owns `lib/supabase/` and writes the wrappers; the owner listed writes the 
 | `getOpenClubNights` | none | `OpenClubNight[]`, open nights at the student's campus, soonest first | Edward (claim screen) |
 | `getClubNights` | `{ businessId }` | `ClubNight[]` with `visit_count`, newest first | Adolfo (club night results) |
 | `getStaff` | `{ businessId }` | `StaffMember[]` (owner and staff, active or invited) | Adolfo (staff list) |
+| `subscribeToRedemptions` | `({ businessId }, onRedemption: (r: Redemption) => void)` | `() => void` (unsubscribe). Calls `onRedemption` for each new visit at that business within a few seconds (Realtime; RLS limits it to members, and `student_location` is never sent) | Adolfo (live visit feed) |
 
 ```ts
 type DealStatus = "scheduled" | "live" | "ended";
@@ -342,6 +343,7 @@ Every error code needs a friendly message in the UI (Edward and Adolfo).
 - Club nights: Pepper Tree Pizza Co. has one **open** night (claim it with `claimClubNight()`); Orange Peel Tacos has a **claimed** Chess Club night live right now (link-only deal `deal-opt-chess-night`, opens with `getDeal()`, never in the feed) and a past Film Club night with 18 visits.
 - Every mock PIN starts as `1234`; `setPin()` replaces it for Orange Peel Tacos. The mock staff account works at Orange Peel Tacos, so `staffRedeem()` on any other business's code returns `NOT_STAFF`.
 - The mock owner owns Orange Peel Tacos: `setPin()` and `addStaff()` for any other business return `NOT_OWNER`. `getStaff()` shows an owner, an active staff member, and an invited one.
+- `subscribeToRedemptions()` fires whenever a mock `redeem()`, `redeemPin()`, or `staffRedeem()` records a visit at that business.
 - Test helpers (not in the real API): `MOCK_POSITIONS`, `UCR_CENTER`, `campusNow()`.
 
 ---
