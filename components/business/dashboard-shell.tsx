@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Leaf, Store } from "lucide-react";
+import { Leaf } from "lucide-react";
 import { DashboardNav } from "@/components/business/dashboard-nav";
+import { BusinessIdentity } from "@/components/business/business-context";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
@@ -21,15 +22,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <span className="rounded-pill bg-peach px-3 py-1 text-xs font-extrabold tracking-wider text-brown lg:mt-2 lg:inline-block">BUSINESS</span>
         </div>
 
-        <div className="my-5 flex items-center gap-3 rounded-button border border-border bg-bg-dashboard p-3 lg:my-7">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-button bg-peach-deep text-brown">
-            <Store aria-hidden="true" className="size-5" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-sm font-extrabold [overflow-wrap:anywhere]">Orange Peel Tacos</p>
-            <p className="text-xs text-ink-fine">Sample business · UC Riverside</p>
-          </div>
-        </div>
+        <BusinessIdentity />
 
         <DashboardNav />
 

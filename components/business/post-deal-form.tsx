@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Check, ImagePlus, Plus, Tag } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { createDeal } from "@/lib/supabase/business";
 import { campusDateTimeInput, campusDateTimeToISO, DEAL_PHOTO_TYPES, DEAL_TIMEZONE_LABEL, MAX_DEAL_PHOTO_BYTES, validateCreateDealInput } from "@/lib/supabase/deal-input";
 import type { CreateDealErrors, DiscountType, MyDeal } from "@/lib/supabase/types";
+import { BusinessLoading, useBusiness } from "@/components/business/business-context";
 
 const control = "mt-2 block min-h-12 w-full min-w-0 rounded-button border border-border-strong bg-surface-dashboard px-3 py-2.5 text-base outline-none focus-visible:border-green focus-visible:ring-2 focus-visible:ring-green/30 aria-invalid:border-destructive";
 const emptyValues = { title: "", description: "", discountType: "amount_off" as DiscountType, discountValue: "", start: "", end: "", studentsOnly: true };
@@ -34,6 +35,7 @@ function readPhoto(file: File): Promise<string> {
 }
 
 export function PostDealForm() {
+  const { profile } = useBusiness();
   const [values, setValues] = useState(emptyValues);
   const [photo, setPhoto] = useState<string | null>(null);
   const [photoReading, setPhotoReading] = useState(false);
@@ -41,12 +43,23 @@ export function PostDealForm() {
   const [saveError, setSaveError] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<MyDeal | null>(null);
+  const [errorFocusRequest, setErrorFocusRequest] = useState(0);
   const fileInput = useRef<HTMLInputElement>(null);
   const titleInput = useRef<HTMLInputElement>(null);
   const summary = useRef<HTMLDivElement>(null);
   const success = useRef<HTMLElement>(null);
   const photoReadId = useRef(0);
   const submitting = useRef(false);
+  const hadSaved = useRef(false);
+
+  useEffect(() => {
+    if (saved) success.current?.focus();
+    else if (hadSaved.current) titleInput.current?.focus();
+    hadSaved.current = Boolean(saved);
+  }, [saved]);
+  useEffect(() => {
+    if (errorFocusRequest > 0) summary.current?.focus();
+  }, [errorFocusRequest]);
 
   const numericDiscount = values.discountType === "amount_off" || values.discountType === "percent_off";
   function update<K extends keyof typeof values>(name: K, value: typeof values[K]) {
@@ -55,7 +68,7 @@ export function PostDealForm() {
     setSaveError("");
   }
   function focusSummary() {
-    requestAnimationFrame(() => summary.current?.focus());
+    setErrorFocusRequest(current => current + 1);
   }
   function resetForm() {
     ++photoReadId.current;
@@ -96,12 +109,12 @@ export function PostDealForm() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (submitting.current || photoReading) return;
+    if (submitting.current || photoReading || !profile) return;
     setSaveError("");
     const startsAt = campusDateTimeToISO(values.start);
     const endsAt = campusDateTimeToISO(values.end);
     const result = validateCreateDealInput({
-      business_id: "biz-opt", title: values.title, description: values.description,
+      business_id: profile.business.id, title: values.title, description: values.description,
       discount_type: values.discountType,
       discount_value: numericDiscount ? (values.discountValue.trim() ? Number(values.discountValue) : NaN) : null,
       starts_at: startsAt ?? "", ends_at: endsAt ?? "",
@@ -120,12 +133,11 @@ export function PostDealForm() {
       const response = await createDeal(result.value);
       if (response.ok) {
         setSaved(response.deal);
-        requestAnimationFrame(() => success.current?.focus());
       } else if (response.error === "INVALID_DEAL") {
         setErrors(response.fields);
         focusSummary();
       } else {
-        setSaveError("You do not have permission to post for this business. This demo uses Orange Peel Tacos.");
+        setSaveError("You do not have permission to post for this business.");
         focusSummary();
       }
     } catch {
@@ -137,6 +149,8 @@ export function PostDealForm() {
     }
   }
 
+  if (!profile) return <BusinessLoading />;
+
   if (saved) {
     return (
       <section ref={success} tabIndex={-1} aria-labelledby="saved-heading" className="max-w-2xl rounded-card border border-border bg-surface-dashboard p-6 shadow-card outline-none sm:p-8">
@@ -146,7 +160,7 @@ export function PostDealForm() {
         <p className="mt-2 text-ink-muted">{saved.status === "live" ? "Live in this demo" : "Scheduled in this demo"} · {saved.students_only ? "UCR students only" : "All students"}</p>
         <p className="mt-3 text-sm text-ink-fine">This is sample data, not a published deal. Demo changes reset when the page reloads.</p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Button onClick={() => { resetForm(); requestAnimationFrame(() => titleInput.current?.focus()); }} className="rounded-button">Post another deal</Button>
+          <Button onClick={resetForm} className="rounded-button">Post another deal</Button>
           <Link href="/dashboard/deals" onClick={resetForm} className={buttonVariants({ variant: "outline", className: "rounded-button" })}>View my deals</Link>
         </div>
       </section>
@@ -157,7 +171,7 @@ export function PostDealForm() {
   return (
     <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
       <form onSubmit={submit} noValidate aria-label="Post a deal" aria-busy={saving} className="min-w-0 rounded-card border border-border bg-surface-dashboard p-5 shadow-card sm:p-6">
-        <p className="mb-6 text-sm text-ink-muted">Create a public deal for Orange Peel Tacos. Required fields are marked *.</p>
+        <p className="mb-6 break-words text-sm text-ink-muted">Create a public deal for {profile.business.name}. Required fields are marked *.</p>
         {hasErrors && <div ref={summary} tabIndex={-1} role="alert" className="mb-6 rounded-button border border-destructive bg-destructive/5 p-4 text-sm text-destructive outline-none focus:ring-2 focus:ring-destructive">
           <p className="font-bold">{saveError || "Please check the highlighted fields."}</p>
           {Object.values(errors).filter(Boolean).map(message => <p key={message} className="mt-1">{message}</p>)}
@@ -237,7 +251,7 @@ export function PostDealForm() {
             {values.studentsOnly && <span className="absolute right-3 top-3 rounded-pill bg-surface px-3 py-2 text-xs font-extrabold text-brown">UCR students only</span>}
           </div>
           <div className="space-y-3 p-5">
-            <p className="text-sm font-bold text-ink-muted">Orange Peel Tacos · taco truck</p>
+            <p className="break-words text-sm font-bold text-ink-muted">{profile.business.name} · {profile.business.is_truck ? "food truck" : "restaurant"}</p>
             <h3 className="break-words text-2xl">{values.title.trim() || "Your deal title"}</h3>
             <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-ink-muted">{values.description.trim() || "Tell students what is included and when to stop by."}</p>
             <p className="flex items-start gap-2 text-sm font-bold text-green-dark"><Tag aria-hidden="true" className="size-4 shrink-0" />{values.discountType === "free_item" ? "Free item" : values.discountType === "bogo" ? "Buy one, get one free" : values.discountType === "percent_off" ? `${values.discountValue || "—"}% off` : `$${values.discountValue || "—"} off`}</p>

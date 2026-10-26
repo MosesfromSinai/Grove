@@ -46,6 +46,17 @@ export type BusinessPublic = {
   redemption_mode: RedemptionMode;
 };
 
+export type BusinessProfile = { business: BusinessPublic; pin_ready: boolean };
+export type BusinessLocationOption = Pick<BusinessPublic, "address" | "lat" | "lng">;
+export type SaveBusinessInput = Pick<BusinessPublic,
+  "name" | "address" | "lat" | "lng" | "hours" | "logo_url" | "is_truck"
+> & { business_id: string };
+export type BusinessInputErrors = Partial<Record<keyof SaveBusinessInput, string>>;
+export type SaveBusinessResult =
+  | { ok: true; profile: BusinessProfile }
+  | { ok: false; error: "NOT_OWNER" }
+  | { ok: false; error: "INVALID_BUSINESS"; fields: BusinessInputErrors };
+
 export type DealDetail = Deal & {
   business: BusinessPublic;
   redeemed_today: boolean; // signed-in student already used it today

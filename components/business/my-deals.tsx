@@ -8,6 +8,7 @@ import { cancelDeal, endDeal, getMyDeals } from "@/lib/supabase/business";
 import { CAMPUS_TZ } from "@/lib/supabase/deal-status";
 import type { DealMutationError, DealStatus, MyDeal } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
+import { BusinessLoading, useBusiness } from "@/components/business/business-context";
 
 const tabs = [{ status: "live", label: "Active" }, { status: "scheduled", label: "Scheduled" }, { status: "ended", label: "Expired" }] as const;
 const dateTime = new Intl.DateTimeFormat("en-US", { timeZone: CAMPUS_TZ, year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
@@ -21,6 +22,8 @@ const failureMessages: Record<DealMutationError, string> = {
 };
 
 export function MyDeals() {
+  const { profile } = useBusiness();
+  const businessId = profile?.business.id;
   const [deals, setDeals] = useState<MyDeal[] | null>(null);
   const [tab, setTab] = useState<DealStatus>("live");
   const [loadError, setLoadError] = useState("");
@@ -36,12 +39,14 @@ export function MyDeals() {
   const generation = useRef(0);
 
   useEffect(() => {
+    if (!businessId) return;
+    const currentBusinessId = businessId;
     let active = true;
     async function load() {
       if (inFlight.current) return;
       const request = ++generation.current;
       try {
-        const rows = await getMyDeals({ businessId: "biz-opt" });
+        const rows = await getMyDeals({ businessId: currentBusinessId });
         if (active && request === generation.current) { setDeals(rows); setCheckedAt(Date.now()); setLoadError(""); }
       } catch {
         if (active && request === generation.current) setLoadError("We could not load your deals. Please try again.");
@@ -58,7 +63,7 @@ export function MyDeals() {
       window.removeEventListener("focus", refreshVisible);
       document.removeEventListener("visibilitychange", refreshVisible);
     };
-  }, [revision]);
+  }, [revision, businessId]);
 
   function tabKey(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     const next = event.key === "ArrowRight" ? (index + 1) % tabs.length
@@ -81,14 +86,14 @@ export function MyDeals() {
   }
 
   async function confirm() {
-    if (!confirmation || inFlight.current) return;
+    if (!confirmation || inFlight.current || !businessId) return;
     inFlight.current = true;
     ++generation.current;
     setBusy(true);
     setActionError("");
     setMessage("");
     try {
-      const input = { business_id: "biz-opt", deal_id: confirmation.deal.id };
+      const input = { business_id: businessId, deal_id: confirmation.deal.id };
       if (confirmation.action === "end") {
         const result = await endDeal(input);
         if (result.ok) {
@@ -113,6 +118,7 @@ export function MyDeals() {
     }
   }
 
+  if (!profile) return <BusinessLoading />;
   const visibleDeals = deals?.filter(deal => deal.status === tab) ?? [];
   return (
     <>

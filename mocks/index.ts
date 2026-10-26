@@ -4,10 +4,15 @@
 
 import { campusClock, dealStatus, liveUntil } from "../lib/supabase/deal-status";
 import { validateCreateDealInput } from "../lib/supabase/deal-input";
+import { businessOpenNow, copyHours, validateBusinessInput } from "../lib/supabase/business-input";
 import type {
   AddStaffResult,
   BusinessPublic,
   BusinessStats,
+  BusinessProfile,
+  BusinessLocationOption,
+  SaveBusinessInput,
+  SaveBusinessResult,
   ClaimClubNightResult,
   ClubNight,
   CreateDealInput,
@@ -48,6 +53,9 @@ export { UCR_CENTER } from "./data";
 
 const REDEEM_RADIUS_M = 150;
 const CODE_TTL_MS = 30_000;
+// Tracks whether the owner has generated a first PIN in this demo session.
+// The PIN itself remains private and is returned only by setPin().
+const initializedPins = new Set<string>();
 
 // Handy coordinates for testing redeem() away from Riverside.
 export const MOCK_POSITIONS = {
@@ -251,6 +259,34 @@ export async function getMyDeals(input: { businessId: string }): Promise<MyDeal[
 
 // ---------- Business writes ----------
 
+function toBusinessProfile(business: MockBusiness): BusinessProfile {
+  return { business: { ...toBusinessPublic(business), hours: copyHours(business.hours) }, pin_ready: initializedPins.has(business.id) };
+}
+
+export async function getMyBusiness(): Promise<BusinessProfile> {
+  return delay(toBusinessProfile(businessById(mockOwner.business_id)));
+}
+
+// Mock-only address lookup. Arbitrary addresses require explicit coordinates;
+// no guessed geocoding or live network service is used in Sprint 1.
+export async function getBusinessLocationOptions(): Promise<BusinessLocationOption[]> {
+  return delay(businesses.map(({ address, lat, lng }) => ({ address, lat, lng })));
+}
+
+export async function saveBusiness(input: SaveBusinessInput): Promise<SaveBusinessResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  const result = validateBusinessInput(input);
+  if (!result.ok) return delay({ ok: false, error: "INVALID_BUSINESS", fields: result.fields });
+  const b = businessById(input.business_id);
+  const value = result.value;
+  Object.assign(b, {
+    name: value.name, address: value.address, lat: value.lat, lng: value.lng,
+    hours: value.hours, logo_url: value.logo_url, is_truck: value.is_truck,
+    open_now: businessOpenNow(value.hours),
+  });
+  return delay({ ok: true, profile: toBusinessProfile(b) });
+}
+
 export async function createDeal(input: CreateDealInput): Promise<CreateDealResult> {
   if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
   const result = validateCreateDealInput(input);
@@ -439,6 +475,7 @@ export async function setPin(input: { business_id: string }): Promise<SetPinResu
   if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
   const pin = String(Math.floor(Math.random() * 10_000)).padStart(4, "0");
   businessById(input.business_id).staff_pin = pin;
+  initializedPins.add(input.business_id);
   return delay({ ok: true, pin });
 }
 

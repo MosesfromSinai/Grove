@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Activity, CalendarDays, Plus, Tags, Users } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { BusinessName } from "@/components/business/business-context";
 
 const summaries = [
   { label: "Today's visits", icon: Users },
@@ -12,8 +13,8 @@ export default function DashboardPage() {
   return (
     <>
       <header className="mb-7 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <p className="mb-1 text-sm font-bold text-green-dark">Orange Peel Tacos</p>
+        <div className="min-w-0">
+          <p className="mb-1 text-sm font-bold text-green-dark [overflow-wrap:anywhere]"><BusinessName /></p>
           <h1 className="text-3xl sm:text-4xl">Overview</h1>
           <p className="mt-2 text-ink-muted">A little local love. More students through your door.</p>
         </div>

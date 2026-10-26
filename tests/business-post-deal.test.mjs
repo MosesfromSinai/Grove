@@ -23,11 +23,12 @@ execFileSync(process.execPath, [
   "--skipLibCheck", "--strict", "--types", "node", "--esModuleInterop",
 ], { cwd: root, stdio: "pipe" });
 const loadCompiled = createRequire(import.meta.url);
-const { createDeal, endDeal, cancelDeal } = loadCompiled(join(output, "lib/supabase/business.js"));
+const { createDeal, endDeal, cancelDeal, getMyBusiness, getBusinessLocationOptions, saveBusiness, setPin } = loadCompiled(join(output, "lib/supabase/business.js"));
 const { getMyDeals, getDeal, getDealsNearby, redeemPin } = loadCompiled(join(output, "mocks/index.js"));
 const fixtures = loadCompiled(join(output, "mocks/data.js"));
 const { campusClock } = loadCompiled(join(output, "lib/supabase/deal-status.js"));
 const { validateCreateDealInput, campusDateTimeToISO, campusDateTimeInput } = loadCompiled(join(output, "lib/supabase/deal-input.js"));
+const { validateBusinessInput, businessOpenNow } = loadCompiled(join(output, "lib/supabase/business-input.js"));
 
 const now = Date.now();
 const input = (overrides = {}) => ({
@@ -226,4 +227,102 @@ test("photo byte limit is exact even when base64 padding changes without changin
   assert.equal(result.ok, false);
   assert.ok(result.fields.photo_url);
   assert.equal(validateCreateDealInput(input({ photo_url: "data:image/png;base64,AAAA=" }), now).ok, false);
+});
+
+const businessInput = (overrides = {}) => ({
+  business_id: "biz-opt", name: "  Campus Bites  ", address: "  University Ave, Riverside  ",
+  lat: 33.9762, lng: -117.3254, hours: { mon: [["11:00", "21:00"]] },
+  logo_url: null, is_truck: false, ...overrides,
+});
+
+test("business profile reads exclude private fields and return detached hours", async () => {
+  const profile = await getMyBusiness();
+  assert.equal(profile.pin_ready, false);
+  for (const key of ["staff_pin", "owner_id", "qr_slug"]) assert.equal(key in profile.business, false);
+  const original = profile.business.hours.mon[0][0];
+  profile.business.hours.mon[0][0] = "00:00";
+  assert.equal((await getMyBusiness()).business.hours.mon[0][0], original);
+});
+
+test("business validation rejects invalid coordinates, hours, logos, and eligibility", () => {
+  const cases = [
+    [{ name: "  " }, "name"], [{ address: "" }, "address"],
+    ...[NaN, Infinity, -91, 91, ""].map(lat => [{ lat }, "lat"]),
+    ...[NaN, Infinity, -181, 181].map(lng => [{ lng }, "lng"]),
+    [{ is_truck: "yes" }, "is_truck"],
+    [{ hours: null }, "hours"], [{ hours: { holiday: [["11:00", "21:00"]] } }, "hours"],
+    [{ hours: { mon: [["25:00", "21:00"]] } }, "hours"],
+    [{ hours: { mon: [["11:00", "11:00"]] } }, "hours"],
+    [{ hours: { mon: [["11:00"]] } }, "hours"],
+    [{ logo_url: "data:image/svg+xml;base64,PHN2Zz4=" }, "logo_url"],
+  ];
+  for (const [changes, field] of cases) {
+    const result = validateBusinessInput(businessInput(changes));
+    assert.equal(result.ok, false, field);
+    assert.ok(result.fields[field], field);
+  }
+  assert.equal(validateBusinessInput(businessInput({ lat: 0, lng: 0, hours: {} })).ok, true);
+});
+
+test("weekly hours support closed days and overnight windows across the week boundary", () => {
+  const overnight = { mon: [["22:00", "02:00"]] };
+  assert.equal(businessOpenNow(overnight, new Date("2026-10-27T06:00:00Z")), true);
+  assert.equal(businessOpenNow(overnight, new Date("2026-10-27T08:00:00Z")), true);
+  assert.equal(businessOpenNow(overnight, new Date("2026-10-27T09:00:00Z")), false);
+  assert.equal(businessOpenNow({ sun: [["22:00", "02:00"]] }, new Date("2026-10-26T08:00:00Z")), true);
+  assert.equal(businessOpenNow({}, new Date("2026-10-26T08:00:00Z")), false);
+  assert.equal(businessOpenNow({ mon: [["11:00", "14:00"], ["17:00", "21:00"]] }, new Date("2026-10-26T20:00:00Z")), true);
+});
+
+test("business saves propagate name, location, hours, logo and truck setting without changing protected fields", async () => {
+  const stored = fixtures.businesses.find(business => business.id === "biz-opt");
+  const protectedValues = { pin: stored.staff_pin, slug: stored.qr_slug, mode: stored.redemption_mode };
+  const logo = "data:image/png;base64,iVBORw0KGgo=";
+  const posted = businessInput({ logo_url: logo, is_truck: true, staff_pin: "injected", qr_slug: "injected", redemption_mode: "staff_scan" });
+  const result = await saveBusiness(posted);
+  assert.equal(result.ok, true);
+  assert.equal(result.profile.business.name, "Campus Bites");
+  assert.equal(result.profile.business.address, "University Ave, Riverside");
+  assert.equal(result.profile.business.lat, posted.lat);
+  assert.equal(result.profile.business.lng, posted.lng);
+  assert.equal(result.profile.business.logo_url, logo);
+  assert.equal(result.profile.business.is_truck, true);
+  assert.equal(stored.staff_pin === protectedValues.pin, true);
+  assert.equal(stored.qr_slug, protectedValues.slug);
+  assert.equal(stored.redemption_mode, protectedValues.mode);
+  posted.hours.mon[0][0] = "00:00";
+  assert.equal((await getMyBusiness()).business.hours.mon[0][0], "11:00");
+  assert.equal((await getDeal({ id: "deal-opt-horchata" })).business.name, "Campus Bites");
+});
+
+test("sample address lookup returns explicit fixture coordinates without exposing business secrets", async () => {
+  const options = await getBusinessLocationOptions();
+  const known = options.find(option => option.address === "Canyon Crest Dr & Blaine St");
+  assert.deepEqual(known, { address: "Canyon Crest Dr & Blaine St", lat: 33.9768, lng: -117.3318 });
+  assert.ok(options.every(option => Object.keys(option).sort().join(",") === "address,lat,lng"));
+  options[0].address = "changed client copy";
+  assert.notEqual((await getBusinessLocationOptions())[0].address, "changed client copy");
+});
+
+test("invalid and unauthorized business saves leave the stored profile unchanged", async () => {
+  const stored = fixtures.businesses.find(business => business.id === "biz-opt");
+  const snapshot = JSON.stringify(stored);
+  assert.equal((await saveBusiness(businessInput({ lat: NaN }))).error, "INVALID_BUSINESS");
+  assert.equal((await saveBusiness(businessInput({ business_id: "biz-saf" }))).error, "NOT_OWNER");
+  assert.equal(JSON.stringify(stored) === snapshot, true);
+});
+
+test("first PIN comes from setPin only, and profile edits never reset or return it", async () => {
+  assert.equal((await getMyBusiness()).pin_ready, false);
+  const result = await setPin({ business_id: "biz-opt" });
+  assert.equal(result.ok, true);
+  assert.equal(/^\d{4}$/.test(result.pin), true);
+  assert.equal((await getMyBusiness()).pin_ready, true);
+  const saved = await saveBusiness(businessInput());
+  assert.equal(saved.ok, true);
+  assert.equal(saved.profile.pin_ready, true);
+  assert.equal(fixtures.businesses.find(business => business.id === "biz-opt").staff_pin === result.pin, true);
+  assert.equal("staff_pin" in saved.profile.business, false);
+  assert.equal("pin" in saved.profile, false);
+  assert.equal((await setPin({ business_id: "biz-saf" })).error, "NOT_OWNER");
 });

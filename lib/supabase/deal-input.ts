@@ -1,8 +1,8 @@
 import { CAMPUS_TZ, campusClock } from "./deal-status";
 import type { CreateDealErrors, CreateDealInput } from "./types";
+import { validMockImage } from "./image-input";
 
-export const MAX_DEAL_PHOTO_BYTES = 5 * 1024 * 1024;
-export const DEAL_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+export { MAX_IMAGE_BYTES as MAX_DEAL_PHOTO_BYTES, IMAGE_TYPES as DEAL_PHOTO_TYPES } from "./image-input";
 
 function isoTimestamp(value: unknown): number {
   if (typeof value !== "string") return NaN;
@@ -12,15 +12,6 @@ function isoTimestamp(value: unknown): number {
   const calendar = new Date(`${wall}Z`);
   if (!Number.isFinite(calendar.getTime()) || calendar.toISOString().slice(0, 19) !== wall) return NaN;
   return Date.parse(value);
-}
-
-function validMockPhoto(value: unknown): boolean {
-  if (value === null) return true;
-  if (typeof value !== "string") return false;
-  const payload = /^data:image\/(?:jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/.exec(value)?.[1];
-  if (!payload || payload.length % 4 !== 0) return false;
-  const padding = payload.endsWith("==") ? 2 : payload.endsWith("=") ? 1 : 0;
-  return (payload.length / 4) * 3 - padding <= MAX_DEAL_PHOTO_BYTES;
 }
 
 export function campusDateTimeInput(at: Date): string {
@@ -79,7 +70,7 @@ export function validateCreateDealInput(input: CreateDealInput, now = Date.now()
   if (typeof input.students_only !== "boolean") fields.students_only = "Choose whether this deal is for UCR students only.";
 
   const photo = input.photo_url;
-  if (!validMockPhoto(photo)) {
+  if (!validMockImage(photo)) {
     fields.photo_url = "Choose a JPG, PNG, or WebP photo up to 5 MB.";
   }
 
