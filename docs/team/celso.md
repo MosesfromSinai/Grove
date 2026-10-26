@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-10-24_
+_Last updated: 2026-10-26_
 
 ---
 
@@ -32,14 +32,14 @@ _Last updated: 2026-10-24_
 - [ ] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` (#31)
 - [ ] Database trigger to create a `profiles` row on first sign-in (#32)
 - [ ] Onboarding: route to student app or business onboarding (root routing in `app/page.tsx`, Moses reviews) (#33)
-- [ ] Review the threat model below; add anything missing (#34)
+- [x] Review the threat model below; add anything missing (#34)
 
 ### Week 2 — Lock down data (Oct 26–Nov 1)
-- [ ] RLS on every table, e.g. students select only public deals (link-only deals open only through `deal_by_id()`) and only their own redemptions; owners read only their own business's data; nobody inserts redemptions directly (only Edge Functions) (#35)
-- [ ] Hash `staff_pin`; never return it to the browser; write the PIN-hash helper early in week 2 so `redeem-pin` and `set-pin` use it (#36)
-- [ ] Rate limits on `redeem` and `redeem-pin`; lockout after repeated bad PINs (log the limit as a **Decision**); write the rate-limit helper early in week 2 so Moses's functions call it (#37)
+- [x] RLS on every table, e.g. students select only public deals (link-only deals open only through `deal_by_id()`) and only their own redemptions; owners read only their own business's data; nobody inserts redemptions directly (only Edge Functions) (#35)
+- [x] Hash `staff_pin`; never return it to the browser; write the PIN-hash helper early in week 2 so `redeem-pin` and `set-pin` use it (#36)
+- [x] Rate limits on `redeem` and `redeem-pin`; lockout after repeated bad PINs (log the limit as a **Decision**); write the rate-limit helper early in week 2 so Moses's functions call it (#37)
 - [ ] Server-side sanity checks on location (reject impossible coordinates) (#38)
-- [ ] RLS for `club_nights`: businesses manage their own; students read open nights at their campus; only `claim-club-night` writes the claim columns; `claimed_by` never reaches the browser (#105)
+- [x] RLS for `club_nights`: businesses manage their own; students read open nights at their campus; only `claim-club-night` writes the claim columns; `claimed_by` never reaches the browser (#105)
 - [ ] Rate-limit club night claims (per student) in `claim-club-night` (#106)
 - [ ] Review the staff-scan token design with Moses (short-lived, signed, single use), agreed by Nov 1 (#39)
 
@@ -71,14 +71,19 @@ Update the Status column as defenses are built.
 | Spoofed GPS | Daily limit; cashier check; flag unusual redemption patterns | Planned |
 | Screenshot of the Redeemed screen | Live clock + animation | Planned |
 | Same deal redeemed repeatedly | Unique rule on (student, deal, date) | Planned |
-| PIN guessing | Hashed PIN, rate limit, lockout | Planned |
+| PIN guessing | bcrypt hash (`verify_pin`), lockout after 5 failures in 15 min (`is_pin_rate_limited`, `record_pin_attempt`) | Built |
 | Reused or shared staff-scan code | Short-lived, single-use, signed token; staff-only redeem | Planned |
-| Non-student signs up | .edu domain check, `verified_student` | Planned |
-| Reading another business's data | RLS on every table | Planned |
+| Non-student signs up | .edu domain check sets `verified_student`; redeeming still requires the flag | Built (auth callback) |
+| Reading another business's data | RLS on every table; `is_business_member` helper prevents cross-business reads | Built |
+| `staff_pin` exposed via API | Column-level REVOKE on `businesses` for anon/authenticated; bcrypt if leaked | Built |
+| `club_nights.claimed_by` exposed via API | Column-level REVOKE on `club_nights` for anon/authenticated | Built |
 | Leaked service-role or VAPID key | Server-only env vars, never committed; rotate if leaked | Planned |
 | Link-only deal shared off campus | Link only shows the deal; redeeming still needs a verified student, the counter sticker, ~150 m, a live window, and the daily limit | Planned |
-| Fake or duplicate club night claims | One claim per club night (conditional update), signed-in verified student, claim rate limit | Planned |
+| Fake or duplicate club night claims | One claim per club night (conditional update), signed-in verified student, claim rate limit (`claim-club-night` Edge Function) | Planned |
 | Claiming a club night for a club you're not in | Not checked: no club accounts in the MVP. **Accepted risk**; the restaurant sees the club name and visits | Accepted |
+| Session token theft | httpOnly cookies + HTTPS (Supabase defaults); sessions expire | Built (Supabase) |
+| Client-side time manipulation to access an out-of-window deal | Server uses `now()` for all deal status checks; client time is never trusted | Planned (in redeem function) |
+| User manually sets `verified_student` or `campus_id` on their own profile | RLS allows own-row updates; setting wrong values only affects display, not redeem (which re-checks the flag server-side). **Accepted risk** for MVP | Accepted |
 
 ## Security test log
 Add a row for every test you run.
@@ -95,6 +100,16 @@ _Record things only you need to remember. Decisions that affect others go in `do
 
 ## Session log
 _Newest at the top. One entry per session._
+
+### 2026-10-26 (session 2)
+- **Did:** RLS policies on every table (#35, #105): `is_business_member` and `is_business_owner` security-definer helpers; column-level REVOKE on `businesses.staff_pin` and `club_nights.claimed_by`; all row-level policies for campuses, profiles, businesses, business_members, deals, redemptions, club_nights. bcrypt PIN helpers via pgcrypto (`hash_pin`, `verify_pin`, `is_pin_rate_limited`, `record_pin_attempt`, `is_redeem_rate_limited`) plus typed TS wrappers for Moses in `supabase/functions/_shared/pin.ts` (#36, #37). Threat model reviewed and updated (#34). Excluded `supabase/functions/` from `tsconfig.json` so Deno imports don't break CI.
+- **Next:** #38 (location sanity checks, server-side), #106 (rate-limit club night claims in `claim-club-night`), #39 (staff-scan token design review with Moses by Nov 1).
+- **Blockers:** #35 policies are live but won't fully function until Moses merges #29 (OAuth) and #32 (profiles trigger). Also need Moses to configure Google OAuth in the Supabase dashboard and add the redirect URL.
+
+### 2026-10-26 (session 1)
+- **Did:** Google OAuth setup (#29): installed `@supabase/ssr` + `@supabase/supabase-js`; created Supabase browser + server clients; `proxy.ts` session refresh; `/auth/callback` route; sign-in page; root routing. Closes #29, #30, #33. (PR #127)
+- **Next:** Threat model review, RLS, PIN hash, rate limit.
+- **Blockers:** .edu check needs `campuses` RLS (done this session). Profile trigger (#32) still needs Moses.
 
 ### 2026-10-19
 - **Did:** Assigned role.
