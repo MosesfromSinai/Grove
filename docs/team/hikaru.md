@@ -15,7 +15,8 @@ _Last updated: 2026-10-25_
 `app/(student)/map/`, `components/map/`, `lib/geo/`, `public/manifest.json`, `public/icons/`, the `deals_nearby` SQL function (Moses reviews the migration). Stretch goal: `lib/push/`, `public/sw.js`, `supabase/functions/notify-deal`.
 
 ## Depends on
-- **Moses:** `mocks/`, tables (end of week 1); the `visibility` column and `deal_status()` (week 2).
+- **Moses:** mocks, tables, and `visibility` are on main; real-data wiring waits on `deal_status()` and typed queries.
+- **Celso:** RLS policies before browser access to real data.
 - **Edward:** deal card component. (The theme is done; the install prompt only matters for push, now a stretch goal.)
 - **Adolfo:** places your "I'm here now" button on the dashboard (week 3).
 

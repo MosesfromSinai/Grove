@@ -30,7 +30,7 @@ Local browser checks on 2026-10-25:
 2. Open now shows seven spots. Adding Has deals shows five. Adding Walking distance shows three. Removing filters restores the matching pins and list rows.
 3. Synthetic geolocation responses verify success, permission denial, unavailable position, and timeout. Every failure returns to campus; a granted location far from campus shows an empty state; Back to campus restores eight spots. Browser overrides were removed after testing.
 4. The 390×844 mobile viewport has no horizontal overflow. Controls have 44 px touch targets and names, filter and selection state are exposed with `aria-pressed`, and the business list provides an alternative to map pins.
-5. Node 22 lint, type checking, production build, and the data, Mapbox-component, and location tests pass. A separate browser tab on the production server verifies the eight default spots and renders without console warnings or errors; production filter interactions also reduce the list to five and three spots.
+5. Node 22 lint, type checking, production build, and the data, Mapbox-component, and location tests pass. A separate browser tab on the local production-build server verifies the eight default spots and renders without console warnings or errors; local production-build filter interactions also reduce the list to five and three spots.
 
 Still pending: actual Mapbox rendering with the restricted token, exact comparison to the linked design canvas (unavailable during this session), and physical iPhone Safari/Android Chrome testing over HTTPS. The real database query and pin bottom sheet are Week 2 work.
 
