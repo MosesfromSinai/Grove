@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "test:db": "npx supabase test db && SUPABASE_DB_TESTS=1 vitest run lib/supabase/queries.db.test.ts",
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
