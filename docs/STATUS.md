@@ -8,8 +8,9 @@ _Last updated: 2026-10-25 by Moses_
 
 ## Current phase
 
-**Phase 1: Foundation** (week 1 of 4, Oct 19–25): sign-in, foundation, database.
-**Next gate:** Students can log in with a school Google account.
+**Phase 2: Core loop** (week 2 of 4, Oct 26–Nov 1): scan-to-redeem end to end, repeat days, visibility, club nights, live-now check.
+**Next gate:** First test redemption (one sticker, two phones); a link-only deal stays out of the feed and map.
+**Carried over from Week 1:** the sign-in gate (students log in with a school Google account) isn't passed yet; it blocks real redemptions.
 **Production:** https://grove-jade.vercel.app (every PR also gets a preview link).
 
 Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove is, MVP scope, Week plan.
@@ -20,17 +21,17 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 
 | Person | Focus |
 |---|---|
-| Moses | Week 1 done: tables (#7, plus #101), CI (#12), and seed data (#8) are on grove-dev and `main`. Next: `deal_status()` (#102), typed queries (#16) |
-| Celso | Google sign-in, .edu check, profile creation, threat model (3 new rows to review) |
-| Edward | App shell, deal feed and deal page on mocks (theme done; see `/theme`) |
-| Adolfo | Dashboard layout, business onboarding, post-deal form on mocks |
-| Hikaru | Map with mock pins, filter chips, location permission handling |
+| Moses | Sprint 1 done: Supabase (#6), Vercel (#13), tables (#7, #101), CI (#12), seed data (#8). Next: `deal_status()` (#102), then typed queries (#16), then `redeem` (#14). Backup for Google OAuth (#29) |
+| Celso | Not started (GitHub invite still pending). Week 1: Google OAuth (#29), sign-in, .edu check, profile trigger. Week 2: RLS on every table (#35), PIN-hash and rate-limit helpers |
+| Edward | Finish the app shell and deal feed on mocks, then the scanner, `redeem` call, and Redeemed screen |
+| Adolfo | Dashboard layout in progress (`adolfo/dashboard-foundation`), then onboarding, the post-deal form with repeat days and visibility, and the sticker |
+| Hikaru | Finish the map on mocks, then `deals_nearby` (tables and seed are on grove-dev) |
 
 ## Blockers
 
 - **Everyone: review your team file.** Moses edited all five on 2026-10-24 (one-time exception, like setup) for the Activity 2 changes: new tasks, interview work, dependencies, and the week plan. Fix anything that's wrong in your own file.
 - **Everyone:** accept the Supabase org invite, then copy the Supabase URL and anon key into your `.env.local` (see README → Getting started). The service-role key stays with Moses.
-- Celso accepted his GitHub invite but hasn't started (no commits, log lines, or assigned issues). **If he isn't active by Oct 26, Moses takes Google OAuth setup (#29)** so the Phase 1 gate isn't stuck.
+- **Celso hasn't accepted his GitHub invite** (pending since Oct 20, write access), so his 22 issues can't be assigned to him and he can't push branches. Moses assigns them once he accepts. **If he isn't active by Oct 26, Moses takes Google OAuth setup (#29)** so the sign-in gate isn't stuck.
 - **Celso:** every table has RLS on and no policies, so the browser (anon and signed-in users) reads nothing until policies land. Includes hiding `businesses.staff_pin` and `club_nights.claimed_by`. The profile trigger can insert into `profiles` as is.
 - **Everyone:** CI ("Lint, typecheck, build") now runs on every PR and must pass to merge. Run `npm run lint && npm run typecheck && npm run build` before pushing.
 - Real tables and seed data are on grove-dev, but keep building on `mocks/` until typed queries (#16) and RLS policies exist.
