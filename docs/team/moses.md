@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-10-24_
+_Last updated: 2026-10-25_
 
 ---
 
@@ -85,14 +85,22 @@ _Record things only you need to remember (gotchas, commands, links). Decisions t
 - Production: https://grove-jade.vercel.app. Vercel is on the Hobby plan (only Moses has access). Teammates copy the Supabase URL and anon key from the dashboard after the org invite; the service-role key stays with Moses; anything else goes by one-time link (onetimesecret.com).
 - Never run `supabase config push`: the local `config.toml` still has the default `127.0.0.1` auth URLs and would overwrite the remote Site URL and redirect URLs.
 - The Grove board is user project #6 (`gh project item-add 6 --owner MosesfromSinai`). Project #2 is an unused duplicate.
+- `main` is protected by the "protect main" ruleset (not classic branch protection): PR + 1 approval, plus the required CI check "Lint, typecheck, build". Admins bypass.
+- Query grove-dev without the DB password: `npx supabase db query --linked "<sql>"` (or `-f file.sql`). Refresh the seed's live deals with `npx supabase db query --linked -f supabase/seed.sql`; it clears its own rows first.
+- `supabase db reset` (local) needs Docker Desktop running; `supabase start -x studio,...` keeps it light.
 
 ## Blockers
-- Celso hasn't accepted his GitHub invite; his issues stay unassigned until he does. If he isn't active by Oct 26, Moses takes Google OAuth setup (#29) so the Phase 1 gate isn't stuck.
+- Celso accepted his GitHub invite but has no commits, log lines, or assigned issues yet. If he isn't active by Oct 26, Moses takes Google OAuth setup (#29) so the Phase 1 gate isn't stuck.
 
 ---
 
 ## Session log
 _Newest at the top. One entry per session._
+
+### 2026-10-25
+- **Did:** Core table migrations (#7) and repeat days, visibility, campus timezone, `club_nights` (#101, pulled forward so the seed has a club night), pushed to grove-dev and checked against the contract; RLS on every table, no policies yet. CI workflow (#12) passes on GitHub and is a required check on `main`. `seed.sql` (#8) with UCR, the eight canvas businesses, 15 deals including the Mon–Wed repeat, and one open club night, applied to grove-dev.
+- **Next:** `deal_status()` (#102), then typed queries (#16), then `redeem` (#14). Take #29 on Oct 26 if Celso still isn't active.
+- **Blockers:** No RLS policies yet, so only the service role can read the tables (Celso).
 
 ### 2026-10-20 (theme)
 - **Did:** Built Edward's theme task (#48) on `main`: Grove tokens in `app/globals.css`, Bricolage Grotesque + Figtree in the root layout, shadcn mapped to Grove colors, `/theme` preview page. Updated the review rule in `CLAUDE.md`.
