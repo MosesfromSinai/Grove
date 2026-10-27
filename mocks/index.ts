@@ -132,6 +132,9 @@ function redeemedToday(dealId: string): boolean {
   );
 }
 
+// Dashboards subscribed with subscribeToRedemptions().
+const listeners = new Set<{ businessId: string; onRedemption: (r: Redemption) => void }>();
+
 function record(d: MockDeal, method: MockRedemption["method"]): Redemption {
   const r: MockRedemption = {
     id: `red-${Date.now()}`,
@@ -142,7 +145,9 @@ function record(d: MockDeal, method: MockRedemption["method"]): Redemption {
     method,
   };
   redemptions.unshift(r);
-  return toRedemption(r);
+  const redemption = toRedemption(r);
+  for (const l of listeners) if (l.businessId === d.business_id) l.onRedemption(redemption);
+  return redemption;
 }
 
 // ---------- Queries ----------
@@ -389,6 +394,20 @@ export async function notifyDeal(input: { deal_id: string }): Promise<NotifyDeal
   const d = deals.find((x) => x.id === input.deal_id);
   if (!d || dealStatus(d) !== "live") return delay({ ok: false, error: "DEAL_NOT_LIVE" });
   return delay({ ok: true, sent: 12 });
+}
+
+// ---------- Live updates ----------
+
+// Calls onRedemption for each new visit at the business; returns the unsubscribe function.
+export function subscribeToRedemptions(
+  input: { businessId: string },
+  onRedemption: (r: Redemption) => void,
+): () => void {
+  const listener = { businessId: input.businessId, onRedemption };
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 }
 
 // ---------- Club nights ----------
