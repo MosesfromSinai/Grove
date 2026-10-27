@@ -6,7 +6,7 @@ The shapes everyone builds against. Frontend work uses `mocks/` that match this 
 **Rule:** any change here goes in a pull request reviewed by the people it affects, plus a line in `docs/LOG.md`.
 **Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together. Screens import from `lib/supabase` (`index.ts`), which serves `mocks/` or the real wrappers in `queries.ts` depending on `NEXT_PUBLIC_DATA_SOURCE`; a compile-time check keeps their signatures identical.
 
-_Last updated: 2026-10-26_
+_Last updated: 2026-10-27_
 
 ---
 
@@ -326,9 +326,11 @@ All return either `{ ok: true, ... }` or `{ ok: false, error: ErrorCode }`. `lib
 | `add-staff` — `addStaff()` | `{ business_id, email }` (owner only) | `{ member: StaffMember }`; status `invited` until that email signs in | Moses |
 | `notify-deal` — `notifyDeal()` | `{ deal_id }`, called when a deal goes live. **Stretch goal** | `{ sent: number }` | Hikaru |
 
-`redeem` checks in this order: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT` (every redemption needs a verified student; `students_only` is display-only), then `WRONG_BUSINESS`, `DEAL_NOT_LIVE` (also for an unknown deal), `LOCATION_REQUIRED`, `TOO_FAR` (over 150 m), `ALREADY_REDEEMED_TODAY`. Functions always answer HTTP 200 with `{ ok, ... }`; anything else means a server error, and the wrapper throws.
+`redeem` checks in this order: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT` (every redemption needs a verified student; `students_only` is display-only), `RATE_LIMITED` (more than 10 `redeem` or `redeem-pin` attempts by the student in a minute), then `WRONG_BUSINESS`, `DEAL_NOT_LIVE` (also for an unknown deal), `LOCATION_REQUIRED`, `TOO_FAR` (over 150 m), `ALREADY_REDEEMED_TODAY`. Functions always answer HTTP 200 with `{ ok, ... }`; anything else means a server error, and the wrapper throws.
 
-`set-pin` and `add-staff` errors: `NOT_SIGNED_IN`, `NOT_OWNER`.
+`redeem-pin` checks in this order: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT`, `RATE_LIMITED` (the same 10-a-minute limit), `DEAL_NOT_LIVE` (unknown deal, another business's deal, or not live now), `RATE_LIMITED` (PIN lockout: 5 bad PINs by that student at that business in 15 minutes; other students aren't affected), `BAD_PIN` (anything but the right 4 digits), `ALREADY_REDEEMED_TODAY`.
+
+`set-pin` and `add-staff` errors: `NOT_SIGNED_IN`, `NOT_OWNER` (only the business's owner; staff get `NOT_OWNER`). A new business's `qr_slug` comes from its name (accents removed, lowercase, dashes), plus a short suffix if taken.
 
 `claim-club-night` errors: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT`, `CLUB_NIGHT_EXPIRED`, `ALREADY_CLAIMED` (one claim per club night; the claim is a single conditional update, so two claims at once can't both win), `RATE_LIMITED` (Celso). An unknown night is `CLUB_NIGHT_EXPIRED`. The club name is trimmed and cut to 60 characters; a blank name is a bad request (HTTP 400, the wrapper throws), so the claim screen requires one.
 

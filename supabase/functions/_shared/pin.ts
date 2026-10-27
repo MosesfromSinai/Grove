@@ -1,4 +1,5 @@
-// Typed wrappers around the PIN SQL functions in 20261026220100_pin_and_rate_limit.sql.
+// Typed wrappers around the PIN SQL functions in 20261026220100_pin_and_rate_limit.sql
+// (lockout per student per business since 20261027000000_pin_lockout_per_student.sql).
 // Import these in redeem-pin and set-pin instead of calling supabase.rpc() directly.
 //
 // Usage in redeem (flood check):
@@ -6,9 +7,9 @@
 //   if (await isRedeemRateLimited(supabase, studentId)) return error("RATE_LIMITED");
 //
 // Usage in redeem-pin:
-//   if (await isPinRateLimited(supabase, businessId)) return error("RATE_LIMITED");
+//   if (await isPinRateLimited(supabase, businessId, studentId)) return error("RATE_LIMITED");
 //   const ok = await verifyPin(supabase, businessId, inputPin);
-//   await recordPinAttempt(supabase, businessId, ok);
+//   await recordPinAttempt(supabase, businessId, studentId, ok);
 //   if (!ok) return error("BAD_PIN");
 //
 // Usage in set-pin:
@@ -25,11 +26,13 @@ async function call<T>(supabase: SupabaseClient, fn: string, args: Record<string
   return data as T;
 }
 
+// Locked out after 5 failed PINs by this student at this business in 15 minutes.
 export async function isPinRateLimited(
   supabase: SupabaseClient,
   businessId: string,
+  studentId: string,
 ): Promise<boolean> {
-  return (await call<boolean>(supabase, "is_pin_rate_limited", { bid: businessId })) !== false;
+  return (await call<boolean>(supabase, "is_pin_rate_limited", { bid: businessId, sid: studentId })) !== false;
 }
 
 export async function verifyPin(
@@ -43,9 +46,10 @@ export async function verifyPin(
 export async function recordPinAttempt(
   supabase: SupabaseClient,
   businessId: string,
+  studentId: string,
   succeeded: boolean,
 ): Promise<void> {
-  await call<null>(supabase, "record_pin_attempt", { bid: businessId, succeeded });
+  await call<null>(supabase, "record_pin_attempt", { bid: businessId, sid: studentId, succeeded });
 }
 
 export async function hashPin(

@@ -25,6 +25,7 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-10-27:** **Decision** (affects Celso): the PIN lockout is per student per business, not per business, so one person's 5 bad PINs no longer block the PIN backup for every student there. Extended Celso's #128 helpers: `pin_attempts.student_id`, `is_pin_rate_limited(bid, sid)`, `record_pin_attempt(bid, sid, succeeded)`, the matching `pin.ts` wrappers, and his `rls_security.test.sql`.
 - **2026-10-27:** **Decision** (affects Adolfo, Celso): Adolfo's business writes (`createDeal`, `endDeal`, `cancelDeal`, `getMyBusiness`, `saveBusiness`) are final in the contract, mock-backed until #73. Business updates stay owner-only; business members (owner and staff) insert and update deals. Merged #126 (main merged in, `getMyDeals` and `setPin` routed through the data switch); #69 and #71 stay open until the canvas check.
 - **2026-10-26:** **Decision** (affects everyone): screens import data functions from `@/lib/supabase`. It serves `mocks/` by default and the real Supabase wrappers when `NEXT_PUBLIC_DATA_SOURCE=supabase` (after Celso's RLS lands); a compile-time check keeps both signatures identical (#131).
 - **2026-10-26:** **Decision** (affects Hikaru): `businesses` has generated `lat`/`lng` columns, and `deals_nearby(lat, lng, radius_m, open_now, has_deals)` returning `DealCard` rows is in the contract for #88 (#131).

@@ -4,7 +4,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
-select plan(45);
+select plan(46);
 
 -- Test accounts. Inserting into auth.users fires handle_new_user(), like a first sign-in.
 -- Seed: a…0001 owns Orange Peel Tacos (b…0001), a…0009 is its staff, taylor@ is invited there.
@@ -45,10 +45,10 @@ select ok(not has_function_privilege('anon', 'public.hash_pin(text)', 'EXECUTE')
 select ok(not has_function_privilege('authenticated', 'public.hash_pin(text)', 'EXECUTE'), 'authenticated cannot run hash_pin');
 select ok(not has_function_privilege('anon', 'public.verify_pin(uuid, text)', 'EXECUTE'), 'anon cannot run verify_pin');
 select ok(not has_function_privilege('authenticated', 'public.verify_pin(uuid, text)', 'EXECUTE'), 'authenticated cannot run verify_pin');
-select ok(not has_function_privilege('anon', 'public.is_pin_rate_limited(uuid)', 'EXECUTE'), 'anon cannot run is_pin_rate_limited');
-select ok(not has_function_privilege('authenticated', 'public.is_pin_rate_limited(uuid)', 'EXECUTE'), 'authenticated cannot run is_pin_rate_limited');
-select ok(not has_function_privilege('anon', 'public.record_pin_attempt(uuid, boolean)', 'EXECUTE'), 'anon cannot run record_pin_attempt');
-select ok(not has_function_privilege('authenticated', 'public.record_pin_attempt(uuid, boolean)', 'EXECUTE'), 'authenticated cannot run record_pin_attempt');
+select ok(not has_function_privilege('anon', 'public.is_pin_rate_limited(uuid, uuid)', 'EXECUTE'), 'anon cannot run is_pin_rate_limited');
+select ok(not has_function_privilege('authenticated', 'public.is_pin_rate_limited(uuid, uuid)', 'EXECUTE'), 'authenticated cannot run is_pin_rate_limited');
+select ok(not has_function_privilege('anon', 'public.record_pin_attempt(uuid, uuid, boolean)', 'EXECUTE'), 'anon cannot run record_pin_attempt');
+select ok(not has_function_privilege('authenticated', 'public.record_pin_attempt(uuid, uuid, boolean)', 'EXECUTE'), 'authenticated cannot run record_pin_attempt');
 select ok(not has_function_privilege('anon', 'public.is_redeem_rate_limited(uuid)', 'EXECUTE'), 'anon cannot run is_redeem_rate_limited');
 select ok(not has_function_privilege('authenticated', 'public.is_redeem_rate_limited(uuid)', 'EXECUTE'), 'authenticated cannot run is_redeem_rate_limited');
 select ok(not has_function_privilege('anon', 'public.record_redeem_attempt(uuid)', 'EXECUTE'), 'anon cannot run record_redeem_attempt');
@@ -67,10 +67,11 @@ select isnt((select staff_pin from businesses where id = 'b0000000-0000-4000-800
   '4821', 'the PIN is stored hashed');
 select ok(verify_pin('b0000000-0000-4000-8000-000000000001', '4821'), 'the right PIN verifies');
 select ok(not verify_pin('b0000000-0000-4000-8000-000000000001', '0000'), 'a wrong PIN fails');
-select record_pin_attempt('b0000000-0000-4000-8000-000000000001', false) from generate_series(1, 4);
-select ok(not is_pin_rate_limited('b0000000-0000-4000-8000-000000000001'), '4 failures is not locked out');
-select record_pin_attempt('b0000000-0000-4000-8000-000000000001', false);
-select ok(is_pin_rate_limited('b0000000-0000-4000-8000-000000000001'), '5 failures in 15 minutes locks the PIN');
+select record_pin_attempt('b0000000-0000-4000-8000-000000000001', '5e000000-0000-4000-8000-0000000000a1', false) from generate_series(1, 4);
+select ok(not is_pin_rate_limited('b0000000-0000-4000-8000-000000000001', '5e000000-0000-4000-8000-0000000000a1'), '4 failures is not locked out');
+select record_pin_attempt('b0000000-0000-4000-8000-000000000001', '5e000000-0000-4000-8000-0000000000a1', false);
+select ok(is_pin_rate_limited('b0000000-0000-4000-8000-000000000001', '5e000000-0000-4000-8000-0000000000a1'), '5 failures in 15 minutes locks the PIN for that student');
+select ok(not is_pin_rate_limited('b0000000-0000-4000-8000-000000000001', '5e000000-0000-4000-8000-0000000000a2'), 'another student at the same business is not locked out');
 
 -- ── Redeem rate limit counts attempts, not successes (fix 5) ──────────────────
 
