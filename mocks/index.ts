@@ -2,13 +2,24 @@
 // Same names, inputs, and return types, so swapping to the real ones is an import change.
 // State lives in memory and resets on page reload.
 
-import { campusClock, dealStatus, liveUntil } from "../lib/supabase/deal-status";
+import { campusClock, dealStatus, liveUntil, openNow } from "../lib/supabase/deal-status";
+import { validateCreateDealInput } from "../lib/supabase/deal-input";
+import { copyHours, validateBusinessInput } from "../lib/supabase/business-input";
 import type {
   AddStaffResult,
   BusinessPublic,
   BusinessStats,
+  BusinessProfile,
+  BusinessLocationOption,
+  SaveBusinessInput,
+  SaveBusinessResult,
   ClaimClubNightResult,
   ClubNight,
+  CreateDealInput,
+  CreateDealResult,
+  DealMutationInput,
+  EndDealResult,
+  CancelDealResult,
   OpenClubNight,
   Deal,
   DealCard,
@@ -42,6 +53,9 @@ export { UCR_CENTER } from "./data";
 
 const REDEEM_RADIUS_M = 150;
 const CODE_TTL_MS = 30_000;
+// Tracks whether the owner has generated a first PIN in this demo session.
+// The PIN itself remains private and is returned only by setPin().
+const initializedPins = new Set<string>();
 
 // Handy coordinates for testing redeem() away from Riverside.
 export const MOCK_POSITIONS = {
@@ -68,6 +82,16 @@ function localDate(iso: string): string {
 
 function toDeal(d: MockDeal): Deal {
   return { ...d, status: dealStatus(d) };
+}
+
+function toMyDeal(d: MockDeal): MyDeal {
+  const historical = d.business_id === "biz-opt"
+    ? orangePeelStats.last30.perDeal.find(([id]) => id === d.id)?.[1]
+    : undefined;
+  return {
+    ...toDeal(d),
+    redemption_count: historical ?? redemptions.filter(r => r.deal_id === d.id).length,
+  };
 }
 
 function toBusinessPublic(b: MockBusiness): BusinessPublic {
@@ -231,17 +255,88 @@ export async function getBusinessStats(input: {
 }
 
 export async function getMyDeals(input: { businessId: string }): Promise<MyDeal[]> {
-  const counts = new Map<string, number>(
-    input.businessId === "biz-opt" ? orangePeelStats.last30.perDeal.map(([id, n]) => [id, n]) : [],
-  );
   const mine = deals
     .filter((d) => d.business_id === input.businessId)
-    .map((d) => ({
-      ...toDeal(d),
-      redemption_count: counts.get(d.id) ?? redemptions.filter((r) => r.deal_id === d.id).length,
-    }))
+    .map(toMyDeal)
     .sort((a, b) => b.starts_at.localeCompare(a.starts_at));
   return delay(mine);
+}
+
+// ---------- Business writes ----------
+
+function toBusinessProfile(business: MockBusiness): BusinessProfile {
+  return { business: { ...toBusinessPublic(business), hours: copyHours(business.hours) }, pin_ready: initializedPins.has(business.id) };
+}
+
+export async function getMyBusiness(): Promise<BusinessProfile> {
+  return delay(toBusinessProfile(businessById(mockOwner.business_id)));
+}
+
+// Mock-only address lookup. Arbitrary addresses require explicit coordinates;
+// no guessed geocoding or live network service is used in Sprint 1.
+export async function getBusinessLocationOptions(): Promise<BusinessLocationOption[]> {
+  return delay(businesses.map(({ address, lat, lng }) => ({ address, lat, lng })));
+}
+
+export async function saveBusiness(input: SaveBusinessInput): Promise<SaveBusinessResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  const result = validateBusinessInput(input);
+  if (!result.ok) return delay({ ok: false, error: "INVALID_BUSINESS", fields: result.fields });
+  const b = businessById(input.business_id);
+  const value = result.value;
+  Object.assign(b, {
+    name: value.name, address: value.address, lat: value.lat, lng: value.lng,
+    hours: value.hours, logo_url: value.logo_url, is_truck: value.is_truck,
+    open_now: openNow(value.hours),
+  });
+  return delay({ ok: true, profile: toBusinessProfile(b) });
+}
+
+export async function createDeal(input: CreateDealInput): Promise<CreateDealResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  const result = validateCreateDealInput(input);
+  if (!result.ok) return delay({ ok: false, error: "INVALID_DEAL", fields: result.fields });
+  const deal: MockDeal = {
+    ...result.value,
+    id: crypto.randomUUID(),
+    active_days: null,
+    daily_start: null,
+    daily_end: null,
+    visibility: "public",
+    created_at: new Date().toISOString(),
+  };
+  deals.push(deal);
+  return delay({ ok: true, deal: { ...toDeal(deal), redemption_count: 0 } });
+}
+
+// Re-check the current clock and store at mutation time, not the UI snapshot.
+export async function endDeal(input: DealMutationInput): Promise<EndDealResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  const deal = deals.find(d => d.id === input.deal_id && d.business_id === input.business_id);
+  if (!deal) return delay({ ok: false, error: "DEAL_NOT_FOUND" });
+  const now = new Date();
+  const status = dealStatus(deal, now);
+  const started = new Date(deal.starts_at).getTime() < now.getTime();
+  if (!started || status === "ended" || (status !== "live" && !deal.active_days)) {
+    return delay({ ok: false, error: "DEAL_NOT_LIVE" });
+  }
+  deal.ends_at = now.toISOString();
+  return delay({ ok: true, deal: toMyDeal(deal) });
+}
+
+export async function cancelDeal(input: DealMutationInput): Promise<CancelDealResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  const index = deals.findIndex(d => d.id === input.deal_id && d.business_id === input.business_id);
+  if (index < 0) return delay({ ok: false, error: "DEAL_NOT_FOUND" });
+  const deal = deals[index];
+  if (dealStatus(deal) !== "scheduled") return delay({ ok: false, error: "DEAL_NOT_SCHEDULED" });
+  if (toMyDeal(deal).redemption_count > 0 || redemptions.some(r => r.deal_id === deal.id)) {
+    return delay({ ok: false, error: "DEAL_HAS_REDEMPTIONS" });
+  }
+  // Preserve the existing club_nights -> deals reference; no cascading cleanup.
+  if (clubNights.some(night => night.deal_id === deal.id)) return delay({ ok: false, error: "DEAL_IN_USE" });
+  deals.splice(index, 1);
+  return delay({ ok: true, deal_id: deal.id });
 }
 
 // ---------- Edge Functions ----------
@@ -399,6 +494,7 @@ export async function setPin(input: { business_id: string }): Promise<SetPinResu
   if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
   const pin = String(Math.floor(Math.random() * 10_000)).padStart(4, "0");
   businessById(input.business_id).staff_pin = pin;
+  initializedPins.add(input.business_id);
   return delay({ ok: true, pin });
 }
 

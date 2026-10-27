@@ -2,7 +2,7 @@
 
 The shapes everyone builds against. Frontend work uses `mocks/` that match this file exactly, then swaps in real queries once the tables and functions exist.
 
-**Owner:** Moses. **Status:** Final (2026-10-24), including the Activity 2 changes: repeat days, link-only deals, club nights. Later changes still follow the rule below.
+**Owner:** Moses. **Status:** Existing table/query contract is final (2026-10-24), including repeat days, link-only deals, and club nights. The Sprint 1 business-write additions below are proposals pending Moses's review. Later changes still follow the rule below.
 **Rule:** any change here goes in a pull request reviewed by the people it affects, plus a line in `docs/LOG.md`.
 **Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together. Screens import from `lib/supabase` (`index.ts`), which serves `mocks/` or the real wrappers in `queries.ts` depending on `NEXT_PUBLIC_DATA_SOURCE`; a compile-time check keeps their signatures identical.
 
@@ -281,6 +281,33 @@ type ClubNight = OpenClubNight & {
   visit_count: number;  // verified redemptions of deal_id
 };
 ```
+
+---
+
+## Business writes (Sprint 1 mock adapter; proposed for Moses review)
+
+| Function | Input | Success returns | Errors |
+|---|---|---|---|
+| `createDeal` | `CreateDealInput` | `{ ok: true, deal: MyDeal }` | `NOT_OWNER`, `INVALID_DEAL` (`fields: CreateDealErrors`) |
+| `endDeal` | `{ business_id, deal_id }` | `{ ok: true, deal: MyDeal }` | `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_LIVE` |
+| `cancelDeal` | `{ business_id, deal_id }` | `{ ok: true, deal_id: string }` | `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_SCHEDULED`, `DEAL_HAS_REDEMPTIONS`, `DEAL_IN_USE` |
+| `getMyBusiness` | none | `BusinessProfile` | none |
+| `getBusinessLocationOptions` (mock helper) | none | `Pick<BusinessPublic, "address" \| "lat" \| "lng">[]` | none |
+| `saveBusiness` | `SaveBusinessInput` | `{ ok: true, profile: BusinessProfile }` | `NOT_OWNER`, `INVALID_BUSINESS` (`fields: BusinessInputErrors`) |
+
+```ts
+type CreateDealInput = Pick<Deal,
+  "business_id" | "title" | "description" | "photo_url" | "starts_at" | "students_only"
+> & { ends_at: string; discount_type: DiscountType; discount_value: number | null };
+type CreateDealErrors = Partial<Record<keyof CreateDealInput, string>>;
+type BusinessProfile = { business: BusinessPublic; pin_ready: boolean };
+type SaveBusinessInput = Pick<BusinessPublic,
+  "name" | "address" | "lat" | "lng" | "hours" | "logo_url" | "is_truck"
+> & { business_id: string };
+type BusinessInputErrors = Partial<Record<keyof SaveBusinessInput, string>>;
+```
+
+Writes return `Promise` results; errors are `{ ok: false, error, fields? }`. Read helpers return `Promise` values. `setPin` retains its Edge Function signature below.
 
 ---
 

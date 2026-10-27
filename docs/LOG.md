@@ -78,7 +78,14 @@ _Nothing logged yet._
 _Nothing logged yet._
 
 ## Adolfo
-_Nothing logged yet._
+- **2026-10-26:** Prepared PR #126 review fixes: concise contract/docs, 21 isolated Vitest tests via `npm test`, shared `openNow`, and verified ignore coverage; lint, typecheck, build, responsive/behavioral and accessibility checks passed; main merge waits on #127.
+- **2026-10-26:** Business setup with profile, coordinates, hours, logo, food-truck toggle, and first-PIN flow on mocks (#70, PR #126).
+- **2026-10-25:** Responsive dashboard shell and navigation (#69, PR #126); canvas comparison remains unverified.
+- **2026-10-25:** Post-deal form with discounts, campus-time scheduling, photo preview, validation, and mock save (#71, PR #126); canvas comparison remains unverified.
+- **2026-10-25:** My deals tabs/counts, End now with retained history, and guarded Cancel with confirmation (#72, PR #126).
+- **2026-10-25:** **Decision** (affects Moses): business-write signatures remain proposals; photos/logos stay in mock memory until Storage wiring in #73.
+- **2026-10-25:** **Decision** (affects Celso): `/dashboard` is the business entry route; real data requires authenticated business membership (#73).
+- **2026-10-25:** **Decision** (affects Moses, Celso): onboarding configures the existing mock owner's business with explicit coordinates; provisioning, geocoding, and real PIN integration remain #73.
 
 ## Hikaru
 - **2026-10-25:** Synced latest main and prepared `hikaru/map-foundation` for team review. Fixed real-map keyboard focus on selection; added Mapbox lifecycle and location-race regression tests plus `npm test` in the required CI job. #84 and real-map verification for #85 remain blocked on the restricted token.
