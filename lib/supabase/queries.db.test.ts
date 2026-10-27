@@ -101,9 +101,11 @@ describe.skipIf(!process.env.SUPABASE_DB_TESTS)("queries on the local seed", () 
     await expect(getDealsNearby({ lat: 33.9737, lng: -117.3281, radiusM: 3000 })).rejects.toThrow();
   });
 
-  test("blocked until #128: the browser's anon key reads nothing", async () => {
+  test("with RLS (#128), the browser's anon key reads a sticker page", async () => {
     setClient(createClient<Database>(local.API_URL, local.ANON_KEY, { auth: { persistSession: false } }));
-    expect(await getBusinessBySlug({ slug: "orange-peel-tacos" })).toBeNull();
+    const result = await getBusinessBySlug({ slug: "orange-peel-tacos" });
+    expect(result?.business).toMatchObject({ name: "Orange Peel Tacos", lat: 33.9762 });
+    expect(result?.liveDeals.map((d) => d.title).sort()).toEqual(["$2 off any burrito", "Free horchata with any combo"]);
     setClient(service);
   });
 });
