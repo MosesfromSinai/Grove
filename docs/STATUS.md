@@ -22,7 +22,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 | Person | Focus |
 |---|---|
 | Moses | Done: `deal_status()`, typed queries (#16), `redeem` (#14), `claim-club-night` (#103), Realtime (#17), all on grove-dev. Next: `redeem-pin` (#15) and `set-pin` (#120) once #128 lands; agree staff-scan tokens (#19) with Celso by Nov 1; gate test (#18) |
-| Celso | #127 review fixes pushed; Google enabled in Supabase Auth and sign-in works locally; preview check waits on Vercel access. Next: the #128 security fixes; then #38, #106, #39 |
+| Celso | #127 merged (Google sign-in confirmed on its preview). #128 review fixes pushed. Next: #38, #106, #39 |
 | Edward | Rework #129 onto `mocks/` and the contract; then the scanner, `redeem` call, and Redeemed screen |
 | Adolfo | #126 merged (#70, #72 done; business writes final in the contract). Canvas check for #69 and #71, then repeat days and visibility on the post-deal form (#112), and #73 |
 | Hikaru | `/map` merged (#125; #86, #87 done). #85 awaits the Mapbox token (#84) and canvas check; then `deals_nearby` (#88) after `deal_status()` |
@@ -33,8 +33,8 @@ Moses re-checks each PR when its author pushes fixes. It merges when CI passes a
 
 | Order | PR | Waiting on |
 |---|---|---|
-| 1 | #127 Celso, Google sign-in | Merge main in first (conflicts); then Google enabled in Supabase Auth and sign-in working on its preview; .edu check moved into `handle_new_user()`; PWA paths public; callback moved; Closes #30 only |
-| 2 | #128 Celso, RLS and PIN helpers | Merge main in first (conflicts); RLS must let business members insert and update their own deals and business; security fixes (PIN functions service-role only, `profiles` updates `full_name` only, open club nights only, `owner_id` hidden, attempt-based redeem limit) plus a test script; also: migrations renamed after the newest on main, students read deals they redeemed, `lat`/`lng` granted, `redemptions.student_location` hidden. Moses re-runs the security checks on a local database before merging |
+| 1 | #127 Celso, Google sign-in | All review items done. Moses confirms Google sign-in on its preview (UCR account and a personal Gmail), then merges |
+| 2 | #128 Celso, RLS and PIN helpers | Security fixes verified on a fresh local database. Waits on #127; then Celso merges main again (docs conflicts only), drops two stale LOG lines, and ticks #32. RLS: business updates are owner-only; business members (owner and staff) insert and update deals |
 | 3 | #129 Edward, student shell and feed | Rebuild on `mocks/` and the contract; no typed-code redeem; remove files outside his area; design tokens; docs |
 
 ## Blockers
@@ -43,7 +43,8 @@ Moses re-checks each PR when its author pushes fixes. It merges when CI passes a
 
 - **Everyone: review your team file.** Moses edited all five on 2026-10-24 (one-time exception, like setup) for the Activity 2 changes: new tasks, interview work, dependencies, and the week plan. Fix anything that's wrong in your own file.
 - **Everyone:** accept the Supabase org invite, then copy the Supabase URL and anon key into your `.env.local` (see README → Getting started). The service-role key stays with Moses.
-- **Sign-in gate:** waits on #127. Google is enabled in Supabase Auth (#29) and sign-in works on localhost; Celso can't open the PR preview (Vercel login), so the preview check waits on access from Moses. Nothing that requires sign-in merges until it works on the preview.
+- **Sign-in gate:** Google sign-in works (confirmed on the #127 preview with a UCR account and a Gmail). The verified-student check runs in #128's `handle_new_user()` trigger.
+- **Settings (done):** Vercel Authentication is off for preview deployments, so anyone with a preview link can open it. Supabase Auth on grove-dev is Google-only: Email is disabled, Google is enabled, and redirect URLs cover production, localhost, and `grove-*-mosesfromsinais-projects.vercel.app` previews.
 - **RLS:** every table on grove-dev still has RLS on and no policies, so the browser reads nothing until #128 merges with its security fixes. Until then, real wrappers return nothing for signed-in users.
 - **Everyone:** CI ("Lint, typecheck, build") runs on every PR and must pass to merge; it now runs `npm test` (vitest) too. Run `npm run lint && npm run typecheck && npm test && npm run build` before pushing.
 - **Everyone:** import data functions from `@/lib/supabase` (not `@/mocks`). It serves mocks until `NEXT_PUBLIC_DATA_SOURCE=supabase`, which flips once #128 lands. Same names and types, so nothing else changes.
