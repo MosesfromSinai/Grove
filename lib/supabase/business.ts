@@ -1,3 +1,5 @@
-// Mock-backed business data boundary. Replace this adapter with authenticated
-// Supabase writes in #73; components never mutate fixture arrays directly.
-export { createDeal, getMyDeals, endDeal, cancelDeal, getMyBusiness, getBusinessLocationOptions, saveBusiness, setPin } from "../../mocks";
+// Business data boundary. getMyDeals and setPin follow the data switch in ./index; the writes
+// stay mock-backed until #73 replaces them with authenticated Supabase writes. Components never
+// mutate fixture arrays directly.
+export { getMyDeals, setPin } from "./index";
+export { createDeal, endDeal, cancelDeal, getMyBusiness, getBusinessLocationOptions, saveBusiness } from "../../mocks";
