@@ -27,9 +27,9 @@ _Last updated: 2026-10-26_
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [ ] Set up Google OAuth in Google Cloud and Supabase Auth (needs the Supabase project, #6; if you aren't active by Oct 26, Moses takes this) (#29)
+- [x] Set up Google OAuth in Google Cloud and Supabase Auth (needs the Supabase project, #6; if you aren't active by Oct 26, Moses takes this) (#29)
 - [x] Sign-in page (canvas screen 1, one button: "Sign in with your school Google account"); business owners use the same Google sign-in with any account (#30)
-- [ ] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` (runs in `handle_new_user()`, PR #128) (#31)
+- [x] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` (runs in `handle_new_user()`, PR #128) (#31)
 - [x] Database trigger to create a `profiles` row on first sign-in (#32)
 - [ ] Onboarding: route to student app or business onboarding (root routing in `app/page.tsx`, Moses reviews) (#33)
 - [x] Review the threat model below; add anything missing (#34)

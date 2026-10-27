@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-10-26_
+_Last updated: 2026-10-27_
 
 ---
 
@@ -45,14 +45,14 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 
 ### Week 2 — Core loop and data (Oct 26–Nov 1)
 - [x] `redeem` Edge Function: sticker belongs to business, deal live, within ~150 m (PostGIS `ST_DWithin`), daily limit, returns `ErrorCode` on failure; live check via `deal_status()` (#102) (#14)
-- [ ] `redeem-pin` Edge Function (hashed PIN check, with Celso) (#15)
+- [x] `redeem-pin` Edge Function (hashed PIN check, with Celso) (#15)
 - [x] Typed queries in `lib/supabase/` for every function in the contract (#16)
 - [x] Enable Realtime on `redemptions` for dashboards (#17)
 - [ ] Run the week-2 gate test: one printed sticker, two phones (#18)
 - [x] Migration: `active_days`, `daily_start`, `daily_end`, `visibility` on `deals`; `timezone` on `campuses`; `club_nights` table (#101)
 - [ ] Live-now check with repeat days: one `deal_status()` SQL function used by `redeem`, `redeem-pin`, `issue-code`, `staff-redeem`, `deals_nearby`, and RLS (#102)
 - [x] `claim-club-night` Edge Function: one claim per night (conditional update), creates the link-only deal, returns `ALREADY_CLAIMED` / `CLUB_NIGHT_EXPIRED` / `NOT_SIGNED_IN` (#103)
-- [ ] `set-pin` Edge Function (owner only; random 4-digit PIN returned once, stored hashed with Celso's helper) and the database default for `qr_slug` on new businesses (#120)
+- [x] `set-pin` Edge Function (owner only; random 4-digit PIN returned once, stored hashed with Celso's helper) and the database default for `qr_slug` on new businesses (#120)
 - [ ] Agree staff-scan token design with Celso by Nov 1; log it as a **Decision** in `LOG.md` (#19)
 
 ### Week 3 — Staff mode and stats (Nov 2–8)
@@ -92,17 +92,22 @@ _Record things only you need to remember (gotchas, commands, links). Decisions t
 - Local tests: `npx supabase start -x studio,imgproxy,inbucket,mailpit,storage-api,logflare,vector,supavisor,postgres-meta` (keeps auth, REST, Realtime, and the edge runtime), then `npm run test:db` (pgTAP plus the `*.db.test.ts` files).
 - After adding a new Edge Function, restart the whole local stack (`supabase stop` then `start`); the runtime only serves functions that existed at start. After `supabase db reset`, restart Realtime (`docker restart supabase_realtime_Grove`) before `test:db`.
 - Deploy a function with `npx supabase functions deploy <name> --use-api`. Smoke test signed out with the anon key from `.env.local`; it should answer `NOT_SIGNED_IN`.
+- Right after a local `db reset`, Realtime can miss the first change; the live-redemptions test retries, so `test:db` is stable now.
 - Realtime `postgres_changes` follows column grants (checked locally): a role without select on `student_location` doesn't receive it.
 - Migration timestamps on main end at `20261026216000`; Celso renames #128's when he merges main.
 
 ## Blockers
-- `redeem-pin` (#15) and `set-pin` (#120) wait on Celso's PIN-hash and rate-limit helpers (#128).
-- The #18 gate test waits on sign-in (#127, Google enabled in Supabase Auth), RLS (#128), and Edward's scanner on real data (#129). `redeem` itself is deployed and tested.
-- #102 stays open until `redeem-pin`, `issue-code`, `staff-redeem`, and `deals_nearby` use `deal_status()`.
+- The #18 gate test waits on Edward's scanner and sticker page on real data (#129, #57) and on `NEXT_PUBLIC_DATA_SOURCE=supabase` in Vercel.
+- #102 stays open until `issue-code`, `staff-redeem` (Week 3), and Hikaru's `deals_nearby` use `deal_status()`.
 ---
 
 ## Session log
 _Newest at the top. One entry per session._
+
+### 2026-10-27
+- **Did:** Fixed and merged Adolfo's #126 (merged main, routed `getMyDeals` and `setPin` through the switch) and marked his business writes final. Reviewed Celso's #127 and #128, re-ran the security checks on a fresh local database (26 out of 26), finished both PRs' docs, merged them, and applied #128 to grove-dev. `redeem-pin` (#15) and `set-pin` with the `qr_slug` default (#120) deployed, with the PIN lockout changed to per student per business; `redeem` now rate-limited. Confirmed a UCR Google sign-in on production creates a verified student profile, so the Week 1 sign-in gate passed (closed #29, #31). Hardened the live-redemptions test.
+- **Next:** Agree the staff-scan design (#19) with Celso by Nov 1; the #18 gate test once Edward's scanner is on real data; then `issue-code` and `staff-redeem` (#20).
+- **Blockers:** Edward's #129 for the gate test.
 
 ### 2026-10-26 (Week 2)
 - **Did:** `deal_status()` and `deal_by_id()` with matching pgTAP and vitest examples (#130, part of #102). Typed queries for every contract function behind one mock/real switch, plus `businesses.lat`/`lng` and `openNow()` (#16, #131). `redeem` (#14, #132) and `claim-club-night` (#103, #133, #134) in SQL behind Edge Functions, deployed to grove-dev, with pgTAP and served-function tests including a two-student claim race. Realtime on `redemptions` plus `subscribeToRedemptions()` (#17, #135). Drafted the staff-scan token write-up (#19). Added four must-fix lines to Celso's #128 review (migration timestamps, redeemed-deal read policy, lat/lng grant, `student_location` grant).
