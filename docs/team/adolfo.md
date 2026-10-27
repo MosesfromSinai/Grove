@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-10-24_
+_Last updated: 2026-10-26_
 
 ---
 
@@ -15,7 +15,7 @@ _Last updated: 2026-10-24_
 `app/(business)/`, `components/business/`.
 
 ## Depends on
-- **Moses:** `mocks/`, real tables (end of week 1), Realtime on `redemptions` (week 2), `club_nights` and `getClubNights` (week 2, for your week 3 club night screens), `set-pin` (week 2), `staff-redeem`, `getBusinessStats`, `add-staff`, and `getStaff` (week 3).
+- **Moses:** tables, typed queries, `getClubNights`, and redemption subscriptions are available on main; branch integration waits on #127. Business-write proposals still need review. Real `set-pin` waits on #128's PIN helpers; staff-scan functions and remaining real-data integration follow the week plan.
 - **Celso:** business sign-in routing; `business_members` access for staff.
 - **Edward:** the deal page at `/deals/<id>`, which your deal link and QR open. (The theme is done; see `/theme`.)
 - **Hikaru:** the "I'm here now" button component (week 3), which you place on the dashboard for food trucks.
@@ -28,10 +28,10 @@ _Last updated: 2026-10-24_
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [ ] Dashboard layout (desktop sidebar, phone and tablet friendly) (#69)
-- [ ] Business onboarding: name, address (sets `location`), hours, logo upload, food-truck toggle; first PIN via `setPin()` (#70)
-- [ ] Post-deal form: title, description, discount, start/end, photo, "UCR students only" (#71)
-- [ ] My deals list: active, scheduled, expired, with redemption counts; End now and Cancel (mocks) (#72)
+- [ ] Dashboard layout (desktop sidebar, phone and tablet friendly) (#69) — implemented on mocks; canvas verification pending
+- [x] Business onboarding: name, address (sets `location`), hours, logo upload, food-truck toggle; first PIN via `setPin()` (#70) — reviewed and tested on mocks
+- [ ] Post-deal form: title, description, discount, start/end, photo, "UCR students only" (#71) — implemented on mocks; canvas verification pending
+- [x] My deals list: active, scheduled, expired, with redemption counts; End now and Cancel (mocks) (#72) — implemented on mocks
 
 ### Week 2 — Live data, stickers, repeat days (Oct 26–Nov 1)
 - [ ] Wire onboarding, posting, and My deals to real tables (#73)
@@ -62,15 +62,12 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 
 ---
 
-## Notes and decisions
-_Record things only you need to remember. Decisions that affect others go in `docs/LOG.md` as **Decision** lines._
+## Notes and session log
 
----
-
-## Session log
-_Newest at the top. One entry per session._
-
-### 2026-10-19
-- **Did:** Assigned role.
-- **Next:** Dashboard layout once the repo exists; start pilot outreach list.
-- **Blockers:** Repo not created yet.
+### 2026-10-26
+- **Did:** Implemented Sprint 1's mock dashboard, post-deal form, My deals, and business setup (#69-72, PR #126). Prepared review cleanup, 21 isolated tests via `npm test`, and reuse of main's shared `openNow` from merged #131. Lint, typecheck, build, responsive layouts at 320-1440px, posting/onboarding behavioral checks, and WCAG A/AA scans passed. Fresh screenshots were inspected; no source check failures remain.
+- **Next:** Merge `origin/main` only after #127 merges, preserving teammates' docs, main's `.gitignore`, and main's contract/types/mocks plus required business writes. Then validate the integrated branch before #73/#112.
+- **Blockers/limitations:** #127 remains open; main has not been merged. Canvas access failed, so #69/#71 visual acceptance remains pending. Mocks reset on reload; sample-address lookup supplies coordinates, arbitrary addresses require manual coordinates. Real auth/provisioning, geocoding, Storage, and PIN integration remain #73. Overview metrics (#75), stats, and sticker/PIN settings remain placeholders.
+- **Review:** Local preview: `http://127.0.0.1:3001/dashboard`; start with `npm run build` then `npm run start -- --hostname 127.0.0.1 --port 3001`. Check responsive navigation, posting/validation, End now/Cancel confirmations and counts, profile propagation, and one-time PIN visibility. Never record PIN values.
+- **Workflow:** Stop before commits or pushes for review. Commit messages use 3-7 lowercase words, simple wording, and no co-author trailer. Keep logs technical and concise.
+- **Sanity check:** Ignore rules cover credentials/local state, dependencies, builds, test reports, and Windows metadata; source tests, configuration, and `.env.example` remain trackable. Documentation retains pending canvas/integration work and records no invented research. The requested local ignore additions must be reconciled with Moses's main-version preference during the deferred merge.

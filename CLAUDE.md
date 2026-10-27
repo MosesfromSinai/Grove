@@ -2,7 +2,7 @@
 
 This file is the shared memory for every team member's AI sessions. Claude Code reads it automatically from the repo root. In claude.ai, paste or attach it at the start of each session along with the files listed under **Session protocol**. **All shared rules live here and only here.** Team files hold personal tasks, notes, and logs.
 
-_Last updated: 2026-10-25 by Moses_
+_Last updated: 2026-10-26 by Moses_
 
 ---
 
@@ -140,7 +140,7 @@ Link-only deals (including club night deals) redeem exactly the same way; having
 - Security lives in the database (Row Level Security), not only in the UI. Only Edge Functions insert into `redemptions`.
 - `SUPABASE_SERVICE_ROLE_KEY` is only used in Edge Functions and server code, never in the browser.
 - Secrets: the repo is public. Every key and password lives only in `.env.local` (git-ignored). Never put a key in code, docs, issues, commit messages, chat, or email. After accepting the Supabase org invite, copy the Supabase URL and anon key yourself from the dashboard (grove-dev → Project Settings → API Keys → Legacy). The `service_role` key stays with Moses only; teammates leave that line empty. If a secret has to be sent, use a one-time link (onetimesecret.com). New keys (e.g. Hikaru's Mapbox token) go to Moses by one-time link, and he adds them to Vercel (Hobby plan: only Moses has access). PR preview links still work for everyone. `.env.example` lists the variable names with empty values. If a key is ever committed, rotate it immediately; deleting the commit isn't enough.
-- Build against `mocks/` until the real table or function exists. Mocks must match `docs/API_CONTRACT.md` exactly.
+- Import data functions from `@/lib/supabase`, never `@/mocks` directly: it serves `mocks/` until `NEXT_PUBLIC_DATA_SOURCE=supabase`, then the real wrappers, with the same names and types. Mocks must match `docs/API_CONTRACT.md` exactly.
 - Every `ErrorCode` from a function gets a friendly message in the UI.
 - Mobile-first: design for a phone screen, then scale up for the dashboard. Camera and location (and push, if built) need HTTPS, so test on the Vercel preview.
 - Design: follow the **Design reference** below. No UCR logos or official branding.
@@ -177,7 +177,7 @@ Use the Tailwind class name with any color utility (`bg-green`, `text-ink-muted`
 - **One branch per feature**, named `name/feature` (e.g. `edward/deal-feed`). A feature usually covers a few related tasks. One branch open at a time, about 1–2 a week; merge and delete it before starting the next. No extra branches for experiments or doc-only changes; doc updates ride along with the code.
 - **Commits:** short, plain, present tense, under ~50 characters: `Add deal feed`, `Fix PIN lockout`. No body unless something truly needs explaining. No emojis or file-by-file summaries.
 - **No attribution:** no `Co-Authored-By` lines, "Generated with" lines, or AI mentions in commits, PRs, or branch names. Each person turns this off once in their own Claude Code settings (`~/.claude/settings.json` on their computer, not in the repo): `"attribution": { "commit": "", "pr": "" }`. The repo ignores `.claude/`.
-- **Pull requests:** title in the same style as a commit. Description is 1–3 lines plus the template checklist and `Closes #<issue>` for each issue the feature finishes.
+- **Pull requests:** title in the same style as a commit. Description is 1–3 lines plus a `Closes #<issue>` line for each issue the feature finishes. No checklist; the doc updates in Session protocol → End still go in the same PR.
 - **Merge into `main` often.** When a feature works, or at the end of a session with working code, suggest a small PR and merge, and say why: log lines and decisions only reach teammates once they're in `main`; small PRs are quick to review and rarely conflict; and anyone waiting on the work gets unblocked. `main` is protected: Moses can push to main and merge on his own; everyone else merges through a PR.
 - **Issues:** every task in a team file has a GitHub issue, assigned to its owner, on the Grove project board. The issue number goes next to the task (`- [ ] Deal feed (#12)`). The PR that finishes it says `Closes #12` (one line per issue), which closes the issue and moves it on the board. When Moses pushes directly to main, put Closes #<issue> in the commit message instead.
 - **Reviews:** one review per PR. Moses reviews migrations and functions; Celso reviews auth and RLS. `.github/CODEOWNERS` requests the right reviewer automatically, but code-owner review isn't required yet: any teammate's approval merges once CI ("Lint, typecheck, build") passes. Moses can push to main and merge on his own; everyone else merges through a PR with 1 approval.

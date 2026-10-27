@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-10-25_
+_Last updated: 2026-10-26_
 
 ---
 
@@ -44,14 +44,14 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 - [x] Connect Vercel; preview deploy per PR; set the env vars in Vercel and teammates copy their Supabase keys from the dashboard; the service-role key stays with Moses (Hobby plan: teammates can't be added) (#13)
 
 ### Week 2 — Core loop and data (Oct 26–Nov 1)
-- [ ] `redeem` Edge Function: sticker belongs to business, deal live, within ~150 m (PostGIS `ST_DWithin`), daily limit, returns `ErrorCode` on failure; live check via `deal_status()` (#102) (#14)
+- [x] `redeem` Edge Function: sticker belongs to business, deal live, within ~150 m (PostGIS `ST_DWithin`), daily limit, returns `ErrorCode` on failure; live check via `deal_status()` (#102) (#14)
 - [ ] `redeem-pin` Edge Function (hashed PIN check, with Celso) (#15)
-- [ ] Typed queries in `lib/supabase/` for every function in the contract (#16)
-- [ ] Enable Realtime on `redemptions` for dashboards (#17)
+- [x] Typed queries in `lib/supabase/` for every function in the contract (#16)
+- [x] Enable Realtime on `redemptions` for dashboards (#17)
 - [ ] Run the week-2 gate test: one printed sticker, two phones (#18)
 - [x] Migration: `active_days`, `daily_start`, `daily_end`, `visibility` on `deals`; `timezone` on `campuses`; `club_nights` table (#101)
 - [ ] Live-now check with repeat days: one `deal_status()` SQL function used by `redeem`, `redeem-pin`, `issue-code`, `staff-redeem`, `deals_nearby`, and RLS (#102)
-- [ ] `claim-club-night` Edge Function: one claim per night (conditional update), creates the link-only deal, returns `ALREADY_CLAIMED` / `CLUB_NIGHT_EXPIRED` / `NOT_SIGNED_IN` (#103)
+- [x] `claim-club-night` Edge Function: one claim per night (conditional update), creates the link-only deal, returns `ALREADY_CLAIMED` / `CLUB_NIGHT_EXPIRED` / `NOT_SIGNED_IN` (#103)
 - [ ] `set-pin` Edge Function (owner only; random 4-digit PIN returned once, stored hashed with Celso's helper) and the database default for `qr_slug` on new businesses (#120)
 - [ ] Agree staff-scan token design with Celso by Nov 1; log it as a **Decision** in `LOG.md` (#19)
 
@@ -89,14 +89,25 @@ _Record things only you need to remember (gotchas, commands, links). Decisions t
 - Query grove-dev without the DB password: `npx supabase db query --linked "<sql>"` (or `-f file.sql`). Refresh the seed's live deals with `npx supabase db query --linked -f supabase/seed.sql`; it clears its own rows first.
 - `supabase db reset` (local) needs Docker Desktop running; `supabase start -x studio,...` keeps it light.
 - Check invite status with `gh api repos/MosesfromSinai/Grove/invitations`, not the collaborators list: on a public repo that lists pending invitees too, with `read`.
+- Local tests: `npx supabase start -x studio,imgproxy,inbucket,mailpit,storage-api,logflare,vector,supavisor,postgres-meta` (keeps auth, REST, Realtime, and the edge runtime), then `npm run test:db` (pgTAP plus the `*.db.test.ts` files).
+- After adding a new Edge Function, restart the whole local stack (`supabase stop` then `start`); the runtime only serves functions that existed at start. After `supabase db reset`, restart Realtime (`docker restart supabase_realtime_Grove`) before `test:db`.
+- Deploy a function with `npx supabase functions deploy <name> --use-api`. Smoke test signed out with the anon key from `.env.local`; it should answer `NOT_SIGNED_IN`.
+- Realtime `postgres_changes` follows column grants (checked locally): a role without select on `student_location` doesn't receive it.
+- Migration timestamps on main end at `20261026216000`; Celso renames #128's when he merges main.
 
 ## Blockers
-- Celso hasn't accepted his GitHub invite (pending since Oct 20, write access), so his 22 issues (#29–#47, #105–#107) can't be assigned yet. Assign them once he accepts. If he isn't active by Oct 26, Moses takes Google OAuth setup (#29) so the sign-in gate isn't stuck.
-
+- `redeem-pin` (#15) and `set-pin` (#120) wait on Celso's PIN-hash and rate-limit helpers (#128).
+- The #18 gate test waits on sign-in (#127, Google enabled in Supabase Auth), RLS (#128), and Edward's scanner on real data (#129). `redeem` itself is deployed and tested.
+- #102 stays open until `redeem-pin`, `issue-code`, `staff-redeem`, and `deals_nearby` use `deal_status()`.
 ---
 
 ## Session log
 _Newest at the top. One entry per session._
+
+### 2026-10-26 (Week 2)
+- **Did:** `deal_status()` and `deal_by_id()` with matching pgTAP and vitest examples (#130, part of #102). Typed queries for every contract function behind one mock/real switch, plus `businesses.lat`/`lng` and `openNow()` (#16, #131). `redeem` (#14, #132) and `claim-club-night` (#103, #133, #134) in SQL behind Edge Functions, deployed to grove-dev, with pgTAP and served-function tests including a two-student claim race. Realtime on `redemptions` plus `subscribeToRedemptions()` (#17, #135). Drafted the staff-scan token write-up (#19). Added four must-fix lines to Celso's #128 review (migration timestamps, redeemed-deal read policy, lat/lng grant, `student_location` grant).
+- **Next:** `redeem-pin` (#15) and `set-pin` with the `qr_slug` default (#120) once #128 lands; agree #19 with Celso by Nov 1; the #18 gate test once sign-in, RLS, and the scanner are merged.
+- **Blockers:** Celso's #127 and #128 (sign-in, RLS, PIN helpers).
 
 ### 2026-10-25
 - **Did:** Core table migrations (#7) and repeat days, visibility, campus timezone, `club_nights` (#101, pulled forward so the seed has a club night), pushed to grove-dev and checked against the contract; RLS on every table, no policies yet. CI workflow (#12) passes on GitHub and is a required check on `main`. `seed.sql` (#8) with UCR, the eight canvas businesses, 15 deals including the Mon–Wed repeat, and one open club night, applied to grove-dev. Merged PR #123; Sprint 1 is done. Found Celso's invite is still pending (it was misread as accepted earlier), so his issues stay unassigned.
