@@ -2,7 +2,7 @@
 
 The project's live memory. Read this first every session. Overwrite it (don't append) whenever the current state changes, so it always describes **now**. History goes in `LOG.md`, not here.
 
-_Last updated: 2026-10-26 by Moses and Adolfo_
+_Last updated: 2026-10-27 by Moses_
 
 ---
 
@@ -24,19 +24,18 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 | Moses | Done: `deal_status()`, typed queries (#16), `redeem` (#14), `claim-club-night` (#103), Realtime (#17), all on grove-dev. Next: `redeem-pin` (#15) and `set-pin` (#120) once #128 lands; agree staff-scan tokens (#19) with Celso by Nov 1; gate test (#18) |
 | Celso | Fix #127 (enable Google in Supabase Auth, #29) and the #128 security holes; then #38, #106, #39 |
 | Edward | Rework #129 onto `mocks/` and the contract; then the scanner, `redeem` call, and Redeemed screen |
-| Adolfo | #126 review fixes done on mocks and main merged; canvas comparison for #69 and #71 still pending. Then repeat days and visibility on the post-deal form (#112), and #73 |
+| Adolfo | #126 merged (#70, #72 done; business writes final in the contract). Canvas check for #69 and #71, then repeat days and visibility on the post-deal form (#112), and #73 |
 | Hikaru | `/map` merged (#125; #86, #87 done). #85 awaits the Mapbox token (#84) and canvas check; then `deals_nearby` (#88) after `deal_status()` |
 
 ## Open PRs (merge in this order)
 
-Moses re-checks each PR when its author pushes fixes. It merges when CI passes and every item in its review is done.
+Moses re-checks each PR when its author pushes fixes. It merges when CI passes and every item in its review is done. #126 (Adolfo, dashboard foundation) merged on Oct 27.
 
 | Order | PR | Waiting on |
 |---|---|---|
-| 1 | #127 Celso, Google sign-in | Google enabled in Supabase Auth and sign-in working on its preview; .edu check moved into `handle_new_user()`; PWA paths public; callback moved; Closes #30 only |
-| 2 | #128 Celso, RLS and PIN helpers | Security fixes (PIN functions service-role only, `profiles` updates `full_name` only, open club nights only, `owner_id` hidden, attempt-based redeem limit) plus a test script; also: migrations renamed after the newest on main, students read deals they redeemed, `lat`/`lng` granted, `redemptions.student_location` hidden. Moses re-runs the security checks on a local database before merging |
-| 3 | #126 Adolfo, dashboard foundation | Merge main after #127 (conflicts block CI); trim contract and docs; tests in vitest; canvas check |
-| 4 | #129 Edward, student shell and feed | Rebuild on `mocks/` and the contract; no typed-code redeem; remove files outside his area; design tokens; docs |
+| 1 | #127 Celso, Google sign-in | Merge main in first (conflicts); then Google enabled in Supabase Auth and sign-in working on its preview; .edu check moved into `handle_new_user()`; PWA paths public; callback moved; Closes #30 only |
+| 2 | #128 Celso, RLS and PIN helpers | Merge main in first (conflicts); RLS must let business members insert and update their own deals and business; security fixes (PIN functions service-role only, `profiles` updates `full_name` only, open club nights only, `owner_id` hidden, attempt-based redeem limit) plus a test script; also: migrations renamed after the newest on main, students read deals they redeemed, `lat`/`lng` granted, `redemptions.student_location` hidden. Moses re-runs the security checks on a local database before merging |
+| 3 | #129 Edward, student shell and feed | Rebuild on `mocks/` and the contract; no typed-code redeem; remove files outside his area; design tokens; docs |
 
 ## Blockers
 
