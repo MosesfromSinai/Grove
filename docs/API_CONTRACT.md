@@ -2,7 +2,7 @@
 
 The shapes everyone builds against. Frontend work uses `mocks/` that match this file exactly, then swaps in real queries once the tables and functions exist.
 
-**Owner:** Moses. **Status:** Existing table/query contract is final (2026-10-24), including repeat days, link-only deals, and club nights. The Sprint 1 business-write additions below are proposals pending Moses's review. Later changes still follow the rule below.
+**Owner:** Moses. **Status:** Final (2026-10-24), including repeat days, link-only deals, and club nights; the business writes are final as of 2026-10-27. Later changes still follow the rule below.
 **Rule:** any change here goes in a pull request reviewed by the people it affects, plus a line in `docs/LOG.md`.
 **Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together. Screens import from `lib/supabase` (`index.ts`), which serves `mocks/` or the real wrappers in `queries.ts` depending on `NEXT_PUBLIC_DATA_SOURCE`; a compile-time check keeps their signatures identical.
 
@@ -284,7 +284,7 @@ type ClubNight = OpenClubNight & {
 
 ---
 
-## Business writes (Sprint 1 mock adapter; proposed for Moses review)
+## Business writes (final; mock-backed until #73)
 
 | Function | Input | Success returns | Errors |
 |---|---|---|---|
