@@ -2,7 +2,7 @@
 
 The project's live memory. Read this first every session. Overwrite it (don't append) whenever the current state changes, so it always describes **now**. History goes in `LOG.md`, not here.
 
-_Last updated: 2026-10-25 by Moses_
+_Last updated: 2026-10-27 by Moses_
 
 ---
 
@@ -10,7 +10,7 @@ _Last updated: 2026-10-25 by Moses_
 
 **Phase 2: Core loop** (week 2 of 4, Oct 26–Nov 1): scan-to-redeem end to end, repeat days, visibility, club nights, live-now check.
 **Next gate:** First test redemption (one sticker, two phones); a link-only deal stays out of the feed and map.
-**Carried over from Week 1:** the sign-in gate (students log in with a school Google account) isn't passed yet; it blocks real redemptions.
+**Week 1 gate passed (2026-10-27):** a UCR Google sign-in on production creates a verified student profile.
 **Production:** https://grove-jade.vercel.app (every PR also gets a preview link).
 
 Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove is, MVP scope, Week plan.
@@ -21,21 +21,31 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 
 | Person | Focus |
 |---|---|
-| Moses | Sprint 1 done: Supabase (#6), Vercel (#13), tables (#7, #101), CI (#12), seed data (#8). Next: `deal_status()` (#102), then typed queries (#16), then `redeem` (#14). Backup for Google OAuth (#29) |
-| Celso | Not started (GitHub invite still pending). Week 1: Google OAuth (#29), sign-in, .edu check, profile trigger. Week 2: RLS on every table (#35), PIN-hash and rate-limit helpers |
-| Edward | Finish the app shell and deal feed on mocks, then the scanner, `redeem` call, and Redeemed screen |
-| Adolfo | Dashboard layout in progress (`adolfo/dashboard-foundation`), then onboarding, the post-deal form with repeat days and visibility, and the sticker |
-| Hikaru | Finish the map on mocks, then `deals_nearby` (tables and seed are on grove-dev) |
+| Moses | Done: sign-in gate, RLS, `redeem`, `redeem-pin`, `set-pin`, `claim-club-night`, Realtime, typed queries, all on grove-dev. Next: staff-scan design (#19) with Celso by Nov 1, the #18 gate test, then `issue-code` and `staff-redeem` (#20) |
+| Celso | #127 and #128 merged; sign-in gate passed. Next: #38, #106, #39 (staff-scan review by Nov 1) |
+| Edward | Rework #129 onto `mocks/` and the contract; then the scanner, `redeem` call, and Redeemed screen |
+| Adolfo | #126 merged (#70, #72 done; business writes final in the contract). Canvas check for #69 and #71, then repeat days and visibility on the post-deal form (#112), and #73 |
+| Hikaru | `/map` merged (#125; #86, #87 done). #85 awaits the Mapbox token (#84) and canvas check; then `deals_nearby` (#88); `deal_status()` is live |
+
+## Open PRs (merge in this order)
+
+Moses re-checks each PR when its author pushes fixes. It merges when CI passes and every item in its review is done. #126, #127, and #128 are merged.
+
+| Order | PR | Waiting on |
+|---|---|---|
+| 1 | #129 Edward, student shell and feed | Rebuild on `mocks/` and the contract; no typed-code redeem; remove files outside his area; design tokens; docs |
 
 ## Blockers
 
+- **Hikaru (#84–85):** restricted Mapbox token still needs creation and transfer to Moses for Vercel. The preview works without tiles; actual Mapbox rendering, canvas screen 3 comparison, and HTTPS phone location testing are pending. Edward can integrate `/map` into the student shell.
+
 - **Everyone: review your team file.** Moses edited all five on 2026-10-24 (one-time exception, like setup) for the Activity 2 changes: new tasks, interview work, dependencies, and the week plan. Fix anything that's wrong in your own file.
 - **Everyone:** accept the Supabase org invite, then copy the Supabase URL and anon key into your `.env.local` (see README → Getting started). The service-role key stays with Moses.
-- **Celso hasn't accepted his GitHub invite** (pending since Oct 20, write access), so his 22 issues can't be assigned to him and he can't push branches. Moses assigns them once he accepts. **If he isn't active by Oct 26, Moses takes Google OAuth setup (#29)** so the sign-in gate isn't stuck.
-- **Celso:** every table has RLS on and no policies, so the browser (anon and signed-in users) reads nothing until policies land. Includes hiding `businesses.staff_pin` and `club_nights.claimed_by`. The profile trigger can insert into `profiles` as is.
-- **Everyone:** CI ("Lint, typecheck, build") now runs on every PR and must pass to merge. Run `npm run lint && npm run typecheck && npm run build` before pushing.
-- Real tables and seed data are on grove-dev, but keep building on `mocks/` until typed queries (#16) and RLS policies exist.
-- Week 2 order for Moses (others build on mocks meanwhile): #102 first (Oct 26–27; #101 is done), then typed queries #16, then `redeem` / `redeem-pin` / `claim-club-night` / `set-pin`, then Realtime #17. Celso writes the rate-limit and PIN-hash helpers early in Week 2 so Moses's functions call them.
+- **Gate test (#18):** `redeem` and `redeem-pin` are deployed. The one-sticker, two-phone test waits on Edward's scanner and sticker page on real data (#129, #57) and on `NEXT_PUBLIC_DATA_SOURCE=supabase` in Vercel (Moses).
+- **Settings (done):** Vercel Authentication is off for preview deployments, so anyone with a preview link can open it. Supabase Auth on grove-dev is Google-only: Email is disabled, Google is enabled, and redirect URLs cover production, localhost, and `grove-*-mosesfromsinais-projects.vercel.app` previews.
+- **RLS is live on grove-dev (#128).** Screens can switch to real data once `NEXT_PUBLIC_DATA_SOURCE=supabase` is set; until then they use mocks.
+- **Everyone:** CI ("Lint, typecheck, build") runs on every PR and must pass to merge; it now runs `npm test` (vitest) too. Run `npm run lint && npm run typecheck && npm test && npm run build` before pushing.
+- **Everyone:** import data functions from `@/lib/supabase` (not `@/mocks`). It serves mocks until `NEXT_PUBLIC_DATA_SOURCE=supabase` is set in Vercel (Moses), now possible since RLS is live. Same names and types, so nothing else changes.
 
 ## Open decisions
 
@@ -43,9 +53,8 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 |---|---|---|
 | Pricing: per verified visit (~$0.50–1, monthly cap) plus a flat fee for club nights; first deal free for pilots. Still to be validated | Hikaru (with everyone's interviews) | Before the pitch deck |
 | MVP demo date (week dates assume a demo around Nov 16–20; re-date the plan once it's set) | Team | Next sync |
-| PIN lockout limit (tries before lockout) | Celso | Week 2 |
 | Final name ("Grove" may be trademarked) | Team | Before slides are final |
-| Staff-scan token design (signed token vs. table) | Moses (Celso reviews) | Nov 1 |
+| Staff-scan token design: Moses recommends a `redemption_codes` table (write-up on #19) | Celso reviews | Nov 1 |
 | Which campus channels to pursue (clubs, fraternities, student ambassadors); none confirmed | Team | Before club night outreach |
 
 ## Business status
