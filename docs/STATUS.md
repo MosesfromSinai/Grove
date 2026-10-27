@@ -22,7 +22,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 | Person | Focus |
 |---|---|
 | Moses | Done: `deal_status()`, typed queries (#16), `redeem` (#14), `claim-club-night` (#103), Realtime (#17), all on grove-dev. Next: `redeem-pin` (#15) and `set-pin` (#120) once #128 lands; agree staff-scan tokens (#19) with Celso by Nov 1; gate test (#18) |
-| Celso | #127 merged (Google sign-in confirmed on its preview). #128 review fixes pushed. Next: #38, #106, #39 |
+| Celso | #127 and #128 merged (sign-in confirmed on the preview; security checks verified on a fresh local database). Next: #38, #106, #39 |
 | Edward | Rework #129 onto `mocks/` and the contract; then the scanner, `redeem` call, and Redeemed screen |
 | Adolfo | #126 merged (#70, #72 done; business writes final in the contract). Canvas check for #69 and #71, then repeat days and visibility on the post-deal form (#112), and #73 |
 | Hikaru | `/map` merged (#125; #86, #87 done). #85 awaits the Mapbox token (#84) and canvas check; then `deals_nearby` (#88) after `deal_status()` |
