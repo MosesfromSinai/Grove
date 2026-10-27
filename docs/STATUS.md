@@ -4,14 +4,13 @@ The project's live memory. Read this first every session. Overwrite it (don't ap
 
 _Last updated: 2026-10-26 by Adolfo_
 
-> Branch sync note: fetched `origin/main` at `d999191`; it has 16 commits not integrated into this checkout. Its project status is now Phase 2, with tables/seed/CI delivered and real browser access still blocked by missing RLS policies/typed queries. The project-wide snapshot below predates those updates; use [upstream STATUS](https://github.com/MosesfromSinai/Grove/blob/main/docs/STATUS.md) for current teammate status until the branch is synchronized. The local Adolfo entry is current. No upstream merge has been performed.
-
 ---
 
 ## Current phase
 
-**Phase 1: Foundation** (week 1 of 4, Oct 19–25): sign-in, foundation, database.
-**Next gate:** Students can log in with a school Google account.
+**Phase 2: Core loop** (week 2 of 4, Oct 26–Nov 1): scan-to-redeem end to end, repeat days, visibility, club nights, live-now check.
+**Next gate:** First test redemption (one sticker, two phones); a link-only deal stays out of the feed and map.
+**Carried over from Week 1:** the sign-in gate (students log in with a school Google account) isn't passed yet; it blocks real redemptions.
 **Production:** https://grove-jade.vercel.app (every PR also gets a preview link).
 
 Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove is, MVP scope, Week plan.
@@ -22,22 +21,34 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 
 | Person | Focus |
 |---|---|
-| Moses | Supabase (#6) and Vercel (#13) are done. Next: migrations (#7) by Oct 25 so Celso's sign-in isn't blocked, then CI (#12) and seed data (#8). Invite everyone to the Supabase org |
-| Celso | Google sign-in, .edu check, profile creation, threat model (3 new rows to review) |
-| Edward | App shell, deal feed and deal page on mocks (theme done; see `/theme`) |
-| Adolfo | Sprint 1 dashboard stages #69/#70/#71/#72 implemented and reviewed on `adolfo/dashboard-foundation`. Onboarding, posting, and deal management use mocks; lint, typecheck, build, 21 regression groups, three responsive/behavioral suites, and accessibility scans passed. Upstream sync/shared API review pending before integration |
-| Hikaru | Map with mock pins, filter chips, location permission handling |
+| Moses | Done: `deal_status()`, typed queries (#16), `redeem` (#14), `claim-club-night` (#103), Realtime (#17), all on grove-dev. Next: `redeem-pin` (#15) and `set-pin` (#120) once #128 lands; agree staff-scan tokens (#19) with Celso by Nov 1; gate test (#18) |
+| Celso | Fix #127 (enable Google in Supabase Auth, #29) and the #128 security holes; then #38, #106, #39 |
+| Edward | Rework #129 onto `mocks/` and the contract; then the scanner, `redeem` call, and Redeemed screen |
+| Adolfo | #126 independent review fixes prepared on mocks; merge main after #127 lands, then validate integration. Canvas comparison remains unverified; #73/#112 follow |
+| Hikaru | `/map` merged (#125; #86, #87 done). #85 awaits the Mapbox token (#84) and canvas check; then `deals_nearby` (#88) after `deal_status()` |
+
+## Open PRs (merge in this order)
+
+Moses re-checks each PR when its author pushes fixes. It merges when CI passes and every item in its review is done.
+
+| Order | PR | Waiting on |
+|---|---|---|
+| 1 | #127 Celso, Google sign-in | Google enabled in Supabase Auth and sign-in working on its preview; .edu check moved into `handle_new_user()`; PWA paths public; callback moved; Closes #30 only |
+| 2 | #128 Celso, RLS and PIN helpers | Security fixes (PIN functions service-role only, `profiles` updates `full_name` only, open club nights only, `owner_id` hidden, attempt-based redeem limit) plus a test script; also: migrations renamed after the newest on main, students read deals they redeemed, `lat`/`lng` granted, `redemptions.student_location` hidden. Moses re-runs the security checks on a local database before merging |
+| 3 | #126 Adolfo, dashboard foundation | Merge main after #127 (conflicts block CI); trim contract and docs; tests in vitest; canvas check |
+| 4 | #129 Edward, student shell and feed | Rebuild on `mocks/` and the contract; no typed-code redeem; remove files outside his area; design tokens; docs |
 
 ## Blockers
 
-- Shared API review (Moses): the #70/#71/#72 business adapter, mock writes, validation, types, contract additions, and test script are proposals pending review. Real provisioning/auth/RLS/geocoding/Storage remains #73; the current dashboard is a sample-only preview.
-- Branch sync: reconcile the newer upstream guidance, CI, STATUS, and LOG before integration. Preserve the feature branch's Sprint 1 work. Synchronization requires the existing merge approval.
+- **Hikaru (#84–85):** restricted Mapbox token still needs creation and transfer to Moses for Vercel. The preview works without tiles; actual Mapbox rendering, canvas screen 3 comparison, and HTTPS phone location testing are pending. Edward can integrate `/map` into the student shell.
 
 - **Everyone: review your team file.** Moses edited all five on 2026-10-24 (one-time exception, like setup) for the Activity 2 changes: new tasks, interview work, dependencies, and the week plan. Fix anything that's wrong in your own file.
 - **Everyone:** accept the Supabase org invite, then copy the Supabase URL and anon key into your `.env.local` (see README → Getting started). The service-role key stays with Moses.
-- Celso still needs to accept his GitHub invite; his issues stay unassigned until he does. **If he isn't active by Oct 26, Moses takes Google OAuth setup (#29)** so the Phase 1 gate isn't stuck.
-- Week 1 ends Oct 25 and most Week 1 tasks are open. Build on `mocks/`; don't wait on real tables.
-- Week 2 order for Moses (others build on mocks meanwhile): #101 and #102 first (Oct 26–27), then typed queries #16, then `redeem` / `redeem-pin` / `claim-club-night` / `set-pin`, then Realtime #17. Celso writes the rate-limit and PIN-hash helpers early in Week 2 so Moses's functions call them.
+- **Sign-in gate:** waits on #127. Celso enables Google in Supabase Auth (#29); nothing that requires sign-in merges until it works on the preview.
+- **RLS:** every table on grove-dev still has RLS on and no policies, so the browser reads nothing until #128 merges with its security fixes. Until then, real wrappers return nothing for signed-in users.
+- **Everyone:** CI ("Lint, typecheck, build") runs on every PR and must pass to merge; it now runs `npm test` (vitest) too. Run `npm run lint && npm run typecheck && npm test && npm run build` before pushing.
+- **Everyone:** import data functions from `@/lib/supabase` (not `@/mocks`). It serves mocks until `NEXT_PUBLIC_DATA_SOURCE=supabase`, which flips once #128 lands. Same names and types, so nothing else changes.
+- **Gate test (#18):** `redeem` is deployed and tested on grove-dev. The one-sticker, two-phone test waits on sign-in (#127, Google enabled), RLS (#128), and the scanner on real data (#129). `redeem-pin` and `set-pin` wait on #128's PIN helpers.
 
 ## Open decisions
 

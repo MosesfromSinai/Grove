@@ -1,34 +1,19 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
-import { createRequire } from "node:module";
-import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
-import { after, test } from "node:test";
-import { fileURLToPath } from "node:url";
+import { beforeEach, test, vi } from "vitest";
+import { campusClock, openNow } from "../lib/supabase/deal-status";
+import { validateCreateDealInput, campusDateTimeToISO, campusDateTimeInput } from "../lib/supabase/deal-input";
+import { validateBusinessInput } from "../lib/supabase/business-input";
 
-const root = fileURLToPath(new URL("../", import.meta.url));
-const output = mkdtempSync(join(tmpdir(), "grove-post-deal-"));
-after(() => {
-  if (dirname(resolve(output)) !== resolve(tmpdir())) throw new Error("Unexpected test output path");
-  rmSync(output, { recursive: true, force: true });
+let createDeal, endDeal, cancelDeal, getMyBusiness, getBusinessLocationOptions, saveBusiness, setPin;
+let getMyDeals, getDeal, getDealsNearby, redeemPin, fixtures;
+
+// Each case gets fresh fixtures and PIN metadata, independent of test order.
+beforeEach(async () => {
+  vi.resetModules();
+  ({ createDeal, endDeal, cancelDeal, getMyBusiness, getBusinessLocationOptions, saveBusiness, setPin } = await import("../lib/supabase/business"));
+  ({ getMyDeals, getDeal, getDealsNearby, redeemPin } = await import("../mocks/index"));
+  fixtures = await import("../mocks/data");
 });
-// Compile the real wrappers and fixtures into an isolated temp directory. No
-// extra test framework, runtime dependency, or generated repository files.
-execFileSync(process.execPath, [
-  join(root, "node_modules/typescript/lib/tsc.js"),
-  "mocks/index.ts", "lib/supabase/business.ts", "lib/supabase/deal-input.ts",
-  "--outDir", output, "--rootDir", root,
-  "--module", "commonjs", "--moduleResolution", "node", "--target", "ES2020",
-  "--skipLibCheck", "--strict", "--types", "node", "--esModuleInterop",
-], { cwd: root, stdio: "pipe" });
-const loadCompiled = createRequire(import.meta.url);
-const { createDeal, endDeal, cancelDeal, getMyBusiness, getBusinessLocationOptions, saveBusiness, setPin } = loadCompiled(join(output, "lib/supabase/business.js"));
-const { getMyDeals, getDeal, getDealsNearby, redeemPin } = loadCompiled(join(output, "mocks/index.js"));
-const fixtures = loadCompiled(join(output, "mocks/data.js"));
-const { campusClock } = loadCompiled(join(output, "lib/supabase/deal-status.js"));
-const { validateCreateDealInput, campusDateTimeToISO, campusDateTimeInput } = loadCompiled(join(output, "lib/supabase/deal-input.js"));
-const { validateBusinessInput, businessOpenNow } = loadCompiled(join(output, "lib/supabase/business-input.js"));
 
 const now = Date.now();
 const input = (overrides = {}) => ({
@@ -266,12 +251,12 @@ test("business validation rejects invalid coordinates, hours, logos, and eligibi
 
 test("weekly hours support closed days and overnight windows across the week boundary", () => {
   const overnight = { mon: [["22:00", "02:00"]] };
-  assert.equal(businessOpenNow(overnight, new Date("2026-10-27T06:00:00Z")), true);
-  assert.equal(businessOpenNow(overnight, new Date("2026-10-27T08:00:00Z")), true);
-  assert.equal(businessOpenNow(overnight, new Date("2026-10-27T09:00:00Z")), false);
-  assert.equal(businessOpenNow({ sun: [["22:00", "02:00"]] }, new Date("2026-10-26T08:00:00Z")), true);
-  assert.equal(businessOpenNow({}, new Date("2026-10-26T08:00:00Z")), false);
-  assert.equal(businessOpenNow({ mon: [["11:00", "14:00"], ["17:00", "21:00"]] }, new Date("2026-10-26T20:00:00Z")), true);
+  assert.equal(openNow(overnight, new Date("2026-10-27T06:00:00Z")), true);
+  assert.equal(openNow(overnight, new Date("2026-10-27T08:00:00Z")), true);
+  assert.equal(openNow(overnight, new Date("2026-10-27T09:00:00Z")), false);
+  assert.equal(openNow({ sun: [["22:00", "02:00"]] }, new Date("2026-10-26T08:00:00Z")), true);
+  assert.equal(openNow({}, new Date("2026-10-26T08:00:00Z")), false);
+  assert.equal(openNow({ mon: [["11:00", "14:00"], ["17:00", "21:00"]] }, new Date("2026-10-26T20:00:00Z")), true);
 });
 
 test("business saves propagate name, location, hours, logo and truck setting without changing protected fields", async () => {

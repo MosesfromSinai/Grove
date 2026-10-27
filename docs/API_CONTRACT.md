@@ -6,7 +6,7 @@ The shapes everyone builds against. Frontend work uses `mocks/` that match this 
 **Rule:** any change here goes in a pull request reviewed by the people it affects, plus a line in `docs/LOG.md`.
 **Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together.
 
-_Last updated: 2026-10-26 (Adolfo: Sprint 1 business-write wrapper proposals for Moses review)_
+_Last updated: 2026-10-26_
 
 ---
 
@@ -280,80 +280,30 @@ type ClubNight = OpenClubNight & {
 
 ---
 
-## Business writes (Sprint 1 mock adapter)
+## Business writes (Sprint 1 mock adapter; proposed for Moses review)
 
-`lib/supabase/business.ts` exports the mock-backed business profile, deal, and PIN operations below; replace the adapter with authenticated Supabase access in #73. Moses owns this boundary, the types, and mocks; the additions for #70/#71/#72 remain proposals for his review. No table shape or Edge Function signature changes.
-
-`createDeal(input: CreateDealInput): Promise<CreateDealResult>` creates one **public, one-time** deal for the mock owner's business. Repeat days and visibility controls remain #112. Inputs cannot set id, created time, computed status, visibility, or redemption count.
+| Function | Input | Success returns | Errors |
+|---|---|---|---|
+| `createDeal` | `CreateDealInput` | `{ ok: true, deal: MyDeal }` | `NOT_OWNER`, `INVALID_DEAL` (`fields: CreateDealErrors`) |
+| `endDeal` | `{ business_id, deal_id }` | `{ ok: true, deal: MyDeal }` | `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_LIVE` |
+| `cancelDeal` | `{ business_id, deal_id }` | `{ ok: true, deal_id: string }` | `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_SCHEDULED`, `DEAL_HAS_REDEMPTIONS`, `DEAL_IN_USE` |
+| `getMyBusiness` | none | `BusinessProfile` | none |
+| `getBusinessLocationOptions` (mock helper) | none | `Pick<BusinessPublic, "address" \| "lat" \| "lng">[]` | none |
+| `saveBusiness` | `SaveBusinessInput` | `{ ok: true, profile: BusinessProfile }` | `NOT_OWNER`, `INVALID_BUSINESS` (`fields: BusinessInputErrors`) |
 
 ```ts
 type CreateDealInput = Pick<Deal,
   "business_id" | "title" | "description" | "photo_url" | "starts_at" | "students_only"
-> & {
-  ends_at: string;
-  discount_type: DiscountType;
-  discount_value: number | null;
-};
+> & { ends_at: string; discount_type: DiscountType; discount_value: number | null };
 type CreateDealErrors = Partial<Record<keyof CreateDealInput, string>>;
-type CreateDealResult =
-  | { ok: true; deal: MyDeal }
-  | { ok: false; error: "NOT_OWNER" }
-  | { ok: false; error: "INVALID_DEAL"; fields: CreateDealErrors };
-```
-
-- Trimmed title and description are required. Numeric discounts must be finite, positive, and use at most two decimal places; percent off is at most 100. Free item and BOGO require a null value.
-- `starts_at` and `ends_at` must be ISO timestamps with an explicit `Z` or numeric offset and valid calendar dates; end must be after start and in the future. The form converts UC Riverside wall time (`America/Los_Angeles`) to ISO independently of the device timezone, rejecting nonexistent/ambiguous daylight-saving times. Past starts are allowed for posting a currently live deal.
-- Optional photos are raster JPG/PNG/WebP, up to 5 MB (5 × 1024 × 1024 decoded bytes). **Mock-only:** `photo_url` holds the uploaded image's data URL in memory, not a Supabase Storage URL; the wrapper checks base64 structure and decoded size, and the form checks that the photo decodes before saving. #73 must upload to Storage and save its URL. No photo is written into the repository.
-- Success returns a UUID, computed `status`, and `redemption_count: 0`. `getMyDeals` and `getDeal` read the newly inserted deal; no independent UI store is used. State resets on a full page reload, as with the existing mocks.
-- Failures never insert a deal. `NOT_OWNER` and `INVALID_DEAL` have friendly messages and field feedback in the form. `INVALID_DEAL` is a write-validation result, not a new Edge Function error code.
-
-### Deal management (#72, mock adapter)
-
-The same business adapter also exports `getMyDeals`, `endDeal`, and `cancelDeal`. New write signatures (proposed for Moses review):
-
-```ts
-type DealMutationInput = { business_id: string; deal_id: string };
-type DealMutationError = "NOT_OWNER" | "DEAL_NOT_FOUND" | "DEAL_NOT_LIVE"
-  | "DEAL_NOT_SCHEDULED" | "DEAL_HAS_REDEMPTIONS" | "DEAL_IN_USE";
-type EndDealResult = { ok: true; deal: MyDeal } | { ok: false; error: DealMutationError };
-type CancelDealResult = { ok: true; deal_id: string } | { ok: false; error: DealMutationError };
-// endDeal(input: DealMutationInput): Promise<EndDealResult>
-// cancelDeal(input: DealMutationInput): Promise<CancelDealResult>
-```
-
-- Both recheck ownership, business/deal association, and current status when called. Unknown/foreign ids do not mutate data. Failures use the wrapper-specific codes above; the Edge Function error union is unchanged.
-- `endDeal` sets `ends_at` to now, preserving the row, all redemptions, and its count. It accepts a live deal or an already-started repeating deal between daily windows. Future deals and ended deals are rejected; `ends_at > starts_at` is preserved.
-- `cancelDeal` deletes only a currently scheduled deal with no redemptions. It checks both existing mock historical totals and actual redemption rows. Club-night references are protected (`DEAL_IN_USE`); no cascade or club-night editing is added.
-- The UI labels `live` as Active and `ended` as Expired. No stored status or new table column is introduced. Both visibilities appear, with a Link only badge. Counts retain the existing mock history totals where provided, otherwise count fixture redemption rows.
-- The list reloads on activation/focus and checks statuses every 15 seconds while visible. Writes refresh it and reject stale actions. End/cancel changes are visible to the existing deal/feed/redemption queries and reset on full reload.
-
----
-
-## Business onboarding (#70, mock adapter)
-
-```ts
 type BusinessProfile = { business: BusinessPublic; pin_ready: boolean };
-type BusinessLocationOption = Pick<BusinessPublic, "address" | "lat" | "lng">;
 type SaveBusinessInput = Pick<BusinessPublic,
   "name" | "address" | "lat" | "lng" | "hours" | "logo_url" | "is_truck"
 > & { business_id: string };
 type BusinessInputErrors = Partial<Record<keyof SaveBusinessInput, string>>;
-type SaveBusinessResult =
-  | { ok: true; profile: BusinessProfile }
-  | { ok: false; error: "NOT_OWNER" }
-  | { ok: false; error: "INVALID_BUSINESS"; fields: BusinessInputErrors };
-// getMyBusiness(): Promise<BusinessProfile>
-// getBusinessLocationOptions(): Promise<BusinessLocationOption[]>  (mock helper)
-// saveBusiness(input: SaveBusinessInput): Promise<SaveBusinessResult>
 ```
 
-- The mock owner already has Orange Peel Tacos and its owner membership. `saveBusiness` configures that existing demo record (`biz-opt`), preserving its identity, deals, membership, permanent `qr_slug`, redemption mode, and PIN. It does not pretend to provision a real account or database business. Real creation/member linking, address lookup, RLS and Storage wiring remain #73.
-- `getMyBusiness` exposes public fields plus a `pin_ready` flag, never `staff_pin`, `owner_id`, `qr_slug`, or the PIN itself. Hours are copied so reading/editing a response cannot mutate fixtures. `pin_ready` is mock-session metadata: initially false, then true after a successful `setPin()`; it is not a new database column.
-- Name/address are trimmed and required. Coordinates must be finite and in geographic ranges. The sample-address helper supplies existing fixture addresses and coordinates; the form applies them together. Editing the address clears coordinates; arbitrary addresses require explicit latitude/longitude. No guessed or live geocoding is performed.
-- Hours retain the `Hours` shape. Empty/missing days are closed; periods require distinct, valid `HH:MM` times. An earlier closing time runs past midnight. The form edits one period per day, preserves any additional existing periods, and allows all days closed. The wrapper accepts multiple periods and computes `open_now` at save time, including overnight periods from the previous day.
-- Optional raster logos use the same validated in-memory data URL/5 MB limit as deal photos. The form verifies decoding. No image is written into the repository or uploaded to Storage in this stage.
-- Save and first-PIN generation are separate operations: after profile save, the form calls the existing `setPin()` only if `pin_ready` is false. A PIN failure keeps the saved profile and allows retrying only PIN generation. Editing an initialized profile does not reset the PIN. The returned code is shown locally, cleared on acknowledgement/navigation, and never included in profile reads or persisted in browser storage.
-- Business context updates the sidebar/overview identity and the deal form's business name/type/id. This is a sample business context, not real auth. All changes reset on full reload. `INVALID_BUSINESS` is a wrapper validation result, not a new Edge Function error code.
+Writes return `Promise` results; errors are `{ ok: false, error, fields? }`. Read helpers return `Promise` values. `setPin` retains its Edge Function signature below.
 
 ---
 

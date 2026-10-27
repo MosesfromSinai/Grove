@@ -2,9 +2,9 @@
 // Same names, inputs, and return types, so swapping to the real ones is an import change.
 // State lives in memory and resets on page reload.
 
-import { campusClock, dealStatus, liveUntil } from "../lib/supabase/deal-status";
+import { campusClock, dealStatus, liveUntil, openNow } from "../lib/supabase/deal-status";
 import { validateCreateDealInput } from "../lib/supabase/deal-input";
-import { businessOpenNow, copyHours, validateBusinessInput } from "../lib/supabase/business-input";
+import { copyHours, validateBusinessInput } from "../lib/supabase/business-input";
 import type {
   AddStaffResult,
   BusinessPublic,
@@ -282,7 +282,7 @@ export async function saveBusiness(input: SaveBusinessInput): Promise<SaveBusine
   Object.assign(b, {
     name: value.name, address: value.address, lat: value.lat, lng: value.lng,
     hours: value.hours, logo_url: value.logo_url, is_truck: value.is_truck,
-    open_now: businessOpenNow(value.hours),
+    open_now: openNow(value.hours),
   });
   return delay({ ok: true, profile: toBusinessProfile(b) });
 }

@@ -1,4 +1,3 @@
-import { campusClock } from "./deal-status";
 import { validMockImage } from "./image-input";
 import type { BusinessInputErrors, Hours, SaveBusinessInput, Weekday } from "./types";
 
@@ -10,15 +9,6 @@ export const BUSINESS_DAYS: { key: Weekday; label: string }[] = [
 
 export function copyHours(hours: Hours): Hours {
   return Object.fromEntries(Object.entries(hours).map(([day, periods]) => [day, periods.map(([open, close]) => [open, close])])) as Hours;
-}
-
-export function businessOpenNow(hours: Hours, at = new Date()): boolean {
-  const clock = campusClock(at);
-  const today = BUSINESS_DAYS.findIndex(day => day.key === clock.weekday);
-  const previous = BUSINESS_DAYS[(today + 6) % 7].key;
-  return (hours[clock.weekday] ?? []).some(([open, close]) => open < close
-    ? open <= clock.time && clock.time < close : open <= clock.time)
-    || (hours[previous] ?? []).some(([open, close]) => close < open && clock.time < close);
 }
 
 export function validateBusinessInput(input: SaveBusinessInput):
