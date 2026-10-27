@@ -25,7 +25,7 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
-- **2026-10-27:** **Decision** (affects Adolfo, Celso): Adolfo's business writes (`createDeal`, `endDeal`, `cancelDeal`, `getMyBusiness`, `saveBusiness`) are final in the contract, mock-backed until #73. Celso's RLS must let business members insert and update their own deals and business. Merged #126 (main merged in, `getMyDeals` and `setPin` routed through the data switch); #69 and #71 stay open until the canvas check.
+- **2026-10-27:** **Decision** (affects Adolfo, Celso): Adolfo's business writes (`createDeal`, `endDeal`, `cancelDeal`, `getMyBusiness`, `saveBusiness`) are final in the contract, mock-backed until #73. Business updates stay owner-only; business members (owner and staff) insert and update deals. Merged #126 (main merged in, `getMyDeals` and `setPin` routed through the data switch); #69 and #71 stay open until the canvas check.
 - **2026-10-26:** **Decision** (affects everyone): screens import data functions from `@/lib/supabase`. It serves `mocks/` by default and the real Supabase wrappers when `NEXT_PUBLIC_DATA_SOURCE=supabase` (after Celso's RLS lands); a compile-time check keeps both signatures identical (#131).
 - **2026-10-26:** **Decision** (affects Hikaru): `businesses` has generated `lat`/`lng` columns, and `deals_nearby(lat, lng, radius_m, open_now, has_deals)` returning `DealCard` rows is in the contract for #88 (#131).
 - **2026-10-26:** **Decision** (affects Adolfo): new `subscribeToRedemptions({ businessId }, onRedemption)` for the live visit feed (#75), on mocks and real data; reuse `openNow()` from `lib/supabase/deal-status.ts` (#131, #135).
@@ -80,8 +80,8 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-26:** Profiles trigger on `auth.users`: creates profiles row on first sign-in, sets role (business if email is in business_members, else student), links pending staff invites. Sprint 1 complete. Closes #32.
 - **2026-10-26:** RLS policies on all tables: `is_business_member`/`is_business_owner` helpers, column-level REVOKE for `staff_pin` and `claimed_by`, all row-level policies. bcrypt PIN helpers (`hash_pin`, `verify_pin`, `is_pin_rate_limited`, `record_pin_attempt`, `is_redeem_rate_limited`) + TS wrappers in `_shared/pin.ts`. Threat model updated. Closes #34, #35, #36, #37, #105.
 - **2026-10-26:** **Decision** (affects Moses): PIN lockout is 5 failures in 15 minutes. Call `is_pin_rate_limited` before attempting, `record_pin_attempt` after. Use `_shared/pin.ts` wrappers in `redeem-pin` and `set-pin`.
-- **2026-10-26:** **Decision** (affects Moses): .edu check in `/auth/callback` needs a public-read RLS policy on `campuses` (anon can SELECT); that policy is now in #35 migration. Callback on PR #127 works once both PRs merge.
-- **2026-10-26:** Google OAuth setup: Supabase clients, proxy.ts session refresh, /auth/callback route, sign-in page, root routing. Closes #29, #30, #33. (PR #127)
+- **2026-10-26:** Google OAuth setup: `@supabase/ssr`, browser + server Supabase clients, `proxy.ts` session refresh, `/auth/callback` route (exchange code → role routing), sign-in page (`/sign-in`), root routing in `app/page.tsx`. Closes #30. (PR #127)
+- **2026-10-26:** **Decision** (affects Moses, Edward, Adolfo): the .edu check runs only in the `handle_new_user()` trigger (#128), never from the browser; `/auth/callback` only reads `profiles.role` to route.
 
 ## Edward
 _Nothing logged yet._

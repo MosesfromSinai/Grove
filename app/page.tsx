@@ -1,9 +1,29 @@
-// Placeholder until sign-in routing (Celso) sends students and businesses to their apps.
-export default function Home() {
-  return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center">
-      <h1 className="text-4xl font-extrabold tracking-tight">Grove</h1>
-      <p>Where food finds its campus.</p>
-    </main>
-  );
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+
+export const instant = false;
+
+// Routes signed-in users to their app based on profile role.
+// Unauthenticated users are redirected to /sign-in by middleware.
+export default async function Home() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/sign-in");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profile?.role === "business") {
+    redirect("/dashboard");
+  }
+
+  redirect("/feed");
 }

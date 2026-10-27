@@ -28,9 +28,9 @@ _Last updated: 2026-10-26_
 
 ### Week 1 — Foundation (Oct 19–25)
 - [ ] Set up Google OAuth in Google Cloud and Supabase Auth (needs the Supabase project, #6; if you aren't active by Oct 26, Moses takes this) (#29)
-- [ ] Sign-in page (canvas screen 1, one button: "Sign in with your school Google account"); business owners use the same Google sign-in with any account (#30)
-- [ ] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` (#31)
-- [ ] Database trigger to create a `profiles` row on first sign-in (#32)
+- [x] Sign-in page (canvas screen 1, one button: "Sign in with your school Google account"); business owners use the same Google sign-in with any account (#30)
+- [ ] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` (runs in `handle_new_user()`, PR #128) (#31)
+- [x] Database trigger to create a `profiles` row on first sign-in (#32)
 - [ ] Onboarding: route to student app or business onboarding (root routing in `app/page.tsx`, Moses reviews) (#33)
 - [x] Review the threat model below; add anything missing (#34)
 
@@ -124,6 +124,16 @@ _Newest at the top. One entry per session._
 - **Did:** Google OAuth setup (#29): installed `@supabase/ssr` + `@supabase/supabase-js`; created Supabase browser + server clients; `proxy.ts` session refresh; `/auth/callback` route; sign-in page; root routing. Closes #29, #30, #33. (PR #127)
 - **Next:** Threat model review, RLS, PIN hash, rate limit.
 - **Blockers:** .edu check needs `campuses` RLS (done this session). Profile trigger (#32) still needs Moses.
+
+### 2026-10-26 (PR #127 review fixes)
+- **Did:** Fixes from Moses's review of #127: removed the .edu check from the callback (it only reads the profile now; the check runs in `handle_new_user()` in #128), moved the callback to `app/(auth)/auth/callback/route.ts` (URL unchanged), made `/manifest.json`, `/sw.js` and `/icons/` public in `proxy.ts`. PR now closes #30 only; unticked #29, #31, #33.
+- **Next:** Enable Google in Supabase Auth (#29), confirm sign-in on this PR's preview, then the #128 review fixes.
+- **Blockers:** none.
+
+### 2026-10-26
+- **Did:** Google OAuth setup (#29): installed `@supabase/ssr` + `@supabase/supabase-js`; created `lib/supabase/client.ts` (browser) and `lib/supabase/server.ts` (SSR); added `proxy.ts` (Next.js 16 session-refresh + unauthenticated redirect); created `/auth/callback` route handler (exchanges code, runs .edu check, routes by role); built the sign-in page (`/sign-in`, canvas screen 1) with Google OAuth button; updated `app/page.tsx` to route by role. Also covers #30 (sign-in page) and #33 (onboarding routing). .edu check (#31) is scaffolded but needs Moses or me to add a public-read RLS policy on `campuses`. Profile trigger (#32) is Moses's migration.
+- **Next:** #32 (ping Moses for the profiles trigger migration), then #34 (threat model review), then week 2: #35 (RLS on every table), #36 (PIN hash), #37 (rate limits).
+- **Blockers:** .edu check (#31) and callback routing (#33) are fully wired but won't run until the `campuses` and `profiles` RLS policies exist (#35). Sign-in flow itself works once Moses configures Google OAuth in the Supabase Auth dashboard (grove-dev → Authentication → Providers → Google) and sets the redirect URL to `{SITE_URL}/auth/callback`.
 
 ### 2026-10-19
 - **Did:** Assigned role.
