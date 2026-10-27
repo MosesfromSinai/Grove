@@ -1,13 +1,13 @@
-import { BottomNav } from "@/components/bottom-nav";
+import { Suspense } from "react";
+import { BottomNav } from "@/components/student/bottom-nav";
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default function StudentLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
-      <header className="sticky top-0 z-10 border-b border-black/10 bg-inherit px-4 py-3">
-        <span className="font-semibold tracking-tight">Grove</span>
-      </header>
-      <main className="flex-1 px-4 py-4 pb-24">{children}</main>
-      <BottomNav />
+    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-student text-ink">
+      <main className="flex-1 px-4 pt-4 pb-24">{children}</main>
+      <Suspense fallback={null}>
+        <BottomNav />
+      </Suspense>
     </div>
   );
 }
