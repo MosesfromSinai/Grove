@@ -1,4 +1,4 @@
-// Typed wrappers around the PIN SQL functions in 20261026000100_pin_and_rate_limit.sql.
+// Typed wrappers around the PIN SQL functions in 20261026220100_pin_and_rate_limit.sql.
 // Import these in redeem-pin and set-pin instead of calling supabase.rpc() directly.
 //
 // Usage in redeem (flood check):
@@ -17,12 +17,19 @@
 
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// Every wrapper throws on a database error instead of returning a default, so a failed
+// check never reads as "not rate limited" or "PIN ok". The function answers with a server error.
+async function call<T>(supabase: SupabaseClient, fn: string, args: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase.rpc(fn, args);
+  if (error) throw new Error(`${fn} failed: ${error.message}`);
+  return data as T;
+}
+
 export async function isPinRateLimited(
   supabase: SupabaseClient,
   businessId: string,
 ): Promise<boolean> {
-  const { data } = await supabase.rpc("is_pin_rate_limited", { bid: businessId });
-  return data === true;
+  return (await call<boolean>(supabase, "is_pin_rate_limited", { bid: businessId })) !== false;
 }
 
 export async function verifyPin(
@@ -30,8 +37,7 @@ export async function verifyPin(
   businessId: string,
   inputPin: string,
 ): Promise<boolean> {
-  const { data } = await supabase.rpc("verify_pin", { bid: businessId, input_pin: inputPin });
-  return data === true;
+  return (await call<boolean>(supabase, "verify_pin", { bid: businessId, input_pin: inputPin })) === true;
 }
 
 export async function recordPinAttempt(
@@ -39,29 +45,29 @@ export async function recordPinAttempt(
   businessId: string,
   succeeded: boolean,
 ): Promise<void> {
-  await supabase.rpc("record_pin_attempt", { bid: businessId, succeeded });
+  await call<null>(supabase, "record_pin_attempt", { bid: businessId, succeeded });
 }
 
 export async function hashPin(
   supabase: SupabaseClient,
   pin: string,
 ): Promise<string> {
-  const { data, error } = await supabase.rpc("hash_pin", { pin });
-  if (error || !data) throw new Error("hash_pin failed");
-  return data as string;
+  if (!/^\d{4}$/.test(pin)) throw new Error("PIN must be 4 digits");
+  const hashed = await call<string | null>(supabase, "hash_pin", { pin });
+  if (!hashed) throw new Error("hash_pin failed");
+  return hashed;
 }
 
 export async function isRedeemRateLimited(
   supabase: SupabaseClient,
   studentId: string,
 ): Promise<boolean> {
-  const { data } = await supabase.rpc("is_redeem_rate_limited", { sid: studentId });
-  return data === true;
+  return (await call<boolean>(supabase, "is_redeem_rate_limited", { sid: studentId })) !== false;
 }
 
 export async function recordRedeemAttempt(
   supabase: SupabaseClient,
   studentId: string,
 ): Promise<void> {
-  await supabase.rpc("record_redeem_attempt", { sid: studentId });
+  await call<null>(supabase, "record_redeem_attempt", { sid: studentId });
 }

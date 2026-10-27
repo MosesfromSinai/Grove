@@ -6,10 +6,8 @@
 -- .edu check to set verified_student and campus_id, and links any pending
 -- business_members invite.
 --
--- protect_profile_columns fires before every UPDATE on profiles.
--- When the caller is the authenticated role (browser), it resets role, email,
--- verified_student, and campus_id to their stored values so only full_name can change.
--- Service role bypasses this restriction (needed for the .edu re-check and admin ops).
+-- The browser can't change role, email, verified_student, or campus_id: the column grant in
+-- 20261026220000_rls_policies.sql allows updates to full_name only.
 
 create function public.handle_new_user()
 returns trigger
@@ -60,24 +58,3 @@ $$;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
-
--- Prevents authenticated browser sessions from writing protected profile columns.
--- Only full_name is writable by the user; everything else is set server-side.
-create function public.protect_profile_columns()
-returns trigger
-language plpgsql security definer set search_path = ''
-as $$
-begin
-  if current_role = 'authenticated' then
-    new.role             := old.role;
-    new.email            := old.email;
-    new.verified_student := old.verified_student;
-    new.campus_id        := old.campus_id;
-  end if;
-  return new;
-end;
-$$;
-
-create trigger protect_profile_columns
-  before update on public.profiles
-  for each row execute function public.protect_profile_columns();

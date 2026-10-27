@@ -26,12 +26,12 @@ $$;
 
 -- Column-level security: staff_pin and owner_id must never leave the database.
 -- Revoke the default blanket grant and re-grant with only the safe columns.
--- Note: lat and lng are generated columns added in migration #131; that migration
--- must also grant select (lat, lng) on public.businesses to anon, authenticated.
+-- Columns are listed by name, so any new column (like lat and lng, #131) must be added here.
 revoke all on public.businesses from anon, authenticated;
-grant select (id, name, campus_id, location, address, hours, logo_url, qr_slug, redemption_mode, is_truck)
+grant select (id, name, campus_id, location, lat, lng, address, hours, logo_url, qr_slug, redemption_mode, is_truck)
   on public.businesses to anon, authenticated;
--- Only owners can insert or update a business; qr_slug is set on insert by the DB and never edited.
+-- There's no insert or delete policy yet, so RLS blocks both from the browser; these grants
+-- only matter once a policy is added. Updates are owner-only (policy below); qr_slug is never edited.
 grant insert (owner_id, name, campus_id, location, address, hours, logo_url, qr_slug, redemption_mode, is_truck)
   on public.businesses to authenticated;
 grant update (name, campus_id, location, address, hours, logo_url, redemption_mode, is_truck)
@@ -48,6 +48,12 @@ grant update (night_date, start_time, end_time, giveback)
   on public.club_nights to authenticated;
 grant delete on public.club_nights to authenticated;
 
+-- Column-level security: profiles are created by the handle_new_user() trigger, and the browser
+-- may change only full_name. role, email, verified_student, and campus_id are set server-side.
+revoke all on public.profiles from anon, authenticated;
+grant select on public.profiles to authenticated;
+grant update (full_name) on public.profiles to authenticated;
+
 -- Column-level security: student_location must not reach the browser or Realtime dashboard.
 revoke all on public.redemptions from anon, authenticated;
 grant select (id, deal_id, business_id, student_id, redeemed_at, redeemed_on, method)
@@ -59,9 +65,7 @@ create policy "campuses_read"
   to anon, authenticated
   using (true);
 
--- profiles: users read and update their own row.
--- Updates are further restricted to full_name only by the protect_profile_columns trigger
--- (see migration 20261026000200_profiles_trigger.sql).
+-- profiles: users read and update their own row (only full_name, per the column grant above).
 create policy "profiles_read_own"
   on public.profiles for select
   to authenticated

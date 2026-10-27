@@ -54,6 +54,7 @@ create table public.pin_attempts (
 create index pin_attempts_business_time_idx on public.pin_attempts (business_id, attempted_at);
 
 alter table public.pin_attempts enable row level security;
+revoke all on public.pin_attempts from anon, authenticated;
 
 -- Returns true if the business is locked out (>=5 failures in the last 15 minutes).
 create function public.is_pin_rate_limited(bid uuid)
@@ -87,6 +88,7 @@ create table public.redeem_attempts (
 create index redeem_attempts_student_time_idx on public.redeem_attempts (student_id, attempted_at);
 
 alter table public.redeem_attempts enable row level security;
+revoke all on public.redeem_attempts from anon, authenticated;
 
 -- Rate limits general redeem attempts per student (flood protection).
 -- The unique constraint on (student_id, deal_id, redeemed_on) handles the daily limit;

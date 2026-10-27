@@ -27,19 +27,19 @@ _Last updated: 2026-10-26_
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [x] Set up Google OAuth in Google Cloud and Supabase Auth (needs the Supabase project, #6; if you aren't active by Oct 26, Moses takes this) (#29)
-- [x] Sign-in page (canvas screen 1, one button: "Sign in with your school Google account"); business owners use the same Google sign-in with any account (#30)
-- [x] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` (#31)
-- [x] Database trigger to create a `profiles` row on first sign-in (#32)
-- [x] Onboarding: route to student app or business onboarding (root routing in `app/page.tsx`, Moses reviews) (#33)
+- [ ] Set up Google OAuth in Google Cloud and Supabase Auth (needs the Supabase project, #6; if you aren't active by Oct 26, Moses takes this) (#29)
+- [ ] Sign-in page (canvas screen 1, one button: "Sign in with your school Google account"); business owners use the same Google sign-in with any account (#30)
+- [ ] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` (#31)
+- [ ] Database trigger to create a `profiles` row on first sign-in (#32)
+- [ ] Onboarding: route to student app or business onboarding (root routing in `app/page.tsx`, Moses reviews) (#33)
 - [x] Review the threat model below; add anything missing (#34)
 
 ### Week 2 — Lock down data (Oct 26–Nov 1)
-- [x] RLS on every table, e.g. students select only public deals (link-only deals open only through `deal_by_id()`) and only their own redemptions; owners read only their own business's data; nobody inserts redemptions directly (only Edge Functions) (#35)
-- [x] Hash `staff_pin`; never return it to the browser; write the PIN-hash helper early in week 2 so `redeem-pin` and `set-pin` use it (#36)
-- [x] Rate limits on `redeem` and `redeem-pin`; lockout after repeated bad PINs (log the limit as a **Decision**); write the rate-limit helper early in week 2 so Moses's functions call it (#37)
+- [ ] RLS on every table, e.g. students select only public deals (link-only deals open only through `deal_by_id()`) and only their own redemptions; owners read only their own business's data; nobody inserts redemptions directly (only Edge Functions) (#35)
+- [ ] Hash `staff_pin`; never return it to the browser; write the PIN-hash helper early in week 2 so `redeem-pin` and `set-pin` use it (#36)
+- [ ] Rate limits on `redeem` and `redeem-pin`; lockout after repeated bad PINs (log the limit as a **Decision**); write the rate-limit helper early in week 2 so Moses's functions call it (#37)
 - [ ] Server-side sanity checks on location (reject impossible coordinates) (#38)
-- [x] RLS for `club_nights`: businesses manage their own; students read open nights at their campus; only `claim-club-night` writes the claim columns; `claimed_by` never reaches the browser (#105)
+- [ ] RLS for `club_nights`: businesses manage their own; students read open nights at their campus; only `claim-club-night` writes the claim columns; `claimed_by` never reaches the browser (#105)
 - [ ] Rate-limit club night claims (per student) in `claim-club-night` (#106)
 - [ ] Review the staff-scan token design with Moses (short-lived, signed, single use), agreed by Nov 1 (#39)
 
@@ -71,9 +71,9 @@ Update the Status column as defenses are built.
 | Spoofed GPS | Daily limit; cashier check; flag unusual redemption patterns | Planned |
 | Screenshot of the Redeemed screen | Live clock + animation | Planned |
 | Same deal redeemed repeatedly | Unique rule on (student, deal, date) | Planned |
-| PIN guessing | bcrypt hash (`verify_pin`), lockout after 5 failures in 15 min (`is_pin_rate_limited`, `record_pin_attempt`) | Built |
+| PIN guessing | PIN functions are service-role only (browser can't call `verify_pin`); bcrypt hash; lockout after 5 failures in 15 min (`is_pin_rate_limited`, `record_pin_attempt`); wrappers fail closed on DB errors | Built (#128) |
 | Reused or shared staff-scan code | Short-lived, single-use, signed token; staff-only redeem | Planned |
-| Non-student signs up | .edu domain check sets `verified_student`; redeeming still requires the flag | Built (auth callback) |
+| Non-student signs up | .edu domain check in the `handle_new_user()` trigger sets `verified_student`; redeeming still requires the flag | Built (#128) |
 | Reading another business's data | RLS on every table; `is_business_member` helper prevents cross-business reads | Built |
 | `staff_pin` exposed via API | Column-level REVOKE on `businesses` for anon/authenticated; bcrypt if leaked | Built |
 | `club_nights.claimed_by` exposed via API | Column-level REVOKE on `club_nights` for anon/authenticated | Built |
@@ -83,13 +83,17 @@ Update the Status column as defenses are built.
 | Claiming a club night for a club you're not in | Not checked: no club accounts in the MVP. **Accepted risk**; the restaurant sees the club name and visits | Accepted |
 | Session token theft | httpOnly cookies + HTTPS (Supabase defaults); sessions expire | Built (Supabase) |
 | Client-side time manipulation to access an out-of-window deal | Server uses `now()` for all deal status checks; client time is never trusted | Planned (in redeem function) |
-| User manually sets `verified_student` or `campus_id` on their own profile | RLS allows own-row updates; setting wrong values only affects display, not redeem (which re-checks the flag server-side). **Accepted risk** for MVP | Accepted |
+| User manually sets `verified_student`, `role`, or `campus_id` on their own profile | Column grant: the browser can update only `full_name` (the old `protect_profile_columns` trigger never fired inside `security definer`, so it was replaced) | Built (#128) |
+| Someone signs up with another person's email (email/password provider) to get verified or take a staff invite | Google-only sign-in: turn off the Email provider in Supabase Auth | Planned (needs Moses) |
+| Flooding `redeem` with failed attempts | `redeem_attempts` table; 10 attempts per minute per student, counted before success or failure | Built (#128) |
 
 ## Security test log
 Add a row for every test you run.
 
 | Date | Test | Result | Fix |
 |---|---|---|---|
+| 2026-10-26 | `supabase/tests/rls_security.test.sql` (45 checks) on a local database: logged-out PIN guessing, making yourself verified or a business, seeing claimed club nights, reading `owner_id`/`staff_pin`/`claimed_by`/`student_location`, editing `qr_slug`, staff editing the business, browser inserting redemptions, attempt-based redeem limit | All pass; reopening the holes makes 7 checks fail | #128 |
+| 2026-10-26 | Old `protect_profile_columns` trigger, as a signed-in user | **Failed**: user set `verified_student = true`, `role = business` | Replaced with a column grant (#128) |
 
 ---
 
@@ -100,6 +104,11 @@ _Record things only you need to remember. Decisions that affect others go in `do
 
 ## Session log
 _Newest at the top. One entry per session._
+
+### 2026-10-26 (#128 review fixes)
+- **Did:** Merged main; renamed migrations to `20261026220000`–`220200`; replaced the broken `protect_profile_columns` trigger with a column grant (browser updates only `full_name`); added `lat`/`lng` to the businesses select grant; revoked browser rights on `pin_attempts` and `redeem_attempts`; PIN helper wrappers now throw on DB errors; rewrote `rls_security.test.sql` (45 behavioral checks, all pass locally, plus Moses's tests and `npm run test:db`). Unticked #29–#33, #35–#37, #105 per Moses's review.
+- **Next:** Moses's re-review of #127 and #128; #38, #106, #39 (staff-scan tokens, by Nov 1).
+- **Blockers:** #127 preview check needs Vercel access from Moses. Email provider should be turned off in Supabase Auth (Moses).
 
 ### 2026-10-26 (session 3)
 - **Did:** Security hardening fixes from Moses's PR review. Added REVOKE EXECUTE on all PIN/rate-limit functions from public/anon/authenticated, GRANT to service_role only. Created `redeem_attempts` table and rewrote `is_redeem_rate_limited` to count attempts (not successful redemptions); added `record_redeem_attempt`. Added `recordRedeemAttempt` and `isRedeemRateLimited` to `_shared/pin.ts`. Added .edu check to `handle_new_user()` trigger (sets verified_student and campus_id at sign-in). Added `protect_profile_columns` BEFORE UPDATE trigger (resets role/email/verified_student/campus_id when current_role = 'authenticated', so only full_name is browser-writable). Fixed column-level REVOKE on redemptions to exclude student_location. Added `deals_read_redeemed` policy. Added `claimed_club_name is null` to club_nights_read_students. Removed owner_id from businesses SELECT grant, qr_slug from UPDATE grant. Businesses update policy is now owner-only (not member-level). Created `supabase/tests/rls_security_test.sql` with 18 pgTAP assertions.
