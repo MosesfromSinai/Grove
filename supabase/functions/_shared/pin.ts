@@ -1,6 +1,10 @@
 // Typed wrappers around the PIN SQL functions in 20261026000100_pin_and_rate_limit.sql.
 // Import these in redeem-pin and set-pin instead of calling supabase.rpc() directly.
 //
+// Usage in redeem (flood check):
+//   await recordRedeemAttempt(supabase, studentId);
+//   if (await isRedeemRateLimited(supabase, studentId)) return error("RATE_LIMITED");
+//
 // Usage in redeem-pin:
 //   if (await isPinRateLimited(supabase, businessId)) return error("RATE_LIMITED");
 //   const ok = await verifyPin(supabase, businessId, inputPin);
@@ -45,4 +49,19 @@ export async function hashPin(
   const { data, error } = await supabase.rpc("hash_pin", { pin });
   if (error || !data) throw new Error("hash_pin failed");
   return data as string;
+}
+
+export async function isRedeemRateLimited(
+  supabase: SupabaseClient,
+  studentId: string,
+): Promise<boolean> {
+  const { data } = await supabase.rpc("is_redeem_rate_limited", { sid: studentId });
+  return data === true;
+}
+
+export async function recordRedeemAttempt(
+  supabase: SupabaseClient,
+  studentId: string,
+): Promise<void> {
+  await supabase.rpc("record_redeem_attempt", { sid: studentId });
 }

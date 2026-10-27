@@ -24,14 +24,17 @@ as $$
   );
 $$;
 
--- Column-level security: staff_pin must never leave the database.
--- Revoke the default blanket grant and re-grant without staff_pin.
+-- Column-level security: staff_pin and owner_id must never leave the database.
+-- Revoke the default blanket grant and re-grant with only the safe columns.
+-- Note: lat and lng are generated columns added in migration #131; that migration
+-- must also grant select (lat, lng) on public.businesses to anon, authenticated.
 revoke all on public.businesses from anon, authenticated;
-grant select (id, owner_id, name, campus_id, location, address, hours, logo_url, qr_slug, redemption_mode, is_truck)
+grant select (id, name, campus_id, location, address, hours, logo_url, qr_slug, redemption_mode, is_truck)
   on public.businesses to anon, authenticated;
+-- Only owners can insert or update a business; qr_slug is set on insert by the DB and never edited.
 grant insert (owner_id, name, campus_id, location, address, hours, logo_url, qr_slug, redemption_mode, is_truck)
   on public.businesses to authenticated;
-grant update (name, campus_id, location, address, hours, logo_url, qr_slug, redemption_mode, is_truck)
+grant update (name, campus_id, location, address, hours, logo_url, redemption_mode, is_truck)
   on public.businesses to authenticated;
 grant delete on public.businesses to authenticated;
 
@@ -45,13 +48,20 @@ grant update (night_date, start_time, end_time, giveback)
   on public.club_nights to authenticated;
 grant delete on public.club_nights to authenticated;
 
+-- Column-level security: student_location must not reach the browser or Realtime dashboard.
+revoke all on public.redemptions from anon, authenticated;
+grant select (id, deal_id, business_id, student_id, redeemed_at, redeemed_on, method)
+  on public.redemptions to authenticated;
+
 -- campuses: anyone can read; writes only via seed/migrations (service role)
 create policy "campuses_read"
   on public.campuses for select
   to anon, authenticated
   using (true);
 
--- profiles: users read and update their own row; inserts by the DB trigger (Moses, #32)
+-- profiles: users read and update their own row.
+-- Updates are further restricted to full_name only by the protect_profile_columns trigger
+-- (see migration 20261026000200_profiles_trigger.sql).
 create policy "profiles_read_own"
   on public.profiles for select
   to authenticated
@@ -63,17 +73,18 @@ create policy "profiles_update_own"
   using (auth.uid() = id)
   with check (auth.uid() = id);
 
--- businesses: anyone reads public-safe columns (staff_pin excluded above); members update theirs
+-- businesses: anyone reads public-safe columns (staff_pin and owner_id excluded above);
+-- only owners can update their business
 create policy "businesses_read"
   on public.businesses for select
   to anon, authenticated
   using (true);
 
-create policy "businesses_update_members"
+create policy "businesses_update_owner"
   on public.businesses for update
   to authenticated
-  using (public.is_business_member(id))
-  with check (public.is_business_member(id));
+  using (public.is_business_owner(id))
+  with check (public.is_business_owner(id));
 
 -- business_members: members of the same business see the member list; owners delete staff rows
 create policy "business_members_read"
@@ -87,7 +98,9 @@ create policy "business_members_delete_owner"
   using (public.is_business_owner(business_id) and role = 'staff');
 
 -- deals: anyone reads public deals; link-only deals are invisible here and only reachable via
--- deal_by_id() (security definer, Moses #16); members read all their deals and manage them
+-- deal_by_id() (security definer, Moses #16); members read all their deals and manage them;
+-- students can also read deals they have already redeemed (needed for getMyRedemptions to
+-- show the title of a link-only club night deal)
 create policy "deals_read_public"
   on public.deals for select
   to anon, authenticated
@@ -97,6 +110,16 @@ create policy "deals_read_members"
   on public.deals for select
   to authenticated
   using (public.is_business_member(business_id));
+
+create policy "deals_read_redeemed"
+  on public.deals for select
+  to authenticated
+  using (
+    exists (
+      select 1 from public.redemptions
+      where deal_id = deals.id and student_id = auth.uid()
+    )
+  );
 
 create policy "deals_insert_members"
   on public.deals for insert
@@ -127,7 +150,8 @@ create policy "redemptions_read_business"
   using (public.is_business_member(business_id));
 
 -- club_nights: members manage their own (claim columns excluded from UPDATE grant above,
--- so claim-club-night writes them via service role); verified students read open nights at their campus
+-- so claim-club-night writes them via service role);
+-- verified students see only open (unclaimed) nights at their campus
 create policy "club_nights_read_members"
   on public.club_nights for select
   to authenticated
@@ -154,7 +178,8 @@ create policy "club_nights_read_students"
   on public.club_nights for select
   to authenticated
   using (
-    exists (
+    claimed_club_name is null
+    and exists (
       select 1
       from public.profiles p
       join public.businesses b on b.id = club_nights.business_id
