@@ -1,4 +1,4 @@
-import type { Deal, DealStatus, Weekday } from "./types";
+import type { Deal, DealStatus, Hours, Weekday } from "./types";
 
 // Same rules as the deal_status SQL function. Times are campus time (campuses.timezone).
 export const CAMPUS_TZ = "America/Los_Angeles";
@@ -53,4 +53,17 @@ export function liveUntil(deal: DealTiming, now: Date = new Date(), timeZone: st
   const ends = deal.ends_at ? new Date(deal.ends_at).getTime() : Infinity;
   const left = (minutes(deal.daily_end) - minutes(campusClock(now, timeZone).time)) * 60_000;
   return new Date(Math.min(ends, now.getTime() + left)).toISOString();
+}
+
+const WEEK: Weekday[] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+
+// Open right now by campus time. A close earlier than the open runs past midnight, so
+// yesterday's late period can still be open this morning.
+export function openNow(hours: Hours, now: Date = new Date(), timeZone: string = CAMPUS_TZ): boolean {
+  const { weekday, time } = campusClock(now, timeZone);
+  const yesterday = WEEK[(WEEK.indexOf(weekday) + 6) % 7];
+  const today = (hours[weekday] ?? []).some(([open, close]) =>
+    open < close ? open <= time && time < close : open <= time,
+  );
+  return today || (hours[yesterday] ?? []).some(([open, close]) => close < open && time < close);
 }

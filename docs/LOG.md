@@ -25,6 +25,20 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-10-27:** **Decision** (affects Adolfo, Celso): Adolfo's business writes (`createDeal`, `endDeal`, `cancelDeal`, `getMyBusiness`, `saveBusiness`) are final in the contract, mock-backed until #73. Celso's RLS must let business members insert and update their own deals and business. Merged #126 (main merged in, `getMyDeals` and `setPin` routed through the data switch); #69 and #71 stay open until the canvas check.
+- **2026-10-26:** **Decision** (affects everyone): screens import data functions from `@/lib/supabase`. It serves `mocks/` by default and the real Supabase wrappers when `NEXT_PUBLIC_DATA_SOURCE=supabase` (after Celso's RLS lands); a compile-time check keeps both signatures identical (#131).
+- **2026-10-26:** **Decision** (affects Hikaru): `businesses` has generated `lat`/`lng` columns, and `deals_nearby(lat, lng, radius_m, open_now, has_deals)` returning `DealCard` rows is in the contract for #88 (#131).
+- **2026-10-26:** **Decision** (affects Adolfo): new `subscribeToRedemptions({ businessId }, onRedemption)` for the live visit feed (#75), on mocks and real data; reuse `openNow()` from `lib/supabase/deal-status.ts` (#131, #135).
+- **2026-10-26:** **Decision** (affects Celso): four more must-fixes on #128: rename migrations after the newest on main, let students read deals they redeemed, grant `lat`/`lng`, and hide `redemptions.student_location` with a column grant (Realtime follows column grants).
+- **2026-10-26:** Realtime on `redemptions` plus `subscribeToRedemptions()` in contract, types, mocks, and wrappers; applied to grove-dev (#17, PR #135).
+- **2026-10-26:** `claim-club-night` deployed to grove-dev: `claim_club_night()` makes one conditional update and creates the link-only deal; tests include a two-student race (#103, PRs #133, #134).
+- **2026-10-26:** `redeem` deployed to grove-dev: `redeem_sticker()` runs the contract's checks and `record_redemption()` inserts in one transaction; pgTAP and served-function tests (#14, PR #132).
+- **2026-10-26:** Typed queries for every contract function in `lib/supabase/queries.ts`, the mock/real switch in `lib/supabase/index.ts`, `openNow()`, generated DB types, and `npm run test:db` (#16, PR #131).
+- **2026-10-26:** `deal_status()` and `deal_by_id()` on grove-dev, with the same 9 examples in pgTAP and vitest (#102, PR #130).
+- **2026-10-26:** **Decision** (affects Edward): `claim-club-night` answers a blank club name with HTTP 400, so `claimClubNight()` throws. The claim screen must require a name and show a generic error if the claim throws.
+- **2026-10-26:** **Decision** (affects Edward): every redemption requires a verified student (`NOT_VERIFIED_STUDENT` otherwise), so `students_only` is display-only (the "UCR students only" tag).
+- **2026-10-26:** **Decision** (affects everyone): merged Hikaru's map (#125); vitest with `npm test` in CI is the team test runner. Requested changes on #126, #127, #128, #129 with fix prompts; merge order is #127, #128, #126, #129 (STATUS → Open PRs).
+- **2026-10-26:** Removed the PR template (descriptions are now 1–3 lines plus `Closes #` lines), reviewed open PRs #125–#129 (RLS and PIN-function holes in #128 confirmed on a local database), and assigned Celso's 22 issues now that he has accepted his invite.
 - **2026-10-25:** **Decision** (affects everyone): CI ("Lint, typecheck, build") is a required check on `main`; a PR can't merge until it passes (`.github/workflows/ci.yml`, #12).
 - **2026-10-25:** **Decision** (affects Celso): every table has RLS on with no policies; RLS policies (including hiding `staff_pin` and `club_nights.claimed_by`) are Celso's next step before the app reads real data.
 - **2026-10-25:** Seed data on grove-dev: UCR (with timezone), the eight canvas businesses, 15 deals including the Mon–Wed 2–5 PM repeat at Verde Bowl, and one open club night at Pepper Tree Pizza Co.; re-runnable (`supabase/seed.sql`, #8).
@@ -70,7 +84,16 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 _Nothing logged yet._
 
 ## Adolfo
-_Nothing logged yet._
+- **2026-10-26:** Prepared PR #126 review fixes: concise contract/docs, 21 isolated Vitest tests via `npm test`, shared `openNow`, and verified ignore coverage; lint, typecheck, build, responsive/behavioral and accessibility checks passed; main merge waits on #127.
+- **2026-10-26:** Business setup with profile, coordinates, hours, logo, food-truck toggle, and first-PIN flow on mocks (#70, PR #126).
+- **2026-10-25:** Responsive dashboard shell and navigation (#69, PR #126); canvas comparison remains unverified.
+- **2026-10-25:** Post-deal form with discounts, campus-time scheduling, photo preview, validation, and mock save (#71, PR #126); canvas comparison remains unverified.
+- **2026-10-25:** My deals tabs/counts, End now with retained history, and guarded Cancel with confirmation (#72, PR #126).
+- **2026-10-25:** **Decision** (affects Moses): business-write signatures remain proposals; photos/logos stay in mock memory until Storage wiring in #73.
+- **2026-10-25:** **Decision** (affects Celso): `/dashboard` is the business entry route; real data requires authenticated business membership (#73).
+- **2026-10-25:** **Decision** (affects Moses, Celso): onboarding configures the existing mock owner's business with explicit coordinates; provisioning, geocoding, and real PIN integration remain #73.
 
 ## Hikaru
-_Nothing logged yet._
+- **2026-10-25:** Synced latest main and prepared `hikaru/map-foundation` for team review. Fixed real-map keyboard focus on selection; added Mapbox lifecycle and location-race regression tests plus `npm test` in the required CI job. #84 and real-map verification for #85 remain blocked on the restricted token.
+- **2026-10-25:** Implemented the Week 1 map at `/map` on `hikaru/map-foundation`: grouped orange/green mock pins, combinable filters (#86), and location with campus fallback (#87). Mapbox wiring is in place, with a labeled pin preview until #84 supplies a restricted token; #85 remains open for actual-map and canvas verification. Four data tests and local browser checks cover filtering and synthetic location outcomes (`components/map/README.md`).
+- **2026-10-25:** **Decision** (affects Edward, Moses): map defaults to a 3 km search radius; Walking distance narrows it to 800 m in a straight line, explicitly labeled as proximity rather than a route. The API contract and mocks are unchanged.
