@@ -22,7 +22,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 | Person | Focus |
 |---|---|
 | Moses | Done: `deal_status()`, typed queries (#16), `redeem` (#14), `claim-club-night` (#103), Realtime (#17), all on grove-dev. Next: `redeem-pin` (#15) and `set-pin` (#120) once #128 lands; agree staff-scan tokens (#19) with Celso by Nov 1; gate test (#18) |
-| Celso | #127 and #128 review fixes pushed (main merged in, CI passing). Next: #38, #106, #39 |
+| Celso | #127 merged (Google sign-in confirmed on its preview). #128 review fixes pushed. Next: #38, #106, #39 |
 | Edward | Rework #129 onto `mocks/` and the contract; then the scanner, `redeem` call, and Redeemed screen |
 | Adolfo | #126 merged (#70, #72 done; business writes final in the contract). Canvas check for #69 and #71, then repeat days and visibility on the post-deal form (#112), and #73 |
 | Hikaru | `/map` merged (#125; #86, #87 done). #85 awaits the Mapbox token (#84) and canvas check; then `deals_nearby` (#88) after `deal_status()` |
@@ -43,7 +43,7 @@ Moses re-checks each PR when its author pushes fixes. It merges when CI passes a
 
 - **Everyone: review your team file.** Moses edited all five on 2026-10-24 (one-time exception, like setup) for the Activity 2 changes: new tasks, interview work, dependencies, and the week plan. Fix anything that's wrong in your own file.
 - **Everyone:** accept the Supabase org invite, then copy the Supabase URL and anon key into your `.env.local` (see README → Getting started). The service-role key stays with Moses.
-- **Sign-in gate:** waits on #127 merging after Moses confirms sign-in on its preview.
+- **Sign-in gate:** Google sign-in works (confirmed on the #127 preview with a UCR account and a Gmail). The verified-student check runs in #128's `handle_new_user()` trigger.
 - **Settings (done):** Vercel Authentication is off for preview deployments, so anyone with a preview link can open it. Supabase Auth on grove-dev is Google-only: Email is disabled, Google is enabled, and redirect URLs cover production, localhost, and `grove-*-mosesfromsinais-projects.vercel.app` previews.
 - **RLS:** every table on grove-dev still has RLS on and no policies, so the browser reads nothing until #128 merges with its security fixes. Until then, real wrappers return nothing for signed-in users.
 - **Everyone:** CI ("Lint, typecheck, build") runs on every PR and must pass to merge; it now runs `npm test` (vitest) too. Run `npm run lint && npm run typecheck && npm test && npm run build` before pushing.

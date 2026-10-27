@@ -73,7 +73,8 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-12:** Updated the Grove Tech Stack Plan (Claude Docs) for sticker redemption and both modes.
 
 ## Celso
-_Nothing logged yet._
+- **2026-10-26:** Google OAuth setup: `@supabase/ssr`, browser + server Supabase clients, `proxy.ts` session refresh, `/auth/callback` route (exchange code → role routing), sign-in page (`/sign-in`), root routing in `app/page.tsx`. Closes #30. (PR #127)
+- **2026-10-26:** **Decision** (affects Moses, Edward, Adolfo): the .edu check runs only in the `handle_new_user()` trigger (#128), never from the browser; `/auth/callback` only reads `profiles.role` to route.
 
 ## Edward
 _Nothing logged yet._
