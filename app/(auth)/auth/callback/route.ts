@@ -32,25 +32,8 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // .edu check: match the email domain against campuses.email_domain.
-  // Requires RLS: allow authenticated read on campuses (Celso, #35).
-  const email = user.email ?? "";
-  const domain = email.split("@")[1] ?? "";
-  const { data: campus } = await supabase
-    .from("campuses")
-    .select("id")
-    .eq("email_domain", domain)
-    .maybeSingle();
-
-  if (campus) {
-    // Profile row is created by the DB trigger on first sign-in (Moses, #32).
-    // Requires RLS: authenticated user can update their own profiles row.
-    await supabase
-      .from("profiles")
-      .update({ verified_student: true, campus_id: campus.id })
-      .eq("id", user.id);
-  }
-
+  // The .edu check (verified_student, campus_id) runs in the handle_new_user() trigger,
+  // never from the browser session; the callback only reads the profile.
   // Route by role; profile row may not exist yet if the DB trigger (#32) isn't deployed.
   const { data: profile } = await supabase
     .from("profiles")

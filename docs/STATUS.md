@@ -31,7 +31,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 
 - **Everyone: review your team file.** Moses edited all five on 2026-10-24 (one-time exception, like setup) for the Activity 2 changes: new tasks, interview work, dependencies, and the week plan. Fix anything that's wrong in your own file.
 - **Everyone:** accept the Supabase org invite, then copy the Supabase URL and anon key into your `.env.local` (see README → Getting started). The service-role key stays with Moses.
-- **Celso:** .edu check in `/auth/callback` needs a public-read RLS policy on `campuses` (allow anon `SELECT`) before `verified_student` is set. Also needs Moses's profiles trigger migration (#32). Both required before the sign-in gate can be called fully passed.
+- **Celso:** sign-in (#127) needs Google enabled in Supabase Auth (#29) and a check on the PR preview before it merges. `verified_student` is set by the `handle_new_user()` trigger in #128, so the sign-in gate fully passes once both merge.
 - **Celso:** every table has RLS on and no policies, so the browser (anon and signed-in users) reads nothing until policies land. Includes hiding `businesses.staff_pin` and `club_nights.claimed_by`. The profile trigger can insert into `profiles` as is.
 - **Everyone:** CI ("Lint, typecheck, build") now runs on every PR and must pass to merge. Run `npm run lint && npm run typecheck && npm run build` before pushing.
 - Real tables and seed data are on grove-dev, but keep building on `mocks/` until typed queries (#16) and RLS policies exist.

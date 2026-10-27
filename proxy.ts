@@ -37,7 +37,10 @@ export async function proxy(request: NextRequest) {
     pathname === "/sign-in" ||
     pathname.startsWith("/auth/") ||
     pathname.startsWith("/b/") ||
-    pathname === "/theme";
+    pathname === "/theme" ||
+    pathname === "/manifest.json" ||
+    pathname === "/sw.js" ||
+    pathname.startsWith("/icons/");
 
   if (!user && !isPublic) {
     return NextResponse.redirect(new URL("/sign-in", request.url));

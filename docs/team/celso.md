@@ -27,11 +27,11 @@ _Last updated: 2026-10-26_
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [x] Set up Google OAuth in Google Cloud and Supabase Auth (needs the Supabase project, #6; if you aren't active by Oct 26, Moses takes this) (#29)
+- [ ] Set up Google OAuth in Google Cloud and Supabase Auth (needs the Supabase project, #6; if you aren't active by Oct 26, Moses takes this) (#29)
 - [x] Sign-in page (canvas screen 1, one button: "Sign in with your school Google account"); business owners use the same Google sign-in with any account (#30)
-- [x] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` — scaffolded in callback; needs RLS read policy on `campuses` (#31)
+- [ ] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` (runs in `handle_new_user()`, PR #128) (#31)
 - [ ] Database trigger to create a `profiles` row on first sign-in (#32)
-- [x] Onboarding: route to student app or business onboarding (root routing in `app/page.tsx`, Moses reviews) (#33)
+- [ ] Onboarding: route to student app or business onboarding (root routing in `app/page.tsx`, Moses reviews) (#33)
 - [ ] Review the threat model below; add anything missing (#34)
 
 ### Week 2 — Lock down data (Oct 26–Nov 1)
@@ -95,6 +95,11 @@ _Record things only you need to remember. Decisions that affect others go in `do
 
 ## Session log
 _Newest at the top. One entry per session._
+
+### 2026-10-26 (PR #127 review fixes)
+- **Did:** Fixes from Moses's review of #127: removed the .edu check from the callback (it only reads the profile now; the check runs in `handle_new_user()` in #128), moved the callback to `app/(auth)/auth/callback/route.ts` (URL unchanged), made `/manifest.json`, `/sw.js` and `/icons/` public in `proxy.ts`. PR now closes #30 only; unticked #29, #31, #33.
+- **Next:** Enable Google in Supabase Auth (#29), confirm sign-in on this PR's preview, then the #128 review fixes.
+- **Blockers:** none.
 
 ### 2026-10-26
 - **Did:** Google OAuth setup (#29): installed `@supabase/ssr` + `@supabase/supabase-js`; created `lib/supabase/client.ts` (browser) and `lib/supabase/server.ts` (SSR); added `proxy.ts` (Next.js 16 session-refresh + unauthenticated redirect); created `/auth/callback` route handler (exchanges code, runs .edu check, routes by role); built the sign-in page (`/sign-in`, canvas screen 1) with Google OAuth button; updated `app/page.tsx` to route by role. Also covers #30 (sign-in page) and #33 (onboarding routing). .edu check (#31) is scaffolded but needs Moses or me to add a public-read RLS policy on `campuses`. Profile trigger (#32) is Moses's migration.
