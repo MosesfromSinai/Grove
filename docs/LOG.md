@@ -25,6 +25,10 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-10-27:** Week 1 sign-in gate passed: a UCR Google sign-in on production created a verified student profile at UC Riverside on grove-dev. Closed #29 and #31.
+- **2026-10-27:** `redeem-pin` and `set-pin` deployed to grove-dev with the `qr_slug` default for new businesses; `redeem` now returns `RATE_LIMITED` after 10 attempts a minute (#15, #120, PR #137).
+- **2026-10-27:** Merged Celso's #127 (Google sign-in) and #128 (RLS, PIN helpers, profile trigger) after finishing their docs; applied #128 to grove-dev; re-checked security on a fresh local database (26 out of 26). Flipped the anon read test (PR #136).
+- **2026-10-27:** The live-redemptions test waits for the channel and retries after a fresh db reset, so `npm run test:db` is stable.
 - **2026-10-27:** **Decision** (affects Celso): the PIN lockout is per student per business, not per business, so one person's 5 bad PINs no longer block the PIN backup for every student there. Extended Celso's #128 helpers: `pin_attempts.student_id`, `is_pin_rate_limited(bid, sid)`, `record_pin_attempt(bid, sid, succeeded)`, the matching `pin.ts` wrappers, and his `rls_security.test.sql`.
 - **2026-10-27:** **Decision** (affects Adolfo, Celso): Adolfo's business writes (`createDeal`, `endDeal`, `cancelDeal`, `getMyBusiness`, `saveBusiness`) are final in the contract, mock-backed until #73. Business updates stay owner-only; business members (owner and staff) insert and update deals. Merged #126 (main merged in, `getMyDeals` and `setPin` routed through the data switch); #69 and #71 stay open until the canvas check.
 - **2026-10-26:** **Decision** (affects everyone): screens import data functions from `@/lib/supabase`. It serves `mocks/` by default and the real Supabase wrappers when `NEXT_PUBLIC_DATA_SOURCE=supabase` (after Celso's RLS lands); a compile-time check keeps both signatures identical (#131).
