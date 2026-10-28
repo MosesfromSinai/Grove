@@ -8,7 +8,7 @@ import type { ErrorCode, Redemption } from "@/lib/supabase";
 import { errorMessages } from "./error-messages";
 import { RedeemedView } from "./redeemed-view";
 
-type Phase = "locating" | "denied" | "scanning" | "redeeming" | "done" | "error" | "camera-error";
+type Phase = "locating" | "denied" | "scanning" | "redeeming" | "done" | "error" | "failed" | "camera-error";
 
 function parseSlug(text: string): string | null {
   const match = text.match(/\/b\/([^/?#]+)/);
@@ -66,13 +66,18 @@ export function Scanner() {
             handled = true;
             setNotSticker(false);
             setPhase("redeeming");
-            const result = await redeem({ deal_id: dealId, qr_slug: slug, lat: position.lat, lng: position.lng });
-            if (result.ok) {
-              setRedemption(result.redemption);
-              setPhase("done");
-            } else {
-              setError(result.error);
-              setPhase("error");
+            try {
+              const result = await redeem({ deal_id: dealId, qr_slug: slug, lat: position.lat, lng: position.lng });
+              if (result.ok) {
+                setRedemption(result.redemption);
+                setPhase("done");
+              } else {
+                setError(result.error);
+                setPhase("error");
+              }
+            } catch {
+              // Network or server failure: no ErrorCode, so never leave "Checking your visit…" up.
+              setPhase("failed");
             }
           },
           () => {}
@@ -137,6 +142,15 @@ export function Scanner() {
       {phase === "camera-error" && (
         <div>
           <p className="text-ink">We couldn&apos;t open your camera. Allow camera access in your browser settings and try again.</p>
+          <button onClick={retry} className="mt-4 min-h-11 rounded-button bg-ink px-6 font-semibold text-white">
+            Try again
+          </button>
+        </div>
+      )}
+
+      {phase === "failed" && (
+        <div>
+          <p className="text-ink">Something went wrong checking your visit. Check your connection and try again.</p>
           <button onClick={retry} className="mt-4 min-h-11 rounded-button bg-ink px-6 font-semibold text-white">
             Try again
           </button>
