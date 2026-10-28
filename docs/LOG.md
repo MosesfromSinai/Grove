@@ -89,7 +89,7 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-26:** **Decision** (affects Moses, Edward, Adolfo): the .edu check runs only in the `handle_new_user()` trigger (#128), never from the browser; `/auth/callback` only reads `profiles.role` to route.
 
 ## Edward
-_Nothing logged yet._
+- **2026-10-28:** Student app on `@/lib/supabase`: app shell with Map, Deals, Profile tabs, deal card, deals feed on `getDealsNearby`, deal page with Redeem in store, scanner (location first, `html5-qrcode`, sticker slug) calling `redeem()` with a message for every `ErrorCode`, and the live Redeemed screen (#49–#52, #55, #56; PR #129). Phone test (#53) and the PIN backup link (#54) still to do.
 
 ## Adolfo
 - **2026-10-26:** Prepared PR #126 review fixes: concise contract/docs, 21 isolated Vitest tests via `npm test`, shared `openNow`, and verified ignore coverage; lint, typecheck, build, responsive/behavioral and accessibility checks passed; main merge waits on #127.

@@ -35,8 +35,8 @@ _Last updated: 2026-10-27_
 - [x] Deal detail page with the orange "Redeem in store" button (#52)
 
 ### Week 2 — Sticker redemption and link-only deals (Oct 26–Nov 1)
-- [x] Scanner page with `html5-qrcode` (not the built-in detector; Safari lacks it) (#53)
-- [x] Ask for location before scanning; clear message if denied, with the PIN backup link (#54)
+- [ ] Scanner page with `html5-qrcode` (not the built-in detector; Safari lacks it) (#53)
+- [ ] Ask for location before scanning; clear message if denied, with the PIN backup link (#54)
 - [x] Call `redeem`; show a friendly message for every `ErrorCode` (#55)
 - [x] Redeemed screen: big green check, deal and business name, live ticking clock, moving animation (#56)
 - [ ] Sticker landing page `/b/[slug]`: live public deals, or "No deals right now" (#57)
