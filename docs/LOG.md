@@ -25,6 +25,7 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-10-28:** Finished and merged Edward's #129 (scanner handles a failed `redeem()`, deal page loads in the browser, his LOG line and ticks); documented that `lib/supabase` wrappers are browser-only. Added #18 test data on grove-dev: Grove Test Kitchen (`grove-test-kitchen`, 33.973732, -117.323060) with a live deal until Nov 4, ids starting `7e57`, to delete after #18.
 - **2026-10-27:** Week 1 sign-in gate passed: a UCR Google sign-in on production created a verified student profile at UC Riverside on grove-dev. Closed #29 and #31.
 - **2026-10-27:** `redeem-pin` and `set-pin` deployed to grove-dev with the `qr_slug` default for new businesses; `redeem` now returns `RATE_LIMITED` after 10 attempts a minute (#15, #120, PR #137).
 - **2026-10-27:** Merged Celso's #127 (Google sign-in) and #128 (RLS, PIN helpers, profile trigger) after finishing their docs; applied #128 to grove-dev; re-checked security on a fresh local database (26 out of 26). Flipped the anon read test (PR #136).
