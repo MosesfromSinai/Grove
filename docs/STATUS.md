@@ -31,8 +31,6 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 
 No open PRs. Moses re-checks each PR when its author pushes fixes; it merges when CI passes and every item in its review is done.
 
-| Order | PR | Waiting on |
-|---|---|---|
 
 ## Blockers
 
