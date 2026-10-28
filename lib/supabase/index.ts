@@ -1,5 +1,7 @@
 // The one data switch. Screens import from "@/lib/supabase" and get mocks/ until
-// NEXT_PUBLIC_DATA_SOURCE=supabase (real data needs Celso's RLS policies, #128).
+// NEXT_PUBLIC_DATA_SOURCE=supabase. Browser-only: the real wrappers use the browser client,
+// so call them from client components ("use client"). From a server component they'd run
+// without the student's session (redeemed_today is always false, RLS sees an anonymous user).
 
 import * as mocks from "../../mocks";
 import * as real from "./queries";

@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-10-24_
+_Last updated: 2026-10-27_
 
 ---
 
@@ -29,16 +29,16 @@ _Last updated: 2026-10-24_
 
 ### Week 1 — Foundation (Oct 19–25)
 - [x] Tailwind theme from the tokens in `CLAUDE.md` → Design reference (colors, Bricolage Grotesque + Figtree, radii, shadow) (#48) — done by Moses; preview at `/theme`
-- [ ] App shell with bottom tabs: Map, Deals, Profile (#49)
-- [ ] Deal card component (shared with Hikaru) (#50)
-- [ ] Deals feed on mocks: photo, business, title, distance, countdown, "UCR students only" tag (#51)
-- [ ] Deal detail page with the orange "Redeem in store" button (#52)
+- [x] App shell with bottom tabs: Map, Deals, Profile (#49)
+- [x] Deal card component (shared with Hikaru) (#50)
+- [x] Deals feed on mocks: photo, business, title, distance, countdown, "UCR students only" tag (#51)
+- [x] Deal detail page with the orange "Redeem in store" button (#52)
 
 ### Week 2 — Sticker redemption and link-only deals (Oct 26–Nov 1)
 - [ ] Scanner page with `html5-qrcode` (not the built-in detector; Safari lacks it) (#53)
 - [ ] Ask for location before scanning; clear message if denied, with the PIN backup link (#54)
-- [ ] Call `redeem`; show a friendly message for every `ErrorCode` (#55)
-- [ ] Redeemed screen: big green check, deal and business name, live ticking clock, moving animation (#56)
+- [x] Call `redeem`; show a friendly message for every `ErrorCode` (#55)
+- [x] Redeemed screen: big green check, deal and business name, live ticking clock, moving animation (#56)
 - [ ] Sticker landing page `/b/[slug]`: live public deals, or "No deals right now" (#57)
 - [ ] PIN entry screen calling `redeem-pin` (#58)
 - [ ] Swap mocks for real queries (#59)
@@ -76,7 +76,13 @@ _Record things only you need to remember. Decisions that affect others go in `do
 ## Session log
 _Newest at the top. One entry per session._
 
+### 2026-10-27
+- **Did:** App shell with Map, Deals, Profile tabs; deal card; deals feed on `getDealsNearby`; deal page with Redeem in store; scanner (location first, `html5-qrcode`) calling `redeem()`; Redeemed screen; friendly message for every `ErrorCode`.
+- **Next:** Sticker landing page, PIN screen, link-only deal handling, then week 3 screens.
+- **Blockers:** None. Scanner not yet tested on a phone over HTTPS.
+
 ### 2026-10-19
 - **Did:** Assigned role.
 - **Next:** Theme and app shell once the repo exists.
 - **Blockers:** Repo not created yet.
+
