@@ -2,13 +2,21 @@
 
 // Client component: getDeal() runs in the browser with the student's session, so
 // redeemed_today ("Already used today") is right. lib/supabase wrappers are browser-only.
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getDeal, type DealDetail } from "@/lib/supabase";
 import { discountLabel } from "@/components/student/format";
 
 export default function DealPage() {
+  return (
+    <Suspense fallback={<p className="pt-10 text-center text-ink-muted">Loading…</p>}>
+      <DealContent />
+    </Suspense>
+  );
+}
+
+function DealContent() {
   const { id } = useParams<{ id: string }>();
   const [deal, setDeal] = useState<DealDetail | null | undefined>(undefined);
   const [failed, setFailed] = useState(false);
