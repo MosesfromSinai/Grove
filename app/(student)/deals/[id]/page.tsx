@@ -1,19 +1,33 @@
-import { Suspense } from "react";
+"use client";
+
+// Client component: getDeal() runs in the browser with the student's session, so
+// redeemed_today ("Already used today") is right. lib/supabase wrappers are browser-only.
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getDeal } from "@/lib/supabase";
+import { useParams } from "next/navigation";
+import { getDeal, type DealDetail } from "@/lib/supabase";
 import { discountLabel } from "@/components/student/format";
 
-export default function DealPage({ params }: { params: Promise<{ id: string }> }) {
-  return (
-    <Suspense fallback={<p className="pt-10 text-center text-ink-muted">Loading…</p>}>
-      <DealContent params={params} />
-    </Suspense>
-  );
-}
+export default function DealPage() {
+  const { id } = useParams<{ id: string }>();
+  const [deal, setDeal] = useState<DealDetail | null | undefined>(undefined);
+  const [failed, setFailed] = useState(false);
 
-async function DealContent({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const deal = await getDeal({ id });
+  useEffect(() => {
+    let cancelled = false;
+    getDeal({ id })
+      .then((d) => !cancelled && setDeal(d))
+      .catch(() => !cancelled && setFailed(true));
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  if (failed) {
+    return <p className="pt-10 text-center text-ink-muted">Couldn&apos;t load this deal. Check your connection and try again.</p>;
+  }
+
+  if (deal === undefined) return <p className="pt-10 text-center text-ink-muted">Loading…</p>;
 
   if (!deal) {
     return (
