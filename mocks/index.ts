@@ -10,6 +10,8 @@ import type {
   BusinessPublic,
   BusinessStats,
   BusinessProfile,
+  UpdateTruckLocationInput,
+  UpdateTruckLocationResult,
   BusinessLocationOption,
   SaveBusinessInput,
   SaveBusinessResult,
@@ -270,6 +272,18 @@ function toBusinessProfile(business: MockBusiness): BusinessProfile {
 
 export async function getMyBusiness(): Promise<BusinessProfile> {
   return delay(toBusinessProfile(businessById(mockOwner.business_id)));
+}
+
+export async function updateTruckLocation(input: UpdateTruckLocationInput): Promise<UpdateTruckLocationResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  if (!Number.isFinite(input.lat) || Math.abs(input.lat) > 90 || !Number.isFinite(input.lng) || Math.abs(input.lng) > 180) {
+    return delay({ ok: false, error: "INVALID_LOCATION" });
+  }
+  const business = businessById(input.business_id);
+  if (!business.is_truck) return delay({ ok: false, error: "NOT_A_TRUCK" });
+  business.lat = input.lat;
+  business.lng = input.lng;
+  return delay({ ok: true, location: { ...input } });
 }
 
 // Mock-only address lookup. Arbitrary addresses require explicit coordinates;

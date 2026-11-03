@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Activity, CalendarDays, Plus, Tags, Users } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { BusinessName } from "@/components/business/business-context";
+import { TruckLocation } from "@/components/map/truck-location";
 
 const summaries = [
   { label: "Today's visits", icon: Users },
@@ -22,6 +23,8 @@ export default function DashboardPage() {
           <Plus aria-hidden="true" className="size-5" /> Post a deal
         </Link>
       </header>
+
+      <TruckLocation />
 
       <section aria-label="Business summary" className="grid gap-4 sm:grid-cols-3">
         {summaries.map(({ label, icon: Icon }) => (

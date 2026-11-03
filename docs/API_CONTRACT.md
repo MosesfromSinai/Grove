@@ -142,7 +142,7 @@ Stretch goal (possible future implementation); not built for the MVP.
 
 Moses owns `lib/supabase/` and writes the wrappers; the owner listed writes the SQL behind it.
 
-`getDealsNearby` calls `deals_nearby(lat float8, lng float8, radius_m int, open_now boolean default false, has_deals boolean default false)`, which returns `DealCard` rows (columns named exactly as the type, `live_until` from the current window). Hikaru writes it (#88).
+`getDealsNearby` calls `deals_nearby(lat float8, lng float8, radius_m int, open_now boolean default false, has_deals boolean default false)`, which returns `DealCard` rows through the `nearby_deal_card` composite type (`live_until` is the exact current window end, in campus time). Migration `20261102000000_nearby_and_truck_location.sql` implements it (#88). Inputs require finite coordinates and a radius of 1–50,000 metres. It is security-invoker, uses PostGIS geography distance, and excludes link-only deals explicitly even for owners and past redeemers. `business_is_open(hours, timezone, at_time)` handles split hours and overnight periods; malformed periods fail closed.
 
 | Function | Input | Returns | Used by |
 |---|---|---|---|
@@ -284,14 +284,15 @@ type ClubNight = OpenClubNight & {
 
 ---
 
-## Business writes (final; mock-backed until #73)
+## Business data and writes
 
 | Function | Input | Success returns | Errors |
 |---|---|---|---|
 | `createDeal` | `CreateDealInput` | `{ ok: true, deal: MyDeal }` | `NOT_OWNER`, `INVALID_DEAL` (`fields: CreateDealErrors`) |
 | `endDeal` | `{ business_id, deal_id }` | `{ ok: true, deal: MyDeal }` | `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_LIVE` |
 | `cancelDeal` | `{ business_id, deal_id }` | `{ ok: true, deal_id: string }` | `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_SCHEDULED`, `DEAL_HAS_REDEMPTIONS`, `DEAL_IN_USE` |
-| `getMyBusiness` | none | `BusinessProfile` | none |
+| `getMyBusiness` | none | `BusinessProfile` | Throws if no owned business |
+| `updateTruckLocation` | `{ business_id, lat, lng }` | `{ ok: true, location: { business_id, lat, lng } }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `NOT_A_TRUCK`, `INVALID_LOCATION` |
 | `getBusinessLocationOptions` (mock helper) | none | `Pick<BusinessPublic, "address" \| "lat" \| "lng">[]` | none |
 | `saveBusiness` | `SaveBusinessInput` | `{ ok: true, profile: BusinessProfile }` | `NOT_OWNER`, `INVALID_BUSINESS` (`fields: BusinessInputErrors`) |
 
@@ -306,6 +307,10 @@ type SaveBusinessInput = Pick<BusinessPublic,
 > & { business_id: string };
 type BusinessInputErrors = Partial<Record<keyof SaveBusinessInput, string>>;
 ```
+
+`getMyBusiness` and `updateTruckLocation` use the shared mock/real switch. Real reads call owner-only `get_my_business()` and expose a `pin_ready` boolean, never the PIN hash. Location updates call owner-only `update_truck_location(business_id uuid, lat float8, lng float8)`, lock the business row, and update its PostGIS location; generated `lat`/`lng` follow automatically. Staff and other owners cannot move the pin. The migration must be applied before enabling these RPCs.
+
+Other business writes remain mock-backed until Adolfo's #73. Real dashboard settings/onboarding/posting are therefore still pending even though the truck-location action supports real data.
 
 Writes return `Promise` results; errors are `{ ok: false, error, fields? }`. Read helpers return `Promise` values. `setPin` retains its Edge Function signature below.
 

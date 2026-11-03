@@ -1,6 +1,7 @@
 import type { DealCard } from "@/lib/supabase/types";
 
 export type Coordinates = { lat: number; lng: number };
+export const UCR_CENTER: Coordinates = { lat: 33.9737, lng: -117.3281 };
 export type MapBusiness = {
   id: string;
   name: string;

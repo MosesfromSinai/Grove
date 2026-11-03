@@ -1,5 +1,5 @@
-// Business data boundary. getMyDeals and setPin follow the data switch in ./index; the writes
-// stay mock-backed until #73 replaces them with authenticated Supabase writes. Components never
-// mutate fixture arrays directly.
-export { getMyDeals, setPin } from "./index";
-export { createDeal, endDeal, cancelDeal, getMyBusiness, getBusinessLocationOptions, saveBusiness } from "../../mocks";
+// Business data boundary. Reads and truck-location updates follow the shared data switch.
+// Other business writes stay mock-backed until #73; a real business UUID cannot be saved
+// by those mock-only onboarding/posting operations. Components never mutate fixture arrays.
+export { getMyDeals, setPin, getMyBusiness, updateTruckLocation } from "./index";
+export { createDeal, endDeal, cancelDeal, getBusinessLocationOptions, saveBusiness } from "../../mocks";

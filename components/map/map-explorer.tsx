@@ -10,7 +10,8 @@ import {
   Tag,
   Truck,
 } from "lucide-react";
-import { getDealsNearby, UCR_CENTER } from "@/mocks";
+import { getDealsNearby } from "@/lib/supabase";
+import { UCR_CENTER } from "@/lib/geo/nearby";
 import {
   formatDistance,
   groupNearbyBusinesses,
@@ -20,6 +21,7 @@ import {
 } from "@/lib/geo/nearby";
 import { useLocation } from "@/lib/geo/use-location";
 import { NearbyMap } from "./nearby-map";
+import { PinDetails } from "./pin-details";
 
 const locationMessages = {
   campus:
@@ -89,7 +91,7 @@ export function MapExplorer() {
   );
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-8 sm:py-10">
+    <div className="mx-auto w-full py-2">
       <header className="mb-6 flex items-center justify-between gap-4">
         <div>
           <p className="mb-1 flex items-center gap-1.5 text-sm font-bold text-green-dark">
@@ -98,7 +100,9 @@ export function MapExplorer() {
           <h1 className="text-3xl sm:text-4xl">Find your next bite</h1>
         </div>
         <span className="rounded-pill bg-peach px-3 py-2 text-xs font-bold text-brown">
-          Sample spots
+          {process.env.NEXT_PUBLIC_DATA_SOURCE === "supabase"
+            ? "Nearby spots"
+            : "Sample spots"}
         </span>
       </header>
 
@@ -267,9 +271,15 @@ export function MapExplorer() {
           </ul>
         )}
       </section>
-      <p className="mt-6 text-center text-xs text-ink-fine">
-        Sample places and deals for the Week 1 preview.
-      </p>
-    </main>
+      {process.env.NEXT_PUBLIC_DATA_SOURCE !== "supabase" && (
+        <p className="mt-6 text-center text-xs text-ink-fine">
+          Sample places and deals for this preview.
+        </p>
+      )}
+      <PinDetails
+        business={selected ?? null}
+        onClose={() => setSelectedId(null)}
+      />
+    </div>
   );
 }
