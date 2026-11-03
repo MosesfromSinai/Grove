@@ -1,37 +1,37 @@
-# Week 1 map preview
+# Map, truck location, and PWA install
 
-Open `/map` after `npm install` and `npm run dev` with Node 22. No Supabase keys are needed for this sprint: the page uses `getDealsNearby` from `mocks/`, matching the API contract.
+Use Node 22, `npm ci`, then `npm run dev`. Screens import `@/lib/supabase`: mocks are the default; `NEXT_PUBLIC_DATA_SOURCE=supabase` selects the authenticated wrappers. Configure Supabase as described in the root README. No service-role key belongs in the browser.
 
-Set `NEXT_PUBLIC_MAPBOX_TOKEN` in git-ignored `.env.local` and restart the dev server to load Mapbox streets. Without a token, or if the map fails, a labeled coordinate pin preview and the complete business list remain usable. The preview is approximate and provides no walking directions. Token creation, allowed domains, and Vercel configuration are still #84's handoff to Moses; don't commit a token or paste it into an issue.
+## What is implemented
 
-## Behavior
+- `/map`: one pin per business, orange for live public deals and green otherwise, combining Open now, Has deals, and Walking distance. Default radius is 3 km; Walking distance is 800 m in a straight line, not a route. Location is requested on tap with a UC Riverside fallback.
+- Pin/list selection opens a native modal bottom sheet with business name, open/closed status, distance, and Edward’s shared deal cards. Keyboard focus is retained on marker selection; the modal handles focus and Escape.
+- Dashboard food trucks get **I’m here now**. Only a successful device position is submitted; denial, unavailability, timeout, and failed saves leave the pin alone. The mock updates memory for the current browser session. The real RPC persists PostGIS location and is owner-only; staff and other owners cannot move it.
+- `public/manifest.json`, 192/512 PNGs, a maskable PNG, Apple touch icon, and root metadata provide standalone install identity. The source artwork is `public/icons/grove.svg`; all PNGs are resized from that SVG. Colors match the existing Grove theme. Push and offline caching are outside this change.
 
-- One pin per business, even with several live deals. Orange means at least one live public deal; green means no live public deal. Existing mocks exclude link-only deals.
-- All three filters combine. Open now and Has deals use the query parameters; Walking distance changes the radius from 3,000 m to 800 m. Distance is measured in a straight line from campus center or the accepted device location.
-- Location is requested only from **Use my location**. Denial, unavailability, and timeout return to UC Riverside. **Back to campus** resets the origin. No location is saved.
-- Pin and list selections share a highlight. Edward's shared deal card and the bottom sheet belong to #90 in Week 2; the student tabs belong to Edward's shell.
-- Mapbox stays client-side, markers and the map are removed on cleanup, and superseded query/location results are ignored.
-- Styles use the `grove-map-` prefix because the scaffold's `*.css` Turbopack loader emits these styles as global CSS. No shared theme or root routing changes are needed.
+## Database handoff to Moses
 
-## Verification
+Review/apply `supabase/migrations/20261102000000_nearby_and_truck_location.sql` on the normal migration path, then regenerate database types. It adds:
 
-Run the required checks on Node 22:
+- `deals_nearby(lat, lng, radius_m, open_now, has_deals)`: PostGIS geography radius/distance, campus-local split/overnight hours, live public deals via `deal_status()`, and exact repeating-window end timestamps. Radius must be 1–50,000 m. A `nearby_deal_card` composite return type preserves the existing RPC argument and row names. Invoker security respects column grants/RLS, and the explicit public-only join also hides link-only deals from their owners and past redeemers.
+- `get_my_business()`: the existing `BusinessProfile` shape for the signed-in owner; returns a PIN-ready boolean and safe public fields, never the hash.
+- `update_truck_location(business_id, lat, lng)`: authenticated owner-only, validated coordinates, locked business row, truck-only update, safe coordinate response. Generated lat/lng follow PostGIS location automatically.
+
+`getMyBusiness` and truck updates now use the data switch; other dashboard writes are still mocks until Adolfo’s #73. Real onboarding/settings/posting are not established by this change. No hosted database has been changed during this session.
+
+## Checks and evidence
 
 ```sh
 npm run lint
 npm run typecheck
-npm run build
 npm test
+npm run build
+# After an isolated local Supabase database has been started/reset with this migration:
+npm run test:db
 ```
 
-Local browser checks on 2026-10-25:
+The new pgTAP file covers RLS-safe discovery, multiple deals, empty businesses, radius/filters, open hours, repeat windows, hidden deals as anon/owner/past redeemer, owner vs staff/other-owner truck updates, invalid coordinates, and discovery after a move. It runs in a transaction and rolls back. The old DB-wrapper test expecting a missing RPC now expects real rows.
 
-1. Campus origin shows eight businesses, with Orange Peel Tacos represented by one pin and two public deals.
-2. Open now shows seven spots. Adding Has deals shows five. Adding Walking distance shows three. Removing filters restores the matching pins and list rows.
-3. Synthetic geolocation responses verify success, permission denial, unavailable position, and timeout. Every failure returns to campus; a granted location far from campus shows an empty state; Back to campus restores eight spots. Browser overrides were removed after testing.
-4. The 390×844 mobile viewport has no horizontal overflow. Controls have 44 px touch targets and names, filter and selection state are exposed with `aria-pressed`, and the business list provides an alternative to map pins.
-5. Node 22 lint, type checking, production build, and the data, Mapbox-component, and location tests pass. A separate browser tab on the local production-build server verifies the eight default spots and renders without console warnings or errors; local production-build filter interactions also reduce the list to five and three spots.
+Local Chrome checks on 2026-11-02 used the actual components on a temporary fixture under `/theme` with placeholder local auth configuration; the original theme route was restored and no auth bypass was committed. The fixture confirmed the bottom sheet and shared card, a synthetic truck location moving the mock pin from 373 m to 35 m after query refresh, denial leaving the pin unchanged, and a narrow viewport without horizontal overflow. Chrome parsed the manifest with zero manifest errors and reported zero installability errors; Apple title/icon links were present. Synthetic browser overrides were removed afterward.
 
-Still pending: actual Mapbox rendering with the restricted token, exact comparison to the linked design canvas (unavailable during this session), and physical iPhone Safari/Android Chrome testing over HTTPS. The real database query and pin bottom sheet are Week 2 work.
-
-Automated component tests use a mocked Mapbox module; they verify marker focus, marker/map cleanup, map errors, initialization failure, and load timeout without a token or external API requests. Location tests cover granted/denied/unavailable/timeout outcomes and stale callbacks after newer requests or a campus reset. `npm test` runs Vitest; the required CI job now includes it. These tests do not establish real Mapbox tiles or physical-phone behavior.
+Still pending: isolated PostGIS/pgTAP execution (Docker handoff requested), applying the migration to grove-dev, authenticated hosted truck testing, actual Mapbox rendering with #84’s restricted token, design-canvas comparison, and physical iPhone Safari/Android Chrome installation checks. Local browser/manifest checks do not establish those outcomes. #84–85, #88/#117 server validation, #94, and #119 remain open until their corresponding checks pass.

@@ -47,6 +47,10 @@ export type BusinessPublic = {
 };
 
 export type BusinessProfile = { business: BusinessPublic; pin_ready: boolean };
+export type UpdateTruckLocationInput = { business_id: string; lat: number; lng: number };
+export type UpdateTruckLocationResult =
+  | { ok: true; location: UpdateTruckLocationInput }
+  | { ok: false; error: "NOT_SIGNED_IN" | "NOT_OWNER" | "NOT_A_TRUCK" | "INVALID_LOCATION" };
 export type BusinessLocationOption = Pick<BusinessPublic, "address" | "lat" | "lng">;
 export type SaveBusinessInput = Pick<BusinessPublic,
   "name" | "address" | "lat" | "lng" | "hours" | "logo_url" | "is_truck"
