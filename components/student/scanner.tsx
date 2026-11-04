@@ -15,6 +15,17 @@ function parseSlug(text: string): string | null {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+function PinLink({ dealId }: { dealId: string }) {
+  return (
+    <Link
+      href={`/pin?deal=${dealId}`}
+      className="mt-3 flex min-h-11 items-center font-semibold text-green-dark underline"
+    >
+      Can&apos;t scan? Ask staff to enter their PIN
+    </Link>
+  );
+}
+
 export function Scanner() {
   const dealId = useSearchParams().get("deal");
   const [phase, setPhase] = useState<Phase>("locating");
@@ -136,6 +147,7 @@ export function Scanner() {
           <button onClick={retry} className="mt-4 min-h-11 rounded-button bg-ink px-6 font-semibold text-white">
             Try again
           </button>
+          <PinLink dealId={dealId} />
         </div>
       )}
 
@@ -145,6 +157,7 @@ export function Scanner() {
           <button onClick={retry} className="mt-4 min-h-11 rounded-button bg-ink px-6 font-semibold text-white">
             Try again
           </button>
+          <PinLink dealId={dealId} />
         </div>
       )}
 
@@ -163,6 +176,7 @@ export function Scanner() {
           <button onClick={retry} className="mt-4 min-h-11 rounded-button bg-ink px-6 font-semibold text-white">
             Try again
           </button>
+          {(error === "TOO_FAR" || error === "LOCATION_REQUIRED") && <PinLink dealId={dealId} />}
         </div>
       )}
     </div>
