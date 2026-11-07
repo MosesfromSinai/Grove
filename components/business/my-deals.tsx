@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Plus, Tags } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { cancelDeal, endDeal, getMyDeals } from "@/lib/supabase/business";
+import { cancelDeal, endDeal, getMyDeals } from "@/lib/supabase";
 import { CAMPUS_TZ } from "@/lib/supabase/deal-status";
 import type { DealMutationError, DealStatus, MyDeal } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";

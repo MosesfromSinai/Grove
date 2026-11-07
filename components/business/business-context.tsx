@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Store } from "lucide-react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { getMyBusiness } from "@/lib/supabase/business";
+import { getMyBusiness } from "@/lib/supabase";
 import type { BusinessProfile } from "@/lib/supabase/types";
 
 type BusinessContextValue = {
@@ -51,7 +51,7 @@ export function BusinessIdentity() {
       </span>
       <div className="min-w-0">
         <p className="text-sm font-extrabold [overflow-wrap:anywhere]">{profile?.business.name ?? (error ? "Business unavailable" : "Loading business…")}</p>
-        <p className="text-xs text-ink-fine">Sample business · UC Riverside</p>
+        <p className="text-xs text-ink-fine">{profile?.business.is_truck ? "Food truck" : "Restaurant"} · UC Riverside</p>
       </div>
     </div>
     {error && <div className="mt-3 text-sm text-destructive"><p>{error}</p><Button variant="outline" onClick={refresh} className="mt-2">Retry business</Button></div>}

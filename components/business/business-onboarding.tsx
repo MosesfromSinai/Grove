@@ -7,7 +7,7 @@ import { Check, Store } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { BusinessLoading, useBusiness } from "@/components/business/business-context";
 import { readImage } from "@/components/business/read-image";
-import { getBusinessLocationOptions, saveBusiness, setPin } from "@/lib/supabase/business";
+import { getBusinessLocationOptions, saveBusiness, setPin } from "@/lib/supabase";
 import { BUSINESS_DAYS, copyHours, validateBusinessInput } from "@/lib/supabase/business-input";
 import { IMAGE_TYPES, MAX_IMAGE_BYTES } from "@/lib/supabase/image-input";
 import type { BusinessInputErrors, BusinessLocationOption, BusinessProfile, Hours, Weekday } from "@/lib/supabase/types";

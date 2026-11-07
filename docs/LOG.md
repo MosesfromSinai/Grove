@@ -93,6 +93,8 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-28:** Student app on `@/lib/supabase`: app shell with Map, Deals, Profile tabs, deal card, deals feed on `getDealsNearby`, deal page with Redeem in store, scanner (location first, `html5-qrcode`, sticker slug) calling `redeem()` with a message for every `ErrorCode`, and the live Redeemed screen (#49–#52, #55, #56; PR #129). Phone test (#53) and the PIN backup link (#54) still to do.
 
 ## Adolfo
+- **2026-11-06:** Compared the live canvas; aligned dashboard shell and post-deal form (#69/#71), with responsive/keyboard/mock-post checks and five component regressions; Adolfo approved a local commit, with push deferred.
+- **2026-11-06:** Corrected stale dependencies in `docs/team/adolfo.md`; #126/#127 are merged and `set-pin`/RLS/Realtime are live. Business profile/writes still use mocks; provisioning/Storage and hosted verification remain #73. Root business-adapter exports need Moses's review.
 - **2026-10-26:** Prepared PR #126 review fixes: concise contract/docs, 21 isolated Vitest tests via `npm test`, shared `openNow`, and verified ignore coverage; lint, typecheck, build, responsive/behavioral and accessibility checks passed; main merge waits on #127.
 - **2026-10-26:** Business setup with profile, coordinates, hours, logo, food-truck toggle, and first-PIN flow on mocks (#70, PR #126).
 - **2026-10-25:** Responsive dashboard shell and navigation (#69, PR #126); canvas comparison remains unverified.
