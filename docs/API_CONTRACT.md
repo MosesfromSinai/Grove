@@ -2,11 +2,11 @@
 
 The shapes everyone builds against. Frontend work uses `mocks/` that match this file exactly, then swaps in real queries once the tables and functions exist.
 
-**Owner:** Moses. **Status:** Final (2026-10-24), including repeat days, link-only deals, and club nights; the business writes are final as of 2026-10-27. Later changes still follow the rule below.
+**Owner:** Moses. **Status:** Final (2026-10-24), including repeat days, link-only deals, and club nights; business-adapter changes for #73/#112, the sticker read for #74, overview/connection helpers for #75, and the mode write for #77 below are proposed for Moses's review (2026-11-06). Hosted integration remains unverified.
 **Rule:** any change here goes in a pull request reviewed by the people it affects, plus a line in `docs/LOG.md`.
 **Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together. Screens import from `lib/supabase` (`index.ts`), which serves `mocks/` or the real wrappers in `queries.ts` depending on `NEXT_PUBLIC_DATA_SOURCE`; a compile-time check keeps their signatures identical. The wrappers are browser-only: call them from client components so they run with the signed-in user's session.
 
-_Last updated: 2026-10-27_
+_Last updated: 2026-11-06_
 
 ---
 
@@ -85,7 +85,7 @@ The owner's row is created with the business. Staff rows come from `add-staff`. 
 - **Repeating deal:** `live` only when today (campus time) is in `active_days` and the time is in `[daily_start, daily_end)`; `scheduled` otherwise. Example: Mon–Wed 2–5 PM is live Monday at 3 PM and `scheduled` Monday at 6 PM or Thursday.
 
 SQL uses one `deal_status(d deals, at_time timestamptz default now())` function returning `scheduled`, `live`, or `ended`; TypeScript uses `dealStatus()` in `lib/supabase/deal-status.ts`. `redeem`, `redeem-pin`, `issue-code`, `staff-redeem`, `deals_nearby`, and RLS all use the same rule.
-- **End now** (or turning off a repeating deal) sets `ends_at = now()`. **Cancel** on a scheduled deal with no redemptions deletes it.
+- **End now** (or turning off a repeating deal, including between daily windows) sets `ends_at = now()`. **Cancel** deletes a scheduled deal only before its first `starts_at`, without redemptions or a club-night reference. After a repeating deal starts, use End now rather than deleting it.
 - Check constraints: `ends_at > starts_at` when set; `ends_at` null only if `active_days` is set; `active_days`, `daily_start`, `daily_end` all set or all null; `daily_end > daily_start`.
 - **Deal link:** every deal opens at `/deals/<id>`, and Adolfo's dashboard offers it as a link and a QR for flyers and group chats. It's advertising only: it opens the deal in Grove and never redeems. Link-only deals rely on the id being unguessable (uuid).
 - **Who reads link-only deals:** RLS lets students select only `public` deals from the table, so link-only deals can't be listed. `getDeal` calls a `deal_by_id(id)` SQL function (security definer) that returns the `deals` row of either visibility by id (no rows if it doesn't exist); that's how a link opens.
@@ -151,11 +151,12 @@ Moses owns `lib/supabase/` and writes the wrappers; the owner listed writes the 
 | `getBusinessBySlug` | `{ slug }` | `{ business: BusinessPublic, liveDeals: Deal[] } \| null`, live public deals only | Edward (sticker landing) |
 | `getMyRedemptions` | none | `Redemption[]`, newest first | Edward |
 | `getBusinessStats` | `{ businessId, from, to }` | `BusinessStats` | Adolfo |
+| `getBusinessOverview` | `{ businessId }` | `BusinessOverview`: today's/week's exact counts and latest 8 visits; member-only | Adolfo (#75 proposal for Moses review) |
 | `getMyDeals` | `{ businessId }` | `MyDeal[]`, newest start first, both visibilities | Adolfo |
 | `getOpenClubNights` | none | `OpenClubNight[]`, open nights at the student's campus, soonest first | Edward (claim screen) |
 | `getClubNights` | `{ businessId }` | `ClubNight[]` with `visit_count`, newest first | Adolfo (club night results) |
 | `getStaff` | `{ businessId }` | `StaffMember[]` (owner and staff, active or invited) | Adolfo (staff list) |
-| `subscribeToRedemptions` | `({ businessId }, onRedemption: (r: Redemption) => void)` | `() => void` (unsubscribe). Calls `onRedemption` for each new visit at that business within a few seconds (Realtime; RLS limits it to members, and `student_location` is never sent) | Adolfo (live visit feed) |
+| `subscribeToRedemptions` | `({ businessId }, onRedemption: (r: Redemption) => void, onConnection?: (state: RedemptionConnection) => void)` | `() => void` (unsubscribe). Calls `onRedemption` for new visits at that business; optional connection callback reports connecting/live/reconnecting (#75 proposal). RLS limits it to members, and `student_location` is never sent | Adolfo (live visit feed) |
 
 ```ts
 type DealStatus = "scheduled" | "live" | "ended";
@@ -255,6 +256,9 @@ type BusinessStats = {
   total: number;
 };
 
+type BusinessOverview = { today: number; week: number; recentVisits: Redemption[]; as_of: string };
+type RedemptionConnection = "connecting" | "live" | "reconnecting";
+
 type OpenClubNight = {
   id: string;
   business_id: string;
@@ -284,23 +288,42 @@ type ClubNight = OpenClubNight & {
 
 ---
 
-## Business writes (final; mock-backed until #73)
+## Business reads and writes (#73/#112/#74/#77 proposals for review)
+
+All adapters now follow the shared mock/real switch. The real path uses the signed-in browser session, checks membership, and remains subject to RLS. It never falls back to mocks. Local adapter tests use simulated responses; authorized grove-dev membership and real-database verification are pending acceptance checks for #73.
+
+**Overview (#75 proposal):** `getBusinessOverview` checks signed-in membership and throws `BusinessAccessError` (`NOT_SIGNED_IN`/`NOT_MEMBER`) or a query error; failures never become zero. Counts use exact HEAD queries independent of the returned-row cap, from campus midnight or Monday midnight through one browser-clock `as_of` instant (inclusive). Resolve calendar boundaries separately in `America/Los_Angeles` to handle DST. The initial feed reads the newest 8 visits across all dates, ordered by `redeemed_at` then `id` descending; only explicitly allowed fields and deal/business labels are selected. Mocks count actual fixture visits in the same periods, rather than using canned stats. Overview reads `getMyDeals` separately and computes live windows with shared `dealStatus`. It subscribes before loading, refreshes canonical counts/feed on events and connection recovery, queues an extra refresh for events arriving during a read, and polls every minute/on return to the tab. It never increments totals from event deliveries. Failed refreshes label retained data as old; lost membership clears it. Subscription cleanup suppresses late callbacks. No new tables, migrations, functions, or backend deployment; authorized real counts/RLS/Realtime and browser/database-clock consistency remain acceptance checks.
 
 | Function | Input | Success returns | Errors |
 |---|---|---|---|
-| `createDeal` | `CreateDealInput` | `{ ok: true, deal: MyDeal }` | `NOT_OWNER`, `INVALID_DEAL` (`fields: CreateDealErrors`) |
-| `endDeal` | `{ business_id, deal_id }` | `{ ok: true, deal: MyDeal }` | `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_LIVE` |
-| `cancelDeal` | `{ business_id, deal_id }` | `{ ok: true, deal_id: string }` | `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_SCHEDULED`, `DEAL_HAS_REDEMPTIONS`, `DEAL_IN_USE` |
-| `getMyBusiness` | none | `BusinessProfile` | none |
-| `getBusinessLocationOptions` (mock helper) | none | `Pick<BusinessPublic, "address" \| "lat" \| "lng">[]` | none |
-| `saveBusiness` | `SaveBusinessInput` | `{ ok: true, profile: BusinessProfile }` | `NOT_OWNER`, `INVALID_BUSINESS` (`fields: BusinessInputErrors`) |
+| `createDeal` | `CreateDealInput` | `{ ok: true, deal: MyDeal }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `IMAGE_STORAGE_UNAVAILABLE`, `INVALID_DEAL` (`fields: CreateDealErrors`) |
+| `endDeal` | `{ business_id, deal_id }` | `{ ok: true, deal: MyDeal }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_LIVE` |
+| `cancelDeal` | `{ business_id, deal_id }` | `{ ok: true, deal_id: string }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_SCHEDULED`, `DEAL_HAS_REDEMPTIONS`, `DEAL_IN_USE` |
+| `getMyBusiness` | none | `BusinessProfile \| null` (no membership) | throws `BusinessAccessError` (`NOT_SIGNED_IN`, `MULTIPLE_BUSINESSES`) or a transport/query error |
+| `getBusinessSticker` | `{ businessId }` | `BusinessSticker \| null` (missing business/slug) | throws `BusinessAccessError` (`NOT_SIGNED_IN`, `NOT_MEMBER`) or a transport/query error |
+| `getBusinessLocationOptions` | none | `Pick<BusinessPublic, "address" \| "lat" \| "lng">[]`; sample coordinates on mocks, `[]` on real data (no geocoder) | throws on transport failure |
+| `saveBusiness` | `SaveBusinessInput` | `{ ok: true, profile: BusinessProfile }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `IMAGE_STORAGE_UNAVAILABLE`, `INVALID_BUSINESS` (`fields: BusinessInputErrors`) |
+| `setRedemptionMode` | `SetRedemptionModeInput` | `{ ok: true, redemption_mode }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `INVALID_MODE`, `STAFF_SCAN_UNAVAILABLE`; throws on transport/query or unconfirmed write |
 
 ```ts
 type CreateDealInput = Pick<Deal,
   "business_id" | "title" | "description" | "photo_url" | "starts_at" | "students_only"
-> & { ends_at: string; discount_type: DiscountType; discount_value: number | null };
+> & {
+  ends_at: string | null;
+  active_days?: Weekday[] | null;
+  daily_start?: string | null;
+  daily_end?: string | null;
+  visibility?: DealVisibility;
+  discount_type: DiscountType;
+  discount_value: number | null;
+};
 type CreateDealErrors = Partial<Record<keyof CreateDealInput, string>>;
-type BusinessProfile = { business: BusinessPublic; pin_ready: boolean };
+type BusinessProfile = { business: BusinessPublic; membership_role: "owner" | "staff"; pin_ready: boolean | null };
+type BusinessSticker = { business_id: string; business_name: string; qr_slug: string };
+
+type SetRedemptionModeInput = { business_id: string; redemption_mode: RedemptionMode };
+type SetRedemptionModeResult = { ok: true; redemption_mode: RedemptionMode } |
+  { ok: false; error: "NOT_SIGNED_IN" | "NOT_OWNER" | "INVALID_MODE" | "STAFF_SCAN_UNAVAILABLE" };
 type SaveBusinessInput = Pick<BusinessPublic,
   "name" | "address" | "lat" | "lng" | "hours" | "logo_url" | "is_truck"
 > & { business_id: string };
@@ -308,6 +331,17 @@ type BusinessInputErrors = Partial<Record<keyof SaveBusinessInput, string>>;
 ```
 
 Writes return `Promise` results; errors are `{ ok: false, error, fields? }`. Read helpers return `Promise` values. `setPin` retains its Edge Function signature below.
+
+- Omitted repeat fields become null; omitted visibility becomes `public`. Chosen weekdays are unique, valid, and normalized Monday–Sunday. Repeats require both `HH:MM` daily times with end later than start (no overnight windows). Only repeats can omit an end instant. Starts/end instants and daily windows use campus time in the UI; instants are saved as UTC.
+- Business updates remain owner-only. Deal reads/writes allow owner or staff membership; `NOT_OWNER` is the legacy write-permission code for nonmembers. Real `getMyDeals` throws `BusinessAccessError` (`NOT_SIGNED_IN` or `NOT_MEMBER`) instead of presenting another business's public rows as its management data. Multiple memberships are refused until the coordinator resolves the account's business; this MVP has no business selector.
+- There is no browser business-creation policy/provisioning function. No membership returns null and an access-needed state; it never loads the sample owner in real mode. Business updates write PostGIS `location` as `SRID=4326;POINT(lng lat)`; generated lat/lng are read-only.
+- `pin_ready: null` means unknown on real data: no query reads `staff_pin`. Onboarding preserves existing PINs and never treats unknown as unset. Mocks retain known boolean readiness. Only an explicitly known `false` runs the first-PIN flow; `setPin` still returns a PIN once and it is never logged or persisted.
+- **Settings (#77 proposal):** `setRedemptionMode` checks signed-in owner membership, validates the mode and updates only `businesses.redemption_mode`, returning only the confirmed mode. It never reads/writes PINs or slugs. Existing SQL grants/policies support this update. However, #20 remains open and `issue-code`/`staff-redeem` are absent on main: the real helper refuses activating `staff_scan` with `STAFF_SCAN_UNAVAILABLE`, and the real UI disables that option. An existing Staff scan configuration can return to Sticker. Mocks support both modes. Remove the guard/disabled state only after backend readiness is verified; complete live mode-switch acceptance is pending.
+- **Reset PIN (#77):** uses the existing `setPin({ business_id })` Edge Function wrapper unchanged, only after explicit owner confirmation. No current PIN read or automatic reset. Only a validated four-digit success response is displayed, held temporarily in component state; manual hide, page/tab exit and a 60-second timeout discard it. It cannot be revealed again. No browser storage, clipboard, logs, or screenshot/report output. Prevent duplicate submission and ignore late responses after navigation; a reset returning while hidden is never revealed later. Transport failures explain that the reset may have completed and require a new explicit confirmation, never an automatic retry. Staff controls are read-only; permission changes lock writes until profile reload. Unknown PIN readiness remains preserved unless a confirmed reset succeeds.
+- Image Storage buckets/policies/uploads are absent. Real posting requires `photo_url: null`; real business saves may retain the exact existing logo URL or remove it. New images return `IMAGE_STORAGE_UNAVAILABLE` without a write. Mock data URLs remain memory-only. HTTPS URLs permit existing Storage logos to pass shared validation; this is not proof an upload exists.
+- Mutations recheck current state and constrain updates/deletes by business and schedule. FK constraints preserve redemptions and club-night references racing deletion. Browser UTC supplies write timestamps as in existing adapters; verify clock and race behavior against the real database before acceptance.
+- `getBusinessSticker` (#74) checks the signed-in user's owner/staff membership, then selects only `businesses.id, name, qr_slug`. Existing SQL column grants permit this; no migration, function, or write is needed. `qr_slug` remains excluded from `BusinessPublic`. A missing slug returns null; no slug is invented. The mock returns only the sample owner's sticker and rejects other businesses with `NOT_MEMBER`.
+- Counter stickers encode the configured `NEXT_PUBLIC_SITE_URL` origin plus `/b/<qr_slug>`, never a deal or redemption endpoint. The origin must be HTTPS (HTTP is allowed only for loopback previews), without credentials/path/query/fragment. Missing/invalid configuration blocks downloading. PNG exports use the Grove theme/fonts, 3/4/6-inch squares at 300 DPI (900/1200/1800 pixels, with PNG pHYs metadata), an unobstructed QR with four-module quiet zone, and the wording "Scan in the Grove app to redeem." Mock exports are marked DEMO. Actual-size printing/physical scans and the hosted membership/slug read remain acceptance checks; Edward's `/b/[slug]` page still depends on PR #139.
 
 ---
 
