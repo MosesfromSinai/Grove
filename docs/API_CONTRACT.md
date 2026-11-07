@@ -2,7 +2,7 @@
 
 The shapes everyone builds against. Frontend work uses `mocks/` that match this file exactly, then swaps in real queries once the tables and functions exist.
 
-**Owner:** Moses. **Status:** Final (2026-10-24), including repeat days, link-only deals, and club nights; business-adapter changes for #73/#112 and the sticker read for #74 below are proposed for Moses's review (2026-11-06). Hosted integration remains unverified.
+**Owner:** Moses. **Status:** Final (2026-10-24), including repeat days, link-only deals, and club nights; business-adapter changes for #73/#112, the sticker read for #74, and overview/connection helpers for #75 below are proposed for Moses's review (2026-11-06). Hosted integration remains unverified.
 **Rule:** any change here goes in a pull request reviewed by the people it affects, plus a line in `docs/LOG.md`.
 **Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together. Screens import from `lib/supabase` (`index.ts`), which serves `mocks/` or the real wrappers in `queries.ts` depending on `NEXT_PUBLIC_DATA_SOURCE`; a compile-time check keeps their signatures identical. The wrappers are browser-only: call them from client components so they run with the signed-in user's session.
 
@@ -151,11 +151,12 @@ Moses owns `lib/supabase/` and writes the wrappers; the owner listed writes the 
 | `getBusinessBySlug` | `{ slug }` | `{ business: BusinessPublic, liveDeals: Deal[] } \| null`, live public deals only | Edward (sticker landing) |
 | `getMyRedemptions` | none | `Redemption[]`, newest first | Edward |
 | `getBusinessStats` | `{ businessId, from, to }` | `BusinessStats` | Adolfo |
+| `getBusinessOverview` | `{ businessId }` | `BusinessOverview`: today's/week's exact counts and latest 8 visits; member-only | Adolfo (#75 proposal for Moses review) |
 | `getMyDeals` | `{ businessId }` | `MyDeal[]`, newest start first, both visibilities | Adolfo |
 | `getOpenClubNights` | none | `OpenClubNight[]`, open nights at the student's campus, soonest first | Edward (claim screen) |
 | `getClubNights` | `{ businessId }` | `ClubNight[]` with `visit_count`, newest first | Adolfo (club night results) |
 | `getStaff` | `{ businessId }` | `StaffMember[]` (owner and staff, active or invited) | Adolfo (staff list) |
-| `subscribeToRedemptions` | `({ businessId }, onRedemption: (r: Redemption) => void)` | `() => void` (unsubscribe). Calls `onRedemption` for each new visit at that business within a few seconds (Realtime; RLS limits it to members, and `student_location` is never sent) | Adolfo (live visit feed) |
+| `subscribeToRedemptions` | `({ businessId }, onRedemption: (r: Redemption) => void, onConnection?: (state: RedemptionConnection) => void)` | `() => void` (unsubscribe). Calls `onRedemption` for new visits at that business; optional connection callback reports connecting/live/reconnecting (#75 proposal). RLS limits it to members, and `student_location` is never sent | Adolfo (live visit feed) |
 
 ```ts
 type DealStatus = "scheduled" | "live" | "ended";
@@ -255,6 +256,9 @@ type BusinessStats = {
   total: number;
 };
 
+type BusinessOverview = { today: number; week: number; recentVisits: Redemption[]; as_of: string };
+type RedemptionConnection = "connecting" | "live" | "reconnecting";
+
 type OpenClubNight = {
   id: string;
   business_id: string;
@@ -287,6 +291,8 @@ type ClubNight = OpenClubNight & {
 ## Business reads and writes (#73/#112/#74 proposals for review)
 
 All adapters now follow the shared mock/real switch. The real path uses the signed-in browser session, checks membership, and remains subject to RLS. It never falls back to mocks. Local adapter tests use simulated responses; authorized grove-dev membership and real-database verification are pending acceptance checks for #73.
+
+**Overview (#75 proposal):** `getBusinessOverview` checks signed-in membership and throws `BusinessAccessError` (`NOT_SIGNED_IN`/`NOT_MEMBER`) or a query error; failures never become zero. Counts use exact HEAD queries independent of the returned-row cap, from campus midnight or Monday midnight through one browser-clock `as_of` instant (inclusive). Resolve calendar boundaries separately in `America/Los_Angeles` to handle DST. The initial feed reads the newest 8 visits across all dates, ordered by `redeemed_at` then `id` descending; only explicitly allowed fields and deal/business labels are selected. Mocks count actual fixture visits in the same periods, rather than using canned stats. Overview reads `getMyDeals` separately and computes live windows with shared `dealStatus`. It subscribes before loading, refreshes canonical counts/feed on events and connection recovery, queues an extra refresh for events arriving during a read, and polls every minute/on return to the tab. It never increments totals from event deliveries. Failed refreshes label retained data as old; lost membership clears it. Subscription cleanup suppresses late callbacks. No new tables, migrations, functions, or backend deployment; authorized real counts/RLS/Realtime and browser/database-clock consistency remain acceptance checks.
 
 | Function | Input | Success returns | Errors |
 |---|---|---|---|

@@ -153,6 +153,9 @@ export type BusinessStats = {
   total: number;
 };
 
+export type BusinessOverview = { today: number; week: number; recentVisits: Redemption[]; as_of: string };
+export type RedemptionConnection = "connecting" | "live" | "reconnecting";
+
 // What a student sees when choosing a club night to claim.
 export type OpenClubNight = {
   id: string;

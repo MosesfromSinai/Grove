@@ -6,10 +6,13 @@ import { campusClock, dealStatus, liveUntil, openNow } from "../lib/supabase/dea
 import { validateCreateDealInput } from "../lib/supabase/deal-input";
 import { copyHours, validateBusinessInput } from "../lib/supabase/business-input";
 import { BusinessAccessError } from "../lib/supabase/business-errors";
+import { overviewPeriod } from "../lib/supabase/overview-period";
 import type {
   AddStaffResult,
   BusinessPublic,
   BusinessStats,
+  BusinessOverview,
+  RedemptionConnection,
   BusinessProfile,
   BusinessSticker,
   BusinessLocationOption,
@@ -121,7 +124,7 @@ function toRedemption(r: MockRedemption): Redemption {
   const d = deals.find((x) => x.id === r.deal_id);
   return {
     ...r,
-    redeemed_on: localDate(r.redeemed_at),
+    redeemed_on: campusClock(new Date(r.redeemed_at)).date,
     deal_title: d?.title ?? "",
     business_name: businessById(r.business_id).name,
   };
@@ -262,6 +265,16 @@ export async function getMyDeals(input: { businessId: string }): Promise<MyDeal[
     .map(toMyDeal)
     .sort((a, b) => b.starts_at.localeCompare(a.starts_at));
   return delay(mine);
+}
+
+export async function getBusinessOverview(input: { businessId: string }): Promise<BusinessOverview> {
+  if (input.businessId !== mockOwner.business_id) throw new BusinessAccessError("NOT_MEMBER");
+  const period = overviewPeriod(new Date());
+  const visits = redemptions.filter(r => r.business_id === input.businessId && Date.parse(r.redeemed_at) <= Date.parse(period.asOf))
+    .sort((a, b) => b.redeemed_at.localeCompare(a.redeemed_at) || b.id.localeCompare(a.id));
+  return delay({ today: visits.filter(r => Date.parse(r.redeemed_at) >= Date.parse(period.todayFrom)).length,
+    week: visits.filter(r => Date.parse(r.redeemed_at) >= Date.parse(period.weekFrom)).length,
+    recentVisits: visits.slice(0, 8).map(toRedemption), as_of: period.asOf });
 }
 
 // ---------- Business writes ----------
@@ -410,9 +423,11 @@ export async function notifyDeal(input: { deal_id: string }): Promise<NotifyDeal
 export function subscribeToRedemptions(
   input: { businessId: string },
   onRedemption: (r: Redemption) => void,
+  onConnection?: (state: RedemptionConnection) => void,
 ): () => void {
   const listener = { businessId: input.businessId, onRedemption };
   listeners.add(listener);
+  onConnection?.("live");
   return () => {
     listeners.delete(listener);
   };

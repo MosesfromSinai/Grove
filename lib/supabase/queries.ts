@@ -8,10 +8,13 @@ import { campusClock, dealStatus, openNow } from "./deal-status";
 import { validateBusinessInput } from "./business-input";
 import { validateCreateDealInput } from "./deal-input";
 import { BusinessAccessError } from "./business-errors";
+import { overviewPeriod } from "./overview-period";
 import type {
   AddStaffResult,
   BusinessPublic,
   BusinessStats,
+  BusinessOverview,
+  RedemptionConnection,
   ClaimClubNightResult,
   ClubNight,
   Deal,
@@ -215,6 +218,31 @@ export async function getMyDeals(input: { businessId: string }): Promise<MyDeal[
   return rows.map(({ redemptions, ...d }) => ({ ...toDeal(d), redemption_count: redemptions[0]?.count ?? 0 }));
 }
 
+// Exact HEAD counts are independent of PostgREST's row cap. The feed is bounded.
+export async function getBusinessOverview(input: { businessId: string }): Promise<BusinessOverview> {
+  const role = await membership(input.businessId);
+  if (role === "NOT_SIGNED_IN") throw new BusinessAccessError(role);
+  if (!role) throw new BusinessAccessError("NOT_MEMBER");
+  const period = overviewPeriod(new Date());
+  const count = async (from: string) => {
+    const result = await db().from("redemptions").select("id", { count: "exact", head: true })
+      .eq("business_id", input.businessId).gte("redeemed_at", from).lte("redeemed_at", period.asOf);
+    check(result);
+    if (result.count === null) throw new Error("Visit count unavailable.");
+    return result.count;
+  };
+  const [today, week, result] = await Promise.all([
+    count(period.todayFrom), count(period.weekFrom),
+    db().from("redemptions")
+      .select("id, deal_id, business_id, student_id, redeemed_at, redeemed_on, method, deals(title), businesses(name)")
+      .eq("business_id", input.businessId).lte("redeemed_at", period.asOf)
+      .order("redeemed_at", { ascending: false }).order("id", { ascending: false }).limit(8),
+  ]);
+  const recentVisits = list(result).map(({ deals, businesses, ...r }) => ({ ...r,
+    method: r.method as Redemption["method"], deal_title: deals?.title ?? "", business_name: businesses?.name ?? "" }));
+  return { today, week, recentVisits, as_of: period.asOf };
+}
+
 // ---------- Live updates ----------
 
 // Live visits for a business dashboard (#17). RLS sends members only their business's visits,
@@ -222,15 +250,24 @@ export async function getMyDeals(input: { businessId: string }): Promise<MyDeal[
 export function subscribeToRedemptions(
   input: { businessId: string },
   onRedemption: (r: Redemption) => void,
+  onConnection?: (state: RedemptionConnection) => void,
 ): () => void {
+  let active = true;
+  onConnection?.("connecting");
   const channel = db()
     .channel(`redemptions:${input.businessId}:${crypto.randomUUID()}`)
     .on(
       "postgres_changes",
       { event: "INSERT", schema: "public", table: "redemptions", filter: `business_id=eq.${input.businessId}` },
       async (payload) => {
+        if (!active) return;
         const r = payload.new as Tables<"redemptions">;
-        const { data: deal } = await db().from("deals").select("title, businesses(name)").eq("id", r.deal_id).maybeSingle();
+        if (r.business_id !== input.businessId) return;
+        // Emit the visit even if its optional label lookup fails. The dashboard
+        // re-reads canonical counts/feed and recovers any missed visits on reconnect.
+        let deal: { title: string; businesses: { name: string } | null } | null = null;
+        try { const result = await db().from("deals").select("title, businesses(name)").eq("id", r.deal_id).maybeSingle(); deal = result.data; } catch { /* labels are optional */ }
+        if (!active) return;
         onRedemption({
           id: r.id,
           deal_id: r.deal_id,
@@ -244,8 +281,9 @@ export function subscribeToRedemptions(
         });
       },
     )
-    .subscribe();
+    .subscribe(status => { if (active) onConnection?.(status === "SUBSCRIBED" ? "live" : "reconnecting"); });
   return () => {
+    active = false;
     void db().removeChannel(channel);
   };
 }
