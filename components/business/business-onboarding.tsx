@@ -7,7 +7,7 @@ import { Check, Store } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { BusinessLoading, useBusiness } from "@/components/business/business-context";
 import { readImage } from "@/components/business/read-image";
-import { getBusinessLocationOptions, saveBusiness, setPin } from "@/lib/supabase";
+import { getBusinessLocationOptions, saveBusiness, setPin, isMockData } from "@/lib/supabase";
 import { BUSINESS_DAYS, copyHours, validateBusinessInput } from "@/lib/supabase/business-input";
 import { IMAGE_TYPES, MAX_IMAGE_BYTES } from "@/lib/supabase/image-input";
 import type { BusinessInputErrors, BusinessLocationOption, BusinessProfile, Hours, Weekday } from "@/lib/supabase/types";
@@ -21,7 +21,9 @@ function FieldError({ field, errors }: { field: keyof BusinessInputErrors; error
 
 export function BusinessOnboarding() {
   const { profile } = useBusiness();
-  return profile ? <BusinessSetupForm key={profile.business.id} initialProfile={profile} /> : <BusinessLoading />;
+  if (!profile) return <BusinessLoading />;
+  if (profile.membership_role === "staff") return <section className="rounded-card bg-surface-dashboard p-6"><h2 className="text-xl">Owner access required</h2><p className="mt-3 text-ink-muted">Only the business owner can update business details or generate a PIN. You can still post and manage deals.</p></section>;
+  return <BusinessSetupForm key={profile.business.id} initialProfile={profile} />;
 }
 
 function BusinessSetupForm({ initialProfile }: { initialProfile: BusinessProfile }) {
@@ -58,6 +60,7 @@ function BusinessSetupForm({ initialProfile }: { initialProfile: BusinessProfile
   }, [errorFocusRequest]);
 
   useEffect(() => {
+    if (!isMockData) return;
     let active = true;
     getBusinessLocationOptions().then(rows => { if (active) setLocations(rows); })
       .catch(() => { if (active) setLookupError("Sample addresses are unavailable. You can enter your address and coordinates below."); });
@@ -143,10 +146,12 @@ function BusinessSetupForm({ initialProfile }: { initialProfile: BusinessProfile
       const response = await saveBusiness(result.value);
       if (response.ok) {
         setSaved(response.profile); updateProfile(response.profile);
-        if (!response.profile.pin_ready) await generateFirstPin(response.profile);
+        if (response.profile.pin_ready === false) await generateFirstPin(response.profile);
       } else {
         if (response.error === "INVALID_BUSINESS") setErrors(response.fields);
-        else setSaveError("You do not have permission to set up this business.");
+        else setSaveError(response.error === "NOT_SIGNED_IN" ? "Sign in again before saving your business."
+          : response.error === "IMAGE_STORAGE_UNAVAILABLE" ? "Logo uploads are not available yet. Keep the existing logo or remove it, then save."
+            : "You do not have permission to set up this business.");
         setErrorFocusRequest(current => current + 1);
       }
     } catch {
@@ -162,7 +167,7 @@ function BusinessSetupForm({ initialProfile }: { initialProfile: BusinessProfile
 
   if (saved) return <section ref={confirmation} tabIndex={-1} aria-labelledby="business-saved" className="max-w-2xl rounded-card border border-border bg-surface-dashboard p-6 shadow-card outline-none sm:p-8">
     <Check aria-hidden="true" className="mb-4 size-9 text-green" />
-    <h2 id="business-saved" className="text-2xl">Business saved to the demo</h2>
+    <h2 id="business-saved" className="text-2xl">{isMockData ? "Business saved to the demo" : "Business details saved"}</h2>
     <p className="mt-3 break-words text-lg font-bold">{saved.business.name}</p>
     <p className="mt-2 break-words text-sm text-ink-muted">{saved.business.address}</p>
     {working && <p role="status" className="mt-4 text-sm text-ink-muted">Generating your first PIN…</p>}
@@ -174,7 +179,8 @@ function BusinessSetupForm({ initialProfile }: { initialProfile: BusinessProfile
     </div>}
     {pinError && <div role="alert" className="mt-4 text-sm text-destructive"><p>{pinError}</p><Button disabled={working} onClick={retryPin} className="mt-3 rounded-button">Generate first PIN</Button></div>}
     {!pin && !working && saved.pin_ready && <p className="mt-4 text-sm font-bold text-green-dark">Your staff PIN is set. Keep it for in-store redemptions.</p>}
-    <p className="mt-5 text-sm text-ink-fine">Demo changes reset on a full page reload. Nothing has been published.</p>
+    {saved.pin_ready === null && <p className="mt-4 text-sm text-ink-muted">Your existing PIN was preserved. PIN setup status is unavailable; confirm it with the Grove coordinator.</p>}
+    {isMockData && <p className="mt-5 text-sm text-ink-fine">Demo changes reset on a full page reload. Nothing has been published.</p>}
     <div className="mt-6 flex flex-wrap gap-3">
       <Link href="/dashboard" onClick={() => setNewPin(null)} aria-disabled={working || undefined} tabIndex={working ? -1 : undefined} className={buttonVariants({ className: `rounded-button ${working ? "pointer-events-none opacity-50" : ""}` })}>Go to dashboard</Link>
       <Button variant="outline" disabled={working} onClick={() => resetDraft(saved)} className="rounded-button">Edit business details</Button>
@@ -183,7 +189,8 @@ function BusinessSetupForm({ initialProfile }: { initialProfile: BusinessProfile
 
   const hasErrors = Boolean(saveError) || Object.values(errors).some(Boolean);
   return <form onSubmit={submit} noValidate aria-label="Business setup" aria-busy={working} className="max-w-4xl rounded-card border border-border bg-surface-dashboard p-5 shadow-card sm:p-7">
-    <p className="mb-6 text-sm text-ink-muted">Set up your sample business. Required fields are marked *.</p>
+    <p className="mb-6 text-sm text-ink-muted">{isMockData ? "Set up your sample business." : "Update your provisioned business's details."} Required fields are marked *.</p>
+    {initialProfile.pin_ready === null && <p className="mb-6 text-sm text-ink-muted">Saving these details preserves your existing PIN. PIN setup status cannot be read here.</p>}
     {hasErrors && <div ref={summary} role="alert" tabIndex={-1} className="mb-6 rounded-button border border-destructive p-4 text-sm text-destructive outline-none focus:ring-2 focus:ring-destructive"><p className="font-bold">{saveError || "Please check the highlighted fields."}</p>{Object.values(errors).filter(Boolean).map(message => <p key={message} className="mt-1">{message}</p>)}</div>}
     <fieldset disabled={working} className="min-w-0 space-y-6 disabled:opacity-70">
       <div>
@@ -192,9 +199,9 @@ function BusinessSetupForm({ initialProfile }: { initialProfile: BusinessProfile
         <FieldError field="name" errors={errors} />
       </div>
       <section aria-labelledby="location-heading" className="min-w-0 space-y-4">
-        <div><h2 id="location-heading" className="text-xl">Where can students find you?</h2><p className="mt-1 text-sm text-ink-fine">Choose a sample address to fill its coordinates. For another location, enter its address, latitude, and longitude.</p></div>
+        <div><h2 id="location-heading" className="text-xl">Where can students find you?</h2><p className="mt-1 text-sm text-ink-fine">{isMockData ? "Choose a sample address to fill its coordinates. For another location, enter its address, latitude, and longitude." : "Enter your address and exact coordinates. Automatic address lookup is not available."}</p></div>
         {lookupError && <p role="alert" className="text-sm text-ink-muted">{lookupError}</p>}
-        <div><label htmlFor="sample-address" className="text-sm font-bold">Sample address lookup</label><select id="sample-address" value={selectedAddress} onChange={event => { const address = event.target.value; setSelectedAddress(address); const selected = locations.find(item => item.address === address); if (selected) { setValues(current => ({ ...current, address: selected.address, lat: String(selected.lat), lng: String(selected.lng) })); clearError("address"); clearError("lat"); clearError("lng"); } }} className={control}><option value="">Enter a location manually</option>{locations.map((location, index) => <option key={`${location.address}-${index}`} value={location.address}>{location.address}</option>)}</select></div>
+        {isMockData && <div><label htmlFor="sample-address" className="text-sm font-bold">Sample address lookup</label><select id="sample-address" value={selectedAddress} onChange={event => { const address = event.target.value; setSelectedAddress(address); const selected = locations.find(item => item.address === address); if (selected) { setValues(current => ({ ...current, address: selected.address, lat: String(selected.lat), lng: String(selected.lng) })); clearError("address"); clearError("lat"); clearError("lng"); } }} className={control}><option value="">Enter a location manually</option>{locations.map((location, index) => <option key={`${location.address}-${index}`} value={location.address}>{location.address}</option>)}</select></div>}
         <div>
           <label htmlFor="business-address" className="text-sm font-bold">Address *</label>
           <input id="business-address" required value={values.address} onChange={event => { setSelectedAddress(""); setValues(current => ({ ...current, address: event.target.value, lat: "", lng: "" })); clearError("address"); }} aria-invalid={Boolean(errors.address)} aria-describedby={`location-help${errors.address ? " business-address-error" : ""}`} className={control} />
@@ -219,15 +226,15 @@ function BusinessSetupForm({ initialProfile }: { initialProfile: BusinessProfile
       </section>
       <div>
         <label htmlFor="business-logo" className="text-sm font-bold">Business logo (optional)</label>
-        <p id="logo-help" className="mt-1 text-sm text-ink-fine">JPG, PNG, or WebP · up to 5 MB. The logo stays in this demo only.</p>
+        <p id="logo-help" className="mt-1 text-sm text-ink-fine">{isMockData ? "JPG, PNG, or WebP · up to 5 MB. The logo stays in this demo only." : "Logo uploads are not available yet. You can keep or remove the existing logo."}</p>
         <div className="mt-3 flex size-24 items-center justify-center overflow-hidden rounded-button bg-peach-deep text-brown">{logo ? <Image src={logo} alt="Business logo preview" width={96} height={96} unoptimized className="size-full object-cover" /> : <Store aria-hidden="true" className="size-8" />}</div>
-        <input ref={file} id="business-logo" type="file" accept="image/jpeg,image/png,image/webp" onChange={chooseLogo} aria-invalid={Boolean(errors.logo_url)} aria-describedby={`logo-help${errors.logo_url ? " business-logo_url-error" : ""}`} className={`${control} text-sm file:mr-3 file:min-h-11 file:rounded-button file:border-0 file:bg-green-tint file:px-3 file:font-bold file:text-green-dark`} />
+        <input ref={file} id="business-logo" type="file" disabled={!isMockData} accept="image/jpeg,image/png,image/webp" onChange={chooseLogo} aria-invalid={Boolean(errors.logo_url)} aria-describedby={`logo-help${errors.logo_url ? " business-logo_url-error" : ""}`} className={`${control} text-sm file:mr-3 file:min-h-11 file:rounded-button file:border-0 file:bg-green-tint file:px-3 file:font-bold file:text-green-dark`} />
         <FieldError field="logo_url" errors={errors} /><p role="status" className="mt-2 text-sm text-ink-muted">{logoReading ? "Reading logo…" : ""}</p>
         {(logo || errors.logo_url) && <Button type="button" variant="ghost" onClick={() => { ++imageReadId.current; setLogo(null); setLogoReading(false); clearError("logo_url"); if (file.current) file.current.value = ""; }}>Remove logo</Button>}
       </div>
       <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm font-bold"><input type="checkbox" checked={values.isTruck} onChange={event => { setValues(current => ({ ...current, isTruck: event.target.checked })); clearError("is_truck"); }} className="size-5 shrink-0 accent-green focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green" />This is a food truck</label>
-      <div className="flex flex-wrap gap-3 border-t border-border-soft pt-6"><Button type="submit" size="lg" disabled={working || logoReading} className="rounded-button">{working ? "Saving…" : initialProfile.pin_ready ? "Save business" : "Save business & get PIN"}</Button><Link href="/dashboard" onClick={() => resetDraft()} aria-disabled={working || undefined} tabIndex={working ? -1 : undefined} className={buttonVariants({ variant: "outline", size: "lg", className: `rounded-button ${working ? "pointer-events-none opacity-50" : ""}` })}>Cancel</Link></div>
-      <p className="text-xs text-ink-fine">Demo only. Changes reset on full page reload.</p>
+      <div className="flex flex-wrap gap-3 border-t border-border-soft pt-6"><Button type="submit" size="lg" disabled={working || logoReading} className="rounded-button">{working ? "Saving…" : initialProfile.pin_ready === false ? "Save business & get PIN" : "Save business"}</Button><Link href="/dashboard" onClick={() => resetDraft()} aria-disabled={working || undefined} tabIndex={working ? -1 : undefined} className={buttonVariants({ variant: "outline", size: "lg", className: `rounded-button ${working ? "pointer-events-none opacity-50" : ""}` })}>Cancel</Link></div>
+      {isMockData && <p className="text-xs text-ink-fine">Demo only. Changes reset on full page reload.</p>}
     </fieldset>
   </form>;
 }

@@ -1,6 +1,14 @@
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
+// Existing real logos may already be Storage URLs. New uploads are checked by
+// the real write adapter, which must not store a browser data URL as an upload.
+export function validImage(value: unknown): boolean {
+  if (validMockImage(value)) return true;
+  if (typeof value !== "string") return false;
+  try { return new URL(value).protocol === "https:"; } catch { return false; }
+}
+
 export function validMockImage(value: unknown): boolean {
   if (value === null) return true;
   if (typeof value !== "string") return false;

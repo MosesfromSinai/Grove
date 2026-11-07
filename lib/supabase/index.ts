@@ -26,6 +26,12 @@ type Api = Pick<
   | "setPin"
   | "addStaff"
   | "notifyDeal"
+  | "getMyBusiness"
+  | "getBusinessLocationOptions"
+  | "saveBusiness"
+  | "createDeal"
+  | "endDeal"
+  | "cancelDeal"
 >;
 
 // Both assignments fail to compile if a real wrapper and its mock ever differ.
@@ -53,11 +59,10 @@ export const {
   setPin,
   addStaff,
   notifyDeal,
+  getMyBusiness, getBusinessLocationOptions, saveBusiness, createDeal, endDeal, cancelDeal,
 } = api;
 
 export * from "./types";
 export { campusClock, dealStatus, liveUntil, openNow } from "./deal-status";
 
-// These business adapters remain mock-backed until #73. Export them here so
-// components use the shared boundary without implying real writes are ready.
-export { createDeal, endDeal, cancelDeal, getMyBusiness, getBusinessLocationOptions, saveBusiness } from "./business";
+export const isMockData = process.env.NEXT_PUBLIC_DATA_SOURCE !== "supabase";

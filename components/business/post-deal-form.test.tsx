@@ -5,7 +5,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { PostDealForm } from "./post-deal-form";
 
 const boundary = vi.hoisted(() => ({ createDeal: vi.fn() }));
-vi.mock("@/lib/supabase", () => ({ createDeal: boundary.createDeal }));
+vi.mock("@/lib/supabase", () => ({ createDeal: boundary.createDeal, isMockData: true }));
 vi.mock("./business-context", () => ({
   useBusiness: () => ({ profile: { business: { id: "business-test", name: "Test restaurant", is_truck: false } } }),
   BusinessLoading: () => <p>Loading</p>,
@@ -14,6 +14,8 @@ vi.mock("./business-context", () => ({
 let container: HTMLDivElement;
 let root: Root;
 beforeEach(async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-11-06T20:00:00Z"));
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   boundary.createDeal.mockReset();
   container = document.createElement("div");
@@ -25,6 +27,7 @@ afterEach(async () => {
   await act(async () => root.unmount());
   container.remove();
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 async function enter(selector: string, value: string) {
@@ -94,4 +97,36 @@ test("UCR badge switch changes the preview and title counter follows typing", as
   expect(container.querySelector("#title-count")!.textContent).toBe("13 / 40 characters");
   await act(async () => container.querySelector<HTMLInputElement>('[role="switch"]')!.click());
   expect(container.querySelector('aside[aria-label="Deal preview"]')!.textContent).not.toContain("UCR students only");
+});
+
+test("repeat days and link-only visibility reach the boundary; turning repeat off clears its payload", async () => {
+  boundary.createDeal.mockResolvedValue({ ok: false, error: "NOT_OWNER" });
+  await fill();
+  const repeating = [...container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')][0];
+  await act(async () => repeating.click());
+  await act(async () => container.querySelector<HTMLInputElement>('input[name="active_days"][value="mon"]')!.click());
+  await act(async () => container.querySelector<HTMLInputElement>('input[name="active_days"][value="wed"]')!.click());
+  await enter("#daily-start", "14:00");
+  await enter("#daily-end", "17:00");
+  await act(async () => container.querySelector<HTMLInputElement>('input[name="visibility"][value="link_only"]')!.click());
+  expect(container.querySelector("#deal-end-date")).toBeNull();
+  await submit();
+  expect(boundary.createDeal).toHaveBeenLastCalledWith(expect.objectContaining({ active_days: ["mon", "wed"], daily_start: "14:00", daily_end: "17:00", ends_at: null, visibility: "link_only" }));
+  await act(async () => repeating.click());
+  await submit();
+  expect(boundary.createDeal).toHaveBeenLastCalledWith(expect.objectContaining({ active_days: null, daily_start: null, daily_end: null, ends_at: "2027-01-05T01:00:00.000Z", visibility: "link_only" }));
+});
+
+test("repeat schedules require days and a same-day daily window before writing", async () => {
+  await fill();
+  await act(async () => [...container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')][0].click());
+  await submit();
+  expect(boundary.createDeal).not.toHaveBeenCalled();
+  expect(container.querySelector('[role="alert"]')!.textContent).toContain("repeat day");
+  await act(async () => container.querySelector<HTMLInputElement>('input[name="active_days"][value="mon"]')!.click());
+  await enter("#daily-start", "17:00");
+  await enter("#daily-end", "14:00");
+  await submit();
+  expect(boundary.createDeal).not.toHaveBeenCalled();
+  expect(container.querySelector('[role="alert"]')!.textContent).toContain("Daily end must be after daily start");
 });

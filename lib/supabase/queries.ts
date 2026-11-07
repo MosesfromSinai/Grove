@@ -5,6 +5,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "./client";
 import type { Database, Tables } from "./database.types";
 import { campusClock, dealStatus, openNow } from "./deal-status";
+import { validateBusinessInput } from "./business-input";
+import { validateCreateDealInput } from "./deal-input";
+import { BusinessAccessError } from "./business-errors";
 import type {
   AddStaffResult,
   BusinessPublic,
@@ -25,6 +28,8 @@ import type {
   StaffMember,
   StaffRedeemResult,
   Weekday,
+  BusinessProfile, BusinessLocationOption, SaveBusinessInput, SaveBusinessResult,
+  CreateDealInput, CreateDealResult, DealMutationInput, EndDealResult, CancelDealResult,
 } from "./types";
 
 type Db = SupabaseClient<Database>;
@@ -197,6 +202,9 @@ export async function getBusinessStats(input: { businessId: string; from: string
 }
 
 export async function getMyDeals(input: { businessId: string }): Promise<MyDeal[]> {
+  const role = await membership(input.businessId);
+  if (role === "NOT_SIGNED_IN") throw new BusinessAccessError(role);
+  if (!role) throw new BusinessAccessError("NOT_MEMBER");
   const rows = list(
     await db()
       .from("deals")
@@ -342,3 +350,121 @@ export const addStaff = (input: { business_id: string; email: string }) => invok
 
 // Stretch goal: there is no notify-deal function yet.
 export const notifyDeal = (input: { deal_id: string }) => invoke<NotifyDealResult>("notify-deal", input);
+
+// ---------- Authenticated business profile and writes (#73) ----------
+// Provisioning and image uploads require backend work; never fall back to mocks.
+async function businessUser(): Promise<string | null> {
+  const { data, error } = await db().auth.getUser();
+  if (error && error.status !== 401 && error.name !== "AuthSessionMissingError") throw error;
+  return data.user?.id ?? null;
+}
+
+async function membership(businessId: string) {
+  const user = await businessUser();
+  if (!user) return "NOT_SIGNED_IN" as const;
+  const row = check(await db().from("business_members").select("role")
+    .eq("business_id", businessId).eq("user_id", user).maybeSingle());
+  return row?.role === "owner" || row?.role === "staff" ? row.role : null;
+}
+
+export async function getMyBusiness(): Promise<BusinessProfile | null> {
+  const user = await businessUser();
+  if (!user) throw new BusinessAccessError("NOT_SIGNED_IN");
+  const members = list(await db().from("business_members").select("business_id, role").eq("user_id", user).limit(2));
+  if (!members.length) return null;
+  if (members.length > 1) throw new BusinessAccessError("MULTIPLE_BUSINESSES");
+  const member = members[0];
+  if (member.role !== "owner" && member.role !== "staff") throw new Error("Invalid business membership");
+  const business = one(await db().from("businesses").select(BUSINESS_PUBLIC).eq("id", member.business_id).single());
+  // staff_pin is private. Unknown must not be treated as an unset PIN.
+  return { business: toBusinessPublic(business), membership_role: member.role, pin_ready: null };
+}
+
+// No geocoder or fixture addresses on real data. Use explicit coordinates.
+export async function getBusinessLocationOptions(): Promise<BusinessLocationOption[]> { return []; }
+
+export async function saveBusiness(input: SaveBusinessInput): Promise<SaveBusinessResult> {
+  const role = await membership(input.business_id);
+  if (role === "NOT_SIGNED_IN") return { ok: false, error: role };
+  if (role !== "owner") return { ok: false, error: "NOT_OWNER" };
+  const validated = validateBusinessInput(input);
+  if (!validated.ok) return { ok: false, error: "INVALID_BUSINESS", fields: validated.fields };
+  const value = validated.value;
+  const previous = check(await db().from("businesses").select(BUSINESS_PUBLIC).eq("id", input.business_id).maybeSingle());
+  if (!previous) return { ok: false, error: "NOT_OWNER" };
+  if (value.logo_url !== null && value.logo_url !== previous.logo_url) return { ok: false, error: "IMAGE_STORAGE_UNAVAILABLE" };
+  const result = await db().from("businesses").update({
+    name: value.name, address: value.address, location: `SRID=4326;POINT(${value.lng} ${value.lat})`,
+    hours: value.hours, logo_url: value.logo_url, is_truck: value.is_truck,
+  }).eq("id", value.business_id).select(BUSINESS_PUBLIC).maybeSingle();
+  if (result.error?.code === "42501" || (!result.error && !result.data)) return { ok: false, error: "NOT_OWNER" };
+  return { ok: true, profile: { business: toBusinessPublic(one(result)), membership_role: "owner", pin_ready: null } };
+}
+
+export async function createDeal(input: CreateDealInput): Promise<CreateDealResult> {
+  const role = await membership(input.business_id);
+  if (role === "NOT_SIGNED_IN") return { ok: false, error: role };
+  if (!role) return { ok: false, error: "NOT_OWNER" };
+  const validated = validateCreateDealInput(input);
+  if (!validated.ok) return { ok: false, error: "INVALID_DEAL", fields: validated.fields };
+  if (validated.value.photo_url !== null) return { ok: false, error: "IMAGE_STORAGE_UNAVAILABLE" };
+  const value = validated.value;
+  const result = await db().from("deals").insert({
+    business_id: value.business_id, title: value.title, description: value.description,
+    discount_type: value.discount_type, discount_value: value.discount_value,
+    starts_at: value.starts_at, ends_at: value.ends_at, students_only: value.students_only,
+    photo_url: null, active_days: value.active_days ?? null,
+    daily_start: value.daily_start ?? null, daily_end: value.daily_end ?? null, visibility: value.visibility ?? "public",
+  }).select("*").single();
+  if (result.error?.code === "42501") return { ok: false, error: "NOT_OWNER" };
+  return { ok: true, deal: { ...toDeal(one(result)), redemption_count: 0 } };
+}
+
+async function businessDeal(input: DealMutationInput) {
+  return check(await db().from("deals").select("*, redemptions(count)")
+    .eq("id", input.deal_id).eq("business_id", input.business_id).maybeSingle());
+}
+
+export async function endDeal(input: DealMutationInput): Promise<EndDealResult> {
+  const role = await membership(input.business_id);
+  if (role === "NOT_SIGNED_IN") return { ok: false, error: role };
+  if (!role) return { ok: false, error: "NOT_OWNER" };
+  const deal = await businessDeal(input);
+  if (!deal) return { ok: false, error: "DEAL_NOT_FOUND" };
+  const now = new Date();
+  if (Date.parse(deal.starts_at) >= now.getTime() || dealStatus(toDeal(deal), now) === "ended") return { ok: false, error: "DEAL_NOT_LIVE" };
+  const at = now.toISOString();
+  const result = await db().from("deals").update({ ends_at: at })
+    .eq("id", input.deal_id).eq("business_id", input.business_id).lt("starts_at", at)
+    .or(`ends_at.is.null,ends_at.gt.${at}`).select("*, redemptions(count)").maybeSingle();
+  if (result.error?.code === "42501") return { ok: false, error: "NOT_OWNER" };
+  if (result.error?.code === "23514" || (!result.error && !result.data)) return { ok: false, error: "DEAL_NOT_LIVE" };
+  const row = one(result);
+  return { ok: true, deal: { ...toDeal(row), redemption_count: row.redemptions[0]?.count ?? 0 } };
+}
+
+export async function cancelDeal(input: DealMutationInput): Promise<CancelDealResult> {
+  const role = await membership(input.business_id);
+  if (role === "NOT_SIGNED_IN") return { ok: false, error: role };
+  if (!role) return { ok: false, error: "NOT_OWNER" };
+  const deal = await businessDeal(input);
+  if (!deal) return { ok: false, error: "DEAL_NOT_FOUND" };
+  const now = new Date();
+  // A repeating deal that has started is turned off with End now, even between
+  // daily windows. Restrict deletion to future starts, also in the DELETE filter.
+  if (Date.parse(deal.starts_at) <= now.getTime() || dealStatus(toDeal(deal), now) !== "scheduled") return { ok: false, error: "DEAL_NOT_SCHEDULED" };
+  if ((deal.redemptions[0]?.count ?? 0) > 0) return { ok: false, error: "DEAL_HAS_REDEMPTIONS" };
+  const nights = list(await db().from("club_nights").select("id").eq("deal_id", input.deal_id).limit(1));
+  if (nights.length) return { ok: false, error: "DEAL_IN_USE" };
+  const result = await db().from("deals").delete().eq("id", input.deal_id).eq("business_id", input.business_id)
+    .eq("starts_at", deal.starts_at).gt("starts_at", now.toISOString()).select("id").maybeSingle();
+  if (result.error?.code === "42501") return { ok: false, error: "NOT_OWNER" };
+  if (result.error?.code === "23503") {
+    // The FK prevents a visit or club-night reference racing the DELETE from
+    // erasing history. Re-read only safe counts to explain the refusal.
+    const current = await businessDeal(input);
+    return { ok: false, error: (current?.redemptions[0]?.count ?? 0) > 0 ? "DEAL_HAS_REDEMPTIONS" : "DEAL_IN_USE" };
+  }
+  const deleted = check(result);
+  return deleted ? { ok: true, deal_id: deleted.id } : { ok: false, error: "DEAL_NOT_SCHEDULED" };
+}

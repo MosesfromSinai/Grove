@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Leaf } from "lucide-react";
 import { DashboardNav, DashboardTip } from "@/components/business/dashboard-nav";
-import { BusinessIdentity } from "@/components/business/business-context";
+import { BusinessIdentity, BusinessDataNotice } from "@/components/business/business-context";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
@@ -30,10 +30,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="min-w-0">
-        <div className="border-b border-border-strong px-4 py-3 text-sm text-ink-muted sm:px-8 lg:px-10">
-          <span className="font-bold text-green-dark">Dashboard preview</span>
-          <span> · Sample business. Features are being added in stages.</span>
-        </div>
+        <BusinessDataNotice />
         <main id="dashboard-content" tabIndex={-1} className="mx-auto w-full max-w-7xl p-4 py-6 focus:outline-none sm:p-8 lg:p-10">
           {children}
         </main>

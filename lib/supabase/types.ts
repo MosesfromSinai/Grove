@@ -46,7 +46,7 @@ export type BusinessPublic = {
   redemption_mode: RedemptionMode;
 };
 
-export type BusinessProfile = { business: BusinessPublic; pin_ready: boolean };
+export type BusinessProfile = { business: BusinessPublic; membership_role: MemberRole; pin_ready: boolean | null };
 export type BusinessLocationOption = Pick<BusinessPublic, "address" | "lat" | "lng">;
 export type SaveBusinessInput = Pick<BusinessPublic,
   "name" | "address" | "lat" | "lng" | "hours" | "logo_url" | "is_truck"
@@ -54,7 +54,7 @@ export type SaveBusinessInput = Pick<BusinessPublic,
 export type BusinessInputErrors = Partial<Record<keyof SaveBusinessInput, string>>;
 export type SaveBusinessResult =
   | { ok: true; profile: BusinessProfile }
-  | { ok: false; error: "NOT_OWNER" }
+  | { ok: false; error: "NOT_OWNER" | "NOT_SIGNED_IN" | "IMAGE_STORAGE_UNAVAILABLE" }
   | { ok: false; error: "INVALID_BUSINESS"; fields: BusinessInputErrors };
 
 export type DealDetail = Deal & {
@@ -66,11 +66,15 @@ export type MyDeal = Deal & {
   redemption_count: number;
 };
 
-// Sprint 1 posting supports a single public time window. Repeat days come later.
+// Omitted repeat fields default to null; omitted visibility defaults to public.
 export type CreateDealInput = Pick<Deal,
   "business_id" | "title" | "description" | "photo_url" | "starts_at" | "students_only"
 > & {
-  ends_at: string;
+  ends_at: string | null;
+  active_days?: Weekday[] | null;
+  daily_start?: string | null;
+  daily_end?: string | null;
+  visibility?: DealVisibility;
   discount_type: DiscountType;
   discount_value: number | null;
 };
@@ -78,12 +82,13 @@ export type CreateDealInput = Pick<Deal,
 export type CreateDealErrors = Partial<Record<keyof CreateDealInput, string>>;
 export type CreateDealResult =
   | { ok: true; deal: MyDeal }
-  | { ok: false; error: "NOT_OWNER" }
+  | { ok: false; error: "NOT_OWNER" | "NOT_SIGNED_IN" | "IMAGE_STORAGE_UNAVAILABLE" }
   | { ok: false; error: "INVALID_DEAL"; fields: CreateDealErrors };
 
 export type DealMutationInput = { business_id: string; deal_id: string };
 export type DealMutationError =
   | "NOT_OWNER"
+  | "NOT_SIGNED_IN"
   | "DEAL_NOT_FOUND"
   | "DEAL_NOT_LIVE"
   | "DEAL_NOT_SCHEDULED"

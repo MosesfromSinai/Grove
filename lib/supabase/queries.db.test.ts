@@ -60,9 +60,30 @@ describe.skipIf(!process.env.SUPABASE_DB_TESTS)("queries on the local seed", () 
   });
 
   test("getMyDeals returns every deal newest first with counts", async () => {
-    const deals = await getMyDeals({ businessId: OPT });
-    expect(deals).toHaveLength(6);
-    expect(deals.find((d) => d.id === BURRITO)?.redemption_count).toBe(1);
+    // Management reads now require a real signed-in member, even when the
+    // other shape checks use service role. These credentials are local-only.
+    const email = `business-query-${crypto.randomUUID()}@example.invalid`;
+    const password = crypto.randomUUID();
+    const created = await service.auth.admin.createUser({ email, password, email_confirm: true });
+    expect(created.error).toBeNull();
+    const id = created.data.user!.id;
+    const member = createClient<Database>(local.API_URL, local.ANON_KEY, { auth: { persistSession: false } });
+    try {
+      const linked = await service.from("business_members").insert({ business_id: OPT, user_id: id, email, role: "staff" });
+      expect(linked.error).toBeNull();
+      const signedIn = await member.auth.signInWithPassword({ email, password });
+      expect(signedIn.error).toBeNull();
+      setClient(member);
+      const deals = await getMyDeals({ businessId: OPT });
+      expect(deals).toHaveLength(6);
+      expect(deals.find((d) => d.id === BURRITO)?.redemption_count).toBe(1);
+    } finally {
+      setClient(service);
+      await member.auth.signOut();
+      await service.from("business_members").delete().eq("user_id", id);
+      await service.from("profiles").delete().eq("id", id);
+      await service.auth.admin.deleteUser(id);
+    }
   });
 
   test("getBusinessStats counts the test visit", async () => {

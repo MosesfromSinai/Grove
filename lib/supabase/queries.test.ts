@@ -13,11 +13,12 @@ import {
 
 // A stand-in Supabase client: every query chain resolves to the rows configured for its table.
 type Fake = {
+  userId?: string;
   tables?: Record<string, unknown>;
   invoke?: (name: string, body: unknown) => { data: unknown; error: Error | null };
 };
 
-function fakeClient({ tables = {}, invoke }: Fake) {
+function fakeClient({ tables = {}, invoke, userId }: Fake) {
   const chain = (data: unknown): unknown =>
     new Proxy(() => {}, {
       get: (_, prop) =>
@@ -28,7 +29,7 @@ function fakeClient({ tables = {}, invoke }: Fake) {
   return {
     from: (table: string) => chain(table in tables ? tables[table] : []),
     rpc: () => chain([]),
-    auth: { getUser: async () => ({ data: { user: null } }) },
+    auth: { getUser: async () => ({ data: { user: userId ? { id: userId } : null }, error: null }) },
     functions: { invoke: async (name: string, opts: { body: unknown }) => invoke!(name, opts.body) },
   };
 }
@@ -59,7 +60,7 @@ const dealRow = {
 afterEach(() => setClient(null as unknown as Parameters<typeof setClient>[0]));
 
 test("getMyDeals maps counts, HH:MM windows, and computed status", async () => {
-  use({ tables: { deals: [{ ...dealRow, redemptions: [{ count: 4 }] }] } });
+  use({ userId: "u1", tables: { business_members: { role: "owner" }, deals: [{ ...dealRow, redemptions: [{ count: 4 }] }] } });
   const [deal] = await getMyDeals({ businessId: "b1" });
   expect(deal).toMatchObject({ redemption_count: 4, daily_start: "14:00", daily_end: "17:00" });
   expect(["live", "scheduled"]).toContain(deal.status);

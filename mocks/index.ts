@@ -265,10 +265,10 @@ export async function getMyDeals(input: { businessId: string }): Promise<MyDeal[
 // ---------- Business writes ----------
 
 function toBusinessProfile(business: MockBusiness): BusinessProfile {
-  return { business: { ...toBusinessPublic(business), hours: copyHours(business.hours) }, pin_ready: initializedPins.has(business.id) };
+  return { business: { ...toBusinessPublic(business), hours: copyHours(business.hours) }, membership_role: "owner", pin_ready: initializedPins.has(business.id) };
 }
 
-export async function getMyBusiness(): Promise<BusinessProfile> {
+export async function getMyBusiness(): Promise<BusinessProfile | null> {
   return delay(toBusinessProfile(businessById(mockOwner.business_id)));
 }
 
@@ -299,10 +299,10 @@ export async function createDeal(input: CreateDealInput): Promise<CreateDealResu
   const deal: MockDeal = {
     ...result.value,
     id: crypto.randomUUID(),
-    active_days: null,
-    daily_start: null,
-    daily_end: null,
-    visibility: "public",
+    active_days: result.value.active_days ?? null,
+    daily_start: result.value.daily_start ?? null,
+    daily_end: result.value.daily_end ?? null,
+    visibility: result.value.visibility ?? "public",
     created_at: new Date().toISOString(),
   };
   deals.push(deal);
@@ -329,7 +329,7 @@ export async function cancelDeal(input: DealMutationInput): Promise<CancelDealRe
   const index = deals.findIndex(d => d.id === input.deal_id && d.business_id === input.business_id);
   if (index < 0) return delay({ ok: false, error: "DEAL_NOT_FOUND" });
   const deal = deals[index];
-  if (dealStatus(deal) !== "scheduled") return delay({ ok: false, error: "DEAL_NOT_SCHEDULED" });
+  if (dealStatus(deal) !== "scheduled" || Date.parse(deal.starts_at) <= Date.now()) return delay({ ok: false, error: "DEAL_NOT_SCHEDULED" });
   if (toMyDeal(deal).redemption_count > 0 || redemptions.some(r => r.deal_id === deal.id)) {
     return delay({ ok: false, error: "DEAL_HAS_REDEMPTIONS" });
   }

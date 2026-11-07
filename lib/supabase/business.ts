@@ -1,5 +1,3 @@
-// Business data boundary. getMyDeals and setPin follow the data switch in ./index; the writes
-// stay mock-backed until #73 replaces them with authenticated Supabase writes. Components never
-// mutate fixture arrays directly.
-export { getMyDeals, setPin } from "./index";
-export { createDeal, endDeal, cancelDeal, getMyBusiness, getBusinessLocationOptions, saveBusiness } from "../../mocks";
+// Compatibility exports; all business reads/writes now follow the shared switch.
+// Components import from @/lib/supabase. No real operation falls back to a mock.
+export { getMyDeals, setPin, createDeal, endDeal, cancelDeal, getMyBusiness, getBusinessLocationOptions, saveBusiness } from "./index";

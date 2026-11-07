@@ -1,4 +1,4 @@
-import { validMockImage } from "./image-input";
+import { validImage } from "./image-input";
 import type { BusinessInputErrors, Hours, SaveBusinessInput, Weekday } from "./types";
 
 export const BUSINESS_DAYS: { key: Weekday; label: string }[] = [
@@ -22,7 +22,7 @@ export function validateBusinessInput(input: SaveBusinessInput):
   if (typeof input.lat !== "number" || !Number.isFinite(input.lat) || input.lat < -90 || input.lat > 90) fields.lat = "Enter a latitude between -90 and 90.";
   if (typeof input.lng !== "number" || !Number.isFinite(input.lng) || input.lng < -180 || input.lng > 180) fields.lng = "Enter a longitude between -180 and 180.";
   if (typeof input.is_truck !== "boolean") fields.is_truck = "Choose whether this is a food truck.";
-  if (!validMockImage(input.logo_url)) fields.logo_url = "Choose a JPG, PNG, or WebP logo up to 5 MB.";
+  if (!validImage(input.logo_url)) fields.logo_url = "Choose a JPG, PNG, or WebP logo up to 5 MB.";
 
   const time = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
   if (!input.hours || typeof input.hours !== "object" || Array.isArray(input.hours)) fields.hours = "Enter valid weekly hours.";
