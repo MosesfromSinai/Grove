@@ -27,6 +27,7 @@ type Api = Pick<
   | "addStaff"
   | "notifyDeal"
   | "getMyBusiness"
+  | "getBusinessSticker"
   | "getBusinessLocationOptions"
   | "saveBusiness"
   | "createDeal"
@@ -59,7 +60,7 @@ export const {
   setPin,
   addStaff,
   notifyDeal,
-  getMyBusiness, getBusinessLocationOptions, saveBusiness, createDeal, endDeal, cancelDeal,
+  getMyBusiness, getBusinessSticker, getBusinessLocationOptions, saveBusiness, createDeal, endDeal, cancelDeal,
 } = api;
 
 export * from "./types";

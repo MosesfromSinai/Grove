@@ -272,6 +272,14 @@ test("business profile reads exclude private fields and return detached hours", 
   assert.equal((await getMyBusiness()).business.hours.mon[0][0], original);
 });
 
+test("mock sticker reads use the same permanent slug as the business landing query", async () => {
+  const api = await import("../lib/supabase/index");
+  const sticker = await api.getBusinessSticker({ businessId: "biz-opt" });
+  assert.equal(sticker.qr_slug, fixtures.businesses.find(b => b.id === "biz-opt").qr_slug);
+  assert.equal((await api.getBusinessBySlug({ slug: sticker.qr_slug })).business.id, sticker.business_id);
+  await assert.rejects(api.getBusinessSticker({ businessId: "biz-saf" }), error => error.code === "NOT_MEMBER");
+});
+
 test("business validation rejects invalid coordinates, hours, logos, and eligibility", () => {
   const cases = [
     [{ name: "  " }, "name"], [{ address: "" }, "address"],

@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { createDeal, endDeal, cancelDeal, getMyBusiness, getMyDeals, saveBusiness, setClient } from "./queries";
+import { createDeal, endDeal, cancelDeal, getMyBusiness, getMyDeals, getBusinessSticker, saveBusiness, setClient } from "./queries";
 import type { CreateDealInput, SaveBusinessInput } from "./types";
 
 type Result = { data: unknown; error: { code?: string; message: string } | null };
@@ -32,6 +32,27 @@ const post: CreateDealInput = { business_id: "b1", title: " Lunch ", description
 const setup: SaveBusinessInput = { business_id: "b1", name: "Test Kitchen", address: "Test address", lat: 33.97, lng: -117.32, hours: { mon: [["11:00", "21:00"]] }, logo_url: business.logo_url, is_truck: false };
 afterEach(() => { setClient(null as unknown as Parameters<typeof setClient>[0]); vi.useRealTimers(); vi.unstubAllEnvs(); });
 function freeze() { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date(now)); }
+
+test("sticker reads check membership and return only the business-facing sticker fields", async () => {
+  const { calls } = fixture([ok({ role: "owner" }), ok({ ...business, qr_slug: "test-kitchen", staff_pin: "never-return", owner_id: "private" })]);
+  expect(await getBusinessSticker({ businessId: "b1" })).toEqual({ business_id: "b1", business_name: "Test Kitchen", qr_slug: "test-kitchen" });
+  expect(calls[1].operations).toContainEqual(["select", ["id, name, qr_slug"]]);
+  expect(calls[1].operations).toContainEqual(["eq", ["id", "b1"]]);
+  fixture([], null);
+  await expect(getBusinessSticker({ businessId: "b1" })).rejects.toMatchObject({ code: "NOT_SIGNED_IN" });
+  const denied = fixture([ok(null)]);
+  await expect(getBusinessSticker({ businessId: "foreign" })).rejects.toMatchObject({ code: "NOT_MEMBER" });
+  expect(denied.calls).toHaveLength(1);
+});
+
+test("sticker reads distinguish missing setup from network failure without generating a slug", async () => {
+  fixture([ok({ role: "staff" }), ok(null)]);
+  expect(await getBusinessSticker({ businessId: "b1" })).toBeNull();
+  fixture([ok({ role: "owner" }), ok({ ...business, qr_slug: "" })]);
+  expect(await getBusinessSticker({ businessId: "b1" })).toBeNull();
+  fixture([ok({ role: "owner" }), failure("network")]);
+  await expect(getBusinessSticker({ businessId: "b1" })).rejects.toThrow("database refused");
+});
 
 test("profile uses the authenticated membership and never reads or guesses PIN readiness", async () => {
   const { calls } = fixture([ok([{ business_id: "b1", role: "owner" }]), ok(business)]);

@@ -5,11 +5,13 @@
 import { campusClock, dealStatus, liveUntil, openNow } from "../lib/supabase/deal-status";
 import { validateCreateDealInput } from "../lib/supabase/deal-input";
 import { copyHours, validateBusinessInput } from "../lib/supabase/business-input";
+import { BusinessAccessError } from "../lib/supabase/business-errors";
 import type {
   AddStaffResult,
   BusinessPublic,
   BusinessStats,
   BusinessProfile,
+  BusinessSticker,
   BusinessLocationOption,
   SaveBusinessInput,
   SaveBusinessResult,
@@ -270,6 +272,12 @@ function toBusinessProfile(business: MockBusiness): BusinessProfile {
 
 export async function getMyBusiness(): Promise<BusinessProfile | null> {
   return delay(toBusinessProfile(businessById(mockOwner.business_id)));
+}
+
+export async function getBusinessSticker(input: { businessId: string }): Promise<BusinessSticker | null> {
+  if (input.businessId !== mockOwner.business_id) throw new BusinessAccessError("NOT_MEMBER");
+  const business = businessById(input.businessId);
+  return delay(business.qr_slug ? { business_id: business.id, business_name: business.name, qr_slug: business.qr_slug } : null);
 }
 
 // Mock-only address lookup. Arbitrary addresses require explicit coordinates;

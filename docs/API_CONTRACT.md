@@ -2,7 +2,7 @@
 
 The shapes everyone builds against. Frontend work uses `mocks/` that match this file exactly, then swaps in real queries once the tables and functions exist.
 
-**Owner:** Moses. **Status:** Final (2026-10-24), including repeat days, link-only deals, and club nights; business-write changes for #73/#112 below are proposed for Moses's review (2026-11-06). Hosted integration remains unverified.
+**Owner:** Moses. **Status:** Final (2026-10-24), including repeat days, link-only deals, and club nights; business-adapter changes for #73/#112 and the sticker read for #74 below are proposed for Moses's review (2026-11-06). Hosted integration remains unverified.
 **Rule:** any change here goes in a pull request reviewed by the people it affects, plus a line in `docs/LOG.md`.
 **Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together. Screens import from `lib/supabase` (`index.ts`), which serves `mocks/` or the real wrappers in `queries.ts` depending on `NEXT_PUBLIC_DATA_SOURCE`; a compile-time check keeps their signatures identical. The wrappers are browser-only: call them from client components so they run with the signed-in user's session.
 
@@ -284,7 +284,7 @@ type ClubNight = OpenClubNight & {
 
 ---
 
-## Business reads and writes (#73/#112 proposal for review)
+## Business reads and writes (#73/#112/#74 proposals for review)
 
 All adapters now follow the shared mock/real switch. The real path uses the signed-in browser session, checks membership, and remains subject to RLS. It never falls back to mocks. Local adapter tests use simulated responses; authorized grove-dev membership and real-database verification are pending acceptance checks for #73.
 
@@ -294,6 +294,7 @@ All adapters now follow the shared mock/real switch. The real path uses the sign
 | `endDeal` | `{ business_id, deal_id }` | `{ ok: true, deal: MyDeal }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_LIVE` |
 | `cancelDeal` | `{ business_id, deal_id }` | `{ ok: true, deal_id: string }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_SCHEDULED`, `DEAL_HAS_REDEMPTIONS`, `DEAL_IN_USE` |
 | `getMyBusiness` | none | `BusinessProfile \| null` (no membership) | throws `BusinessAccessError` (`NOT_SIGNED_IN`, `MULTIPLE_BUSINESSES`) or a transport/query error |
+| `getBusinessSticker` | `{ businessId }` | `BusinessSticker \| null` (missing business/slug) | throws `BusinessAccessError` (`NOT_SIGNED_IN`, `NOT_MEMBER`) or a transport/query error |
 | `getBusinessLocationOptions` | none | `Pick<BusinessPublic, "address" \| "lat" \| "lng">[]`; sample coordinates on mocks, `[]` on real data (no geocoder) | throws on transport failure |
 | `saveBusiness` | `SaveBusinessInput` | `{ ok: true, profile: BusinessProfile }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `IMAGE_STORAGE_UNAVAILABLE`, `INVALID_BUSINESS` (`fields: BusinessInputErrors`) |
 
@@ -311,6 +312,7 @@ type CreateDealInput = Pick<Deal,
 };
 type CreateDealErrors = Partial<Record<keyof CreateDealInput, string>>;
 type BusinessProfile = { business: BusinessPublic; membership_role: "owner" | "staff"; pin_ready: boolean | null };
+type BusinessSticker = { business_id: string; business_name: string; qr_slug: string };
 type SaveBusinessInput = Pick<BusinessPublic,
   "name" | "address" | "lat" | "lng" | "hours" | "logo_url" | "is_truck"
 > & { business_id: string };
@@ -325,6 +327,8 @@ Writes return `Promise` results; errors are `{ ok: false, error, fields? }`. Rea
 - `pin_ready: null` means unknown on real data: no query reads `staff_pin`. Onboarding preserves existing PINs and never treats unknown as unset. Mocks retain known boolean readiness. Only an explicitly known `false` runs the first-PIN flow; `setPin` still returns a PIN once and it is never logged or persisted.
 - Image Storage buckets/policies/uploads are absent. Real posting requires `photo_url: null`; real business saves may retain the exact existing logo URL or remove it. New images return `IMAGE_STORAGE_UNAVAILABLE` without a write. Mock data URLs remain memory-only. HTTPS URLs permit existing Storage logos to pass shared validation; this is not proof an upload exists.
 - Mutations recheck current state and constrain updates/deletes by business and schedule. FK constraints preserve redemptions and club-night references racing deletion. Browser UTC supplies write timestamps as in existing adapters; verify clock and race behavior against the real database before acceptance.
+- `getBusinessSticker` (#74) checks the signed-in user's owner/staff membership, then selects only `businesses.id, name, qr_slug`. Existing SQL column grants permit this; no migration, function, or write is needed. `qr_slug` remains excluded from `BusinessPublic`. A missing slug returns null; no slug is invented. The mock returns only the sample owner's sticker and rejects other businesses with `NOT_MEMBER`.
+- Counter stickers encode the configured `NEXT_PUBLIC_SITE_URL` origin plus `/b/<qr_slug>`, never a deal or redemption endpoint. The origin must be HTTPS (HTTP is allowed only for loopback previews), without credentials/path/query/fragment. Missing/invalid configuration blocks downloading. PNG exports use the Grove theme/fonts, 3/4/6-inch squares at 300 DPI (900/1200/1800 pixels, with PNG pHYs metadata), an unobstructed QR with four-module quiet zone, and the wording "Scan in the Grove app to redeem." Mock exports are marked DEMO. Actual-size printing/physical scans and the hosted membership/slug read remain acceptance checks; Edward's `/b/[slug]` page still depends on PR #139.
 
 ---
 

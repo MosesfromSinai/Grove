@@ -28,7 +28,7 @@ import type {
   StaffMember,
   StaffRedeemResult,
   Weekday,
-  BusinessProfile, BusinessLocationOption, SaveBusinessInput, SaveBusinessResult,
+  BusinessProfile, BusinessSticker, BusinessLocationOption, SaveBusinessInput, SaveBusinessResult,
   CreateDealInput, CreateDealResult, DealMutationInput, EndDealResult, CancelDealResult,
 } from "./types";
 
@@ -382,6 +382,14 @@ export async function getMyBusiness(): Promise<BusinessProfile | null> {
 
 // No geocoder or fixture addresses on real data. Use explicit coordinates.
 export async function getBusinessLocationOptions(): Promise<BusinessLocationOption[]> { return []; }
+
+export async function getBusinessSticker(input: { businessId: string }): Promise<BusinessSticker | null> {
+  const role = await membership(input.businessId);
+  if (role === "NOT_SIGNED_IN") throw new BusinessAccessError(role);
+  if (!role) throw new BusinessAccessError("NOT_MEMBER");
+  const row = check(await db().from("businesses").select("id, name, qr_slug").eq("id", input.businessId).maybeSingle());
+  return row?.qr_slug ? { business_id: row.id, business_name: row.name, qr_slug: row.qr_slug } : null;
+}
 
 export async function saveBusiness(input: SaveBusinessInput): Promise<SaveBusinessResult> {
   const role = await membership(input.business_id);
