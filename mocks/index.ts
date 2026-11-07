@@ -35,6 +35,8 @@ import type {
   RedeemResult,
   Redemption,
   SetPinResult,
+  SetRedemptionModeInput,
+  SetRedemptionModeResult,
   StaffMember,
   StaffRedeemResult,
 } from "../lib/supabase/types";
@@ -512,7 +514,15 @@ function toStaffMember(m: (typeof businessMembers)[number]): StaffMember {
   return { ...m, status: m.user_id ? "active" : "invited" };
 }
 
-// Sets a new random 4-digit PIN and returns it once. The real function stores only the hash.
+// Mode changes preserve the existing PIN and permanent sticker link.
+export async function setRedemptionMode(input: SetRedemptionModeInput): Promise<SetRedemptionModeResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  if (input.redemption_mode !== "sticker" && input.redemption_mode !== "staff_scan") return delay({ ok: false, error: "INVALID_MODE" });
+  businessById(input.business_id).redemption_mode = input.redemption_mode;
+  return delay({ ok: true, redemption_mode: input.redemption_mode });
+}
+
+// The PIN is returned only by this explicit reset; mode changes never touch it.
 export async function setPin(input: { business_id: string }): Promise<SetPinResult> {
   if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
   const pin = String(Math.floor(Math.random() * 10_000)).padStart(4, "0");

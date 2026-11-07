@@ -32,6 +32,7 @@ import type {
   StaffRedeemResult,
   Weekday,
   BusinessProfile, BusinessSticker, BusinessLocationOption, SaveBusinessInput, SaveBusinessResult,
+  SetRedemptionModeInput, SetRedemptionModeResult,
   CreateDealInput, CreateDealResult, DealMutationInput, EndDealResult, CancelDealResult,
 } from "./types";
 
@@ -445,6 +446,22 @@ export async function saveBusiness(input: SaveBusinessInput): Promise<SaveBusine
   }).eq("id", value.business_id).select(BUSINESS_PUBLIC).maybeSingle();
   if (result.error?.code === "42501" || (!result.error && !result.data)) return { ok: false, error: "NOT_OWNER" };
   return { ok: true, profile: { business: toBusinessPublic(one(result)), membership_role: "owner", pin_ready: null } };
+}
+
+export async function setRedemptionMode(input: SetRedemptionModeInput): Promise<SetRedemptionModeResult> {
+  const role = await membership(input.business_id);
+  if (role === "NOT_SIGNED_IN") return { ok: false, error: role };
+  if (role !== "owner") return { ok: false, error: "NOT_OWNER" };
+  if (input.redemption_mode !== "sticker" && input.redemption_mode !== "staff_scan") return { ok: false, error: "INVALID_MODE" };
+  // #20's issue-code/staff-redeem are absent on main. Do not activate a mode
+  // that cannot redeem; lift this guard after backend readiness is verified.
+  if (input.redemption_mode === "staff_scan") return { ok: false, error: "STAFF_SCAN_UNAVAILABLE" };
+  const result = await db().from("businesses").update({ redemption_mode: input.redemption_mode })
+    .eq("id", input.business_id).select("redemption_mode").maybeSingle();
+  if (result.error?.code === "42501" || (!result.error && !result.data)) return { ok: false, error: "NOT_OWNER" };
+  const row = one(result);
+  if (row.redemption_mode !== input.redemption_mode) throw new Error("Redemption mode was not confirmed.");
+  return { ok: true, redemption_mode: row.redemption_mode };
 }
 
 export async function createDeal(input: CreateDealInput): Promise<CreateDealResult> {

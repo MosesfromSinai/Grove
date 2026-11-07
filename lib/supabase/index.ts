@@ -25,6 +25,7 @@ type Api = Pick<
   | "staffRedeem"
   | "claimClubNight"
   | "setPin"
+  | "setRedemptionMode"
   | "addStaff"
   | "notifyDeal"
   | "getMyBusiness"
@@ -60,6 +61,7 @@ export const {
   staffRedeem,
   claimClubNight,
   setPin,
+  setRedemptionMode,
   addStaff,
   notifyDeal,
   getMyBusiness, getBusinessSticker, getBusinessLocationOptions, saveBusiness, createDeal, endDeal, cancelDeal,

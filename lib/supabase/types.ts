@@ -49,6 +49,9 @@ export type BusinessPublic = {
 export type BusinessProfile = { business: BusinessPublic; membership_role: MemberRole; pin_ready: boolean | null };
 // Business-facing sticker read; qr_slug stays out of BusinessPublic.
 export type BusinessSticker = { business_id: string; business_name: string; qr_slug: string };
+export type SetRedemptionModeInput = { business_id: string; redemption_mode: RedemptionMode };
+export type SetRedemptionModeResult = { ok: true; redemption_mode: RedemptionMode } |
+  { ok: false; error: "NOT_SIGNED_IN" | "NOT_OWNER" | "INVALID_MODE" | "STAFF_SCAN_UNAVAILABLE" };
 export type BusinessLocationOption = Pick<BusinessPublic, "address" | "lat" | "lng">;
 export type SaveBusinessInput = Pick<BusinessPublic,
   "name" | "address" | "lat" | "lng" | "hours" | "logo_url" | "is_truck"

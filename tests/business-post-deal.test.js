@@ -17,6 +17,19 @@ beforeEach(async () => {
 
 const now = Date.now();
 afterEach(() => vi.useRealTimers());
+
+test("mock redemption mode changes preserve the PIN and permanent sticker link", async () => {
+  const api = await import("../mocks/index");
+  const business = fixtures.businesses.find(b => b.id === "biz-opt");
+  const beforePin = business.staff_pin; const beforeSlug = business.qr_slug;
+  for (const redemption_mode of ["staff_scan", "sticker"]) {
+    assert.deepEqual(await api.setRedemptionMode({ business_id: business.id, redemption_mode }), { ok: true, redemption_mode });
+    assert.equal((await getMyBusiness()).business.redemption_mode, redemption_mode);
+    assert.equal(business.staff_pin === beforePin, true); assert.equal(business.qr_slug, beforeSlug);
+  }
+  assert.deepEqual(await api.setRedemptionMode({ business_id: "biz-owl", redemption_mode: "staff_scan" }), { ok: false, error: "NOT_OWNER" });
+  assert.deepEqual(await api.setRedemptionMode({ business_id: business.id, redemption_mode: "invalid" }), { ok: false, error: "INVALID_MODE" });
+});
 const input = (overrides = {}) => ({
   business_id: "biz-opt", title: "  $2 off any burrito  ", description: "  Any burrito on the menu.  ",
   discount_type: "amount_off", discount_value: 2, photo_url: null,

@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { createDeal, endDeal, cancelDeal, getMyBusiness, getMyDeals, getBusinessSticker, saveBusiness, setClient } from "./queries";
+import { createDeal, endDeal, cancelDeal, getMyBusiness, getMyDeals, getBusinessSticker, saveBusiness, setRedemptionMode, setPin, setClient } from "./queries";
 import type { CreateDealInput, SaveBusinessInput } from "./types";
 
 type Result = { data: unknown; error: { code?: string; message: string } | null };
@@ -43,6 +43,37 @@ test("sticker reads check membership and return only the business-facing sticker
   const denied = fixture([ok(null)]);
   await expect(getBusinessSticker({ businessId: "foreign" })).rejects.toMatchObject({ code: "NOT_MEMBER" });
   expect(denied.calls).toHaveLength(1);
+});
+
+test("redemption mode changes are owner-only and preserve all other business fields", async () => {
+  fixture([], null); expect(await setRedemptionMode({ business_id: "b1", redemption_mode: "sticker" })).toEqual({ ok: false, error: "NOT_SIGNED_IN" });
+  for (const role of [null, { role: "staff" }]) {
+    const denied = fixture([ok(role)]); expect(await setRedemptionMode({ business_id: "b1", redemption_mode: "sticker" })).toEqual({ ok: false, error: "NOT_OWNER" }); expect(denied.calls).toHaveLength(1);
+  }
+  const { calls } = fixture([ok({ role: "owner" }), ok({ redemption_mode: "sticker" })]);
+  expect(await setRedemptionMode({ business_id: "b1", redemption_mode: "sticker" })).toEqual({ ok: true, redemption_mode: "sticker" });
+  expect(calls[1].operations).toContainEqual(["update", [{ redemption_mode: "sticker" }]]);
+  expect(calls[1].operations).toContainEqual(["eq", ["id", "b1"]]);
+  expect(calls[1].operations).toContainEqual(["select", ["redemption_mode"]]);
+  expect(JSON.stringify(calls)).not.toContain("staff_pin"); expect(JSON.stringify(calls)).not.toContain("qr_slug");
+});
+
+test("live Staff scan stays unavailable until #20; mode failures never return success", async () => {
+  const pending = fixture([ok({ role: "owner" })]); expect(await setRedemptionMode({ business_id: "b1", redemption_mode: "staff_scan" })).toEqual({ ok: false, error: "STAFF_SCAN_UNAVAILABLE" }); expect(pending.calls).toHaveLength(1);
+  fixture([ok({ role: "owner" })]); expect(await setRedemptionMode({ business_id: "b1", redemption_mode: "invalid" as "sticker" })).toEqual({ ok: false, error: "INVALID_MODE" });
+  for (const result of [ok(null), failure("42501")]) { fixture([ok({ role: "owner" }), result]); expect(await setRedemptionMode({ business_id: "b1", redemption_mode: "sticker" })).toEqual({ ok: false, error: "NOT_OWNER" }); }
+  fixture([ok({ role: "owner" }), failure("network")]); await expect(setRedemptionMode({ business_id: "b1", redemption_mode: "sticker" })).rejects.toThrow("database refused");
+  fixture([ok({ role: "owner" }), ok({ redemption_mode: "staff_scan" })]); await expect(setRedemptionMode({ business_id: "b1", redemption_mode: "sticker" })).rejects.toThrow("not confirmed");
+});
+
+test("Reset PIN uses only the existing Edge Function contract and propagates refusals", async () => {
+  const response = { ok: false, error: "NOT_OWNER" };
+  const invoke = vi.fn(async (): Promise<{ data: unknown; error: Error | null }> => ({ data: response, error: null }));
+  setClient({ functions: { invoke } } as unknown as Parameters<typeof setClient>[0]);
+  expect(await setPin({ business_id: "b1" })).toEqual(response);
+  expect(invoke).toHaveBeenCalledWith("set-pin", { body: { business_id: "b1" } });
+  invoke.mockResolvedValueOnce({ data: null, error: new Error("offline") });
+  await expect(setPin({ business_id: "b1" })).rejects.toThrow("offline");
 });
 
 test("sticker reads distinguish missing setup from network failure without generating a slug", async () => {

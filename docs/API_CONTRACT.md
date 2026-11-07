@@ -2,7 +2,7 @@
 
 The shapes everyone builds against. Frontend work uses `mocks/` that match this file exactly, then swaps in real queries once the tables and functions exist.
 
-**Owner:** Moses. **Status:** Final (2026-10-24), including repeat days, link-only deals, and club nights; business-adapter changes for #73/#112, the sticker read for #74, and overview/connection helpers for #75 below are proposed for Moses's review (2026-11-06). Hosted integration remains unverified.
+**Owner:** Moses. **Status:** Final (2026-10-24), including repeat days, link-only deals, and club nights; business-adapter changes for #73/#112, the sticker read for #74, overview/connection helpers for #75, and the mode write for #77 below are proposed for Moses's review (2026-11-06). Hosted integration remains unverified.
 **Rule:** any change here goes in a pull request reviewed by the people it affects, plus a line in `docs/LOG.md`.
 **Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together. Screens import from `lib/supabase` (`index.ts`), which serves `mocks/` or the real wrappers in `queries.ts` depending on `NEXT_PUBLIC_DATA_SOURCE`; a compile-time check keeps their signatures identical. The wrappers are browser-only: call them from client components so they run with the signed-in user's session.
 
@@ -288,7 +288,7 @@ type ClubNight = OpenClubNight & {
 
 ---
 
-## Business reads and writes (#73/#112/#74 proposals for review)
+## Business reads and writes (#73/#112/#74/#77 proposals for review)
 
 All adapters now follow the shared mock/real switch. The real path uses the signed-in browser session, checks membership, and remains subject to RLS. It never falls back to mocks. Local adapter tests use simulated responses; authorized grove-dev membership and real-database verification are pending acceptance checks for #73.
 
@@ -303,6 +303,7 @@ All adapters now follow the shared mock/real switch. The real path uses the sign
 | `getBusinessSticker` | `{ businessId }` | `BusinessSticker \| null` (missing business/slug) | throws `BusinessAccessError` (`NOT_SIGNED_IN`, `NOT_MEMBER`) or a transport/query error |
 | `getBusinessLocationOptions` | none | `Pick<BusinessPublic, "address" \| "lat" \| "lng">[]`; sample coordinates on mocks, `[]` on real data (no geocoder) | throws on transport failure |
 | `saveBusiness` | `SaveBusinessInput` | `{ ok: true, profile: BusinessProfile }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `IMAGE_STORAGE_UNAVAILABLE`, `INVALID_BUSINESS` (`fields: BusinessInputErrors`) |
+| `setRedemptionMode` | `SetRedemptionModeInput` | `{ ok: true, redemption_mode }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `INVALID_MODE`, `STAFF_SCAN_UNAVAILABLE`; throws on transport/query or unconfirmed write |
 
 ```ts
 type CreateDealInput = Pick<Deal,
@@ -319,6 +320,10 @@ type CreateDealInput = Pick<Deal,
 type CreateDealErrors = Partial<Record<keyof CreateDealInput, string>>;
 type BusinessProfile = { business: BusinessPublic; membership_role: "owner" | "staff"; pin_ready: boolean | null };
 type BusinessSticker = { business_id: string; business_name: string; qr_slug: string };
+
+type SetRedemptionModeInput = { business_id: string; redemption_mode: RedemptionMode };
+type SetRedemptionModeResult = { ok: true; redemption_mode: RedemptionMode } |
+  { ok: false; error: "NOT_SIGNED_IN" | "NOT_OWNER" | "INVALID_MODE" | "STAFF_SCAN_UNAVAILABLE" };
 type SaveBusinessInput = Pick<BusinessPublic,
   "name" | "address" | "lat" | "lng" | "hours" | "logo_url" | "is_truck"
 > & { business_id: string };
@@ -331,6 +336,8 @@ Writes return `Promise` results; errors are `{ ok: false, error, fields? }`. Rea
 - Business updates remain owner-only. Deal reads/writes allow owner or staff membership; `NOT_OWNER` is the legacy write-permission code for nonmembers. Real `getMyDeals` throws `BusinessAccessError` (`NOT_SIGNED_IN` or `NOT_MEMBER`) instead of presenting another business's public rows as its management data. Multiple memberships are refused until the coordinator resolves the account's business; this MVP has no business selector.
 - There is no browser business-creation policy/provisioning function. No membership returns null and an access-needed state; it never loads the sample owner in real mode. Business updates write PostGIS `location` as `SRID=4326;POINT(lng lat)`; generated lat/lng are read-only.
 - `pin_ready: null` means unknown on real data: no query reads `staff_pin`. Onboarding preserves existing PINs and never treats unknown as unset. Mocks retain known boolean readiness. Only an explicitly known `false` runs the first-PIN flow; `setPin` still returns a PIN once and it is never logged or persisted.
+- **Settings (#77 proposal):** `setRedemptionMode` checks signed-in owner membership, validates the mode and updates only `businesses.redemption_mode`, returning only the confirmed mode. It never reads/writes PINs or slugs. Existing SQL grants/policies support this update. However, #20 remains open and `issue-code`/`staff-redeem` are absent on main: the real helper refuses activating `staff_scan` with `STAFF_SCAN_UNAVAILABLE`, and the real UI disables that option. An existing Staff scan configuration can return to Sticker. Mocks support both modes. Remove the guard/disabled state only after backend readiness is verified; complete live mode-switch acceptance is pending.
+- **Reset PIN (#77):** uses the existing `setPin({ business_id })` Edge Function wrapper unchanged, only after explicit owner confirmation. No current PIN read or automatic reset. Only a validated four-digit success response is displayed, held temporarily in component state; manual hide, page/tab exit and a 60-second timeout discard it. It cannot be revealed again. No browser storage, clipboard, logs, or screenshot/report output. Prevent duplicate submission and ignore late responses after navigation; a reset returning while hidden is never revealed later. Transport failures explain that the reset may have completed and require a new explicit confirmation, never an automatic retry. Staff controls are read-only; permission changes lock writes until profile reload. Unknown PIN readiness remains preserved unless a confirmed reset succeeds.
 - Image Storage buckets/policies/uploads are absent. Real posting requires `photo_url: null`; real business saves may retain the exact existing logo URL or remove it. New images return `IMAGE_STORAGE_UNAVAILABLE` without a write. Mock data URLs remain memory-only. HTTPS URLs permit existing Storage logos to pass shared validation; this is not proof an upload exists.
 - Mutations recheck current state and constrain updates/deletes by business and schedule. FK constraints preserve redemptions and club-night references racing deletion. Browser UTC supplies write timestamps as in existing adapters; verify clock and race behavior against the real database before acceptance.
 - `getBusinessSticker` (#74) checks the signed-in user's owner/staff membership, then selects only `businesses.id, name, qr_slug`. Existing SQL column grants permit this; no migration, function, or write is needed. `qr_slug` remains excluded from `BusinessPublic`. A missing slug returns null; no slug is invented. The mock returns only the sample owner's sticker and rejects other businesses with `NOT_MEMBER`.
