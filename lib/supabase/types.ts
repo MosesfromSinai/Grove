@@ -179,6 +179,12 @@ export type ClubNight = OpenClubNight & {
   visit_count: number; // verified redemptions of deal_id
 };
 
+export type CreateClubNightInput = Pick<OpenClubNight, "business_id" | "night_date" | "start_time" | "end_time" | "giveback">;
+export type CreateClubNightErrors = Partial<Record<keyof CreateClubNightInput, string>>;
+export type CreateClubNightResult = { ok: true; club_night: OpenClubNight } |
+  { ok: false; error: "NOT_SIGNED_IN" | "NOT_OWNER" } |
+  { ok: false; error: "INVALID_CLUB_NIGHT"; fields: CreateClubNightErrors };
+
 // A business_members row as the owner sees it in settings.
 export type StaffMember = {
   business_id: string;

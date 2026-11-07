@@ -9,6 +9,7 @@ import { validateBusinessInput } from "./business-input";
 import { validateCreateDealInput } from "./deal-input";
 import { BusinessAccessError } from "./business-errors";
 import { overviewPeriod } from "./overview-period";
+import { validateCreateClubNight } from "./club-night-input";
 import type {
   AddStaffResult,
   BusinessPublic,
@@ -33,6 +34,7 @@ import type {
   Weekday,
   BusinessProfile, BusinessSticker, BusinessLocationOption, SaveBusinessInput, SaveBusinessResult,
   SetRedemptionModeInput, SetRedemptionModeResult,
+  CreateClubNightInput, CreateClubNightResult,
   CreateDealInput, CreateDealResult, DealMutationInput, EndDealResult, CancelDealResult,
 } from "./types";
 
@@ -329,6 +331,9 @@ export async function getOpenClubNights(): Promise<OpenClubNight[]> {
 
 // A business's club nights with verified visits, newest first.
 export async function getClubNights(input: { businessId: string }): Promise<ClubNight[]> {
+  const role = await membership(input.businessId);
+  if (role === "NOT_SIGNED_IN") throw new BusinessAccessError(role);
+  if (!role) throw new BusinessAccessError("NOT_MEMBER");
   const rows = list(
     await db()
       .from("club_nights")
@@ -347,6 +352,19 @@ export async function getClubNights(input: { businessId: string }): Promise<Club
     deal_id: c.deal_id,
     visit_count: c.deals?.redemptions[0]?.count ?? 0,
   }));
+}
+
+export async function createClubNight(input: CreateClubNightInput): Promise<CreateClubNightResult> {
+  const role = await membership(input.business_id);
+  if (role === "NOT_SIGNED_IN") return { ok: false, error: role };
+  if (!role) return { ok: false, error: "NOT_OWNER" };
+  const validated = validateCreateClubNight(input);
+  if (!validated.ok) return { ok: false, error: "INVALID_CLUB_NIGHT", fields: validated.fields };
+  const result = await db().from("club_nights").insert(validated.value)
+    .select("id, business_id, night_date, start_time, end_time, giveback, businesses(name)").single();
+  if (result.error?.code === "42501") return { ok: false, error: "NOT_OWNER" };
+  const row = one(result);
+  return { ok: true, club_night: toOpenClubNight(row) };
 }
 
 // ---------- Business settings ----------

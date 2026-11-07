@@ -17,6 +17,7 @@ type Api = Pick<
   | "getMyDeals"
   | "getOpenClubNights"
   | "getClubNights"
+  | "createClubNight"
   | "getStaff"
   | "subscribeToRedemptions"
   | "redeem"
@@ -53,6 +54,7 @@ export const {
   getMyDeals,
   getOpenClubNights,
   getClubNights,
+  createClubNight,
   getStaff,
   subscribeToRedemptions,
   redeem,

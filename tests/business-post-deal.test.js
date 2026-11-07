@@ -18,6 +18,20 @@ beforeEach(async () => {
 const now = Date.now();
 afterEach(() => vi.useRealTimers());
 
+test("posting a mock club night makes an unclaimed night visible without creating a deal or resetting a PIN", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-11-06T20:00:00Z"));
+  const api = await import("../mocks/index"); const beforeDeals = fixtures.deals.length;
+  const business = fixtures.businesses.find(b => b.id === "biz-opt"); const beforePin = business.staff_pin;
+  const result = await api.createClubNight({ business_id: "biz-opt", night_date: "2026-11-07", start_time: "18:00", end_time: "21:00", giveback: "  $1 per student back to your club  " });
+  assert.equal(result.ok, true); assert.equal(result.club_night.giveback, "$1 per student back to your club");
+  assert.ok((await api.getOpenClubNights()).some(n => n.id === result.club_night.id));
+  const listed = (await api.getClubNights({ businessId: "biz-opt" })).find(n => n.id === result.club_night.id);
+  assert.equal(listed.status, "open"); assert.equal(listed.claimed_club_name, null); assert.equal(listed.deal_id, null); assert.equal(listed.visit_count, 0);
+  assert.equal(fixtures.deals.length, beforeDeals); assert.equal(business.staff_pin === beforePin, true);
+  assert.deepEqual(await api.createClubNight({ business_id: "foreign", night_date: "2026-11-07", start_time: "18:00", end_time: "21:00", giveback: "Offer" }), { ok: false, error: "NOT_OWNER" });
+  await assert.rejects(api.getClubNights({ businessId: "foreign" }), { code: "NOT_MEMBER" });
+});
+
 test("mock redemption mode changes preserve the PIN and permanent sticker link", async () => {
   const api = await import("../mocks/index");
   const business = fixtures.businesses.find(b => b.id === "biz-opt");

@@ -7,6 +7,8 @@ import { validateCreateDealInput } from "../lib/supabase/deal-input";
 import { copyHours, validateBusinessInput } from "../lib/supabase/business-input";
 import { BusinessAccessError } from "../lib/supabase/business-errors";
 import { overviewPeriod } from "../lib/supabase/overview-period";
+import { validateCreateClubNight } from "../lib/supabase/club-night-input";
+import { campusDateTimeToISO } from "../lib/supabase/deal-input";
 import type {
   AddStaffResult,
   BusinessPublic,
@@ -37,6 +39,8 @@ import type {
   SetPinResult,
   SetRedemptionModeInput,
   SetRedemptionModeResult,
+  CreateClubNightInput,
+  CreateClubNightResult,
   StaffMember,
   StaffRedeemResult,
 } from "../lib/supabase/types";
@@ -475,10 +479,23 @@ export async function getOpenClubNights(): Promise<OpenClubNight[]> {
 
 // A business's club nights with verified visits, newest first.
 export async function getClubNights(input: { businessId: string }): Promise<ClubNight[]> {
+  if (input.businessId !== mockOwner.business_id) throw new BusinessAccessError("NOT_MEMBER");
   const mine = clubNights
     .filter((c) => c.business_id === input.businessId)
     .sort((a, b) => b.starts_at.localeCompare(a.starts_at));
   return delay(mine.map(toClubNight));
+}
+
+export async function createClubNight(input: CreateClubNightInput): Promise<CreateClubNightResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  const validated = validateCreateClubNight(input);
+  if (!validated.ok) return delay({ ok: false, error: "INVALID_CLUB_NIGHT", fields: validated.fields });
+  const value = validated.value;
+  const night: MockClubNight = { ...value, id: `cn-${crypto.randomUUID()}`, claimed_club_name: null, claimed_by: null,
+    claimed_at: null, deal_id: null, starts_at: campusDateTimeToISO(`${value.night_date}T${value.start_time}`)!,
+    ends_at: campusDateTimeToISO(`${value.night_date}T${value.end_time}`)! };
+  clubNights.unshift(night);
+  return delay({ ok: true, club_night: toOpenClubNight(night) });
 }
 
 export async function claimClubNight(input: { club_night_id: string; club_name: string }): Promise<ClaimClubNightResult> {

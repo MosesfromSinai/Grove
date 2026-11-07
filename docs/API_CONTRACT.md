@@ -2,7 +2,7 @@
 
 The shapes everyone builds against. Frontend work uses `mocks/` that match this file exactly, then swaps in real queries once the tables and functions exist.
 
-**Owner:** Moses. **Status:** Final (2026-10-24), including repeat days, link-only deals, and club nights; business-adapter changes for #73/#112, the sticker read for #74, overview/connection helpers for #75, and the mode write for #77 below are proposed for Moses's review (2026-11-06). Hosted integration remains unverified.
+**Owner:** Moses. **Status:** Final (2026-10-24), including repeat days, link-only deals, and club nights; business-adapter changes for #73/#112, the sticker read for #74, overview/connection helpers for #75, the mode write for #77, and club-night posting for #113 below are proposed for Moses's review (2026-11-06). Hosted integration remains unverified.
 **Rule:** any change here goes in a pull request reviewed by the people it affects, plus a line in `docs/LOG.md`.
 **Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together. Screens import from `lib/supabase` (`index.ts`), which serves `mocks/` or the real wrappers in `queries.ts` depending on `NEXT_PUBLIC_DATA_SOURCE`; a compile-time check keeps their signatures identical. The wrappers are browser-only: call them from client components so they run with the signed-in user's session.
 
@@ -125,6 +125,7 @@ A restaurant posts an open night; one student claims it for a club by typing the
 **Status is computed:** `claimed` if `claimed_club_name` is set; otherwise `expired` from the night's end time on, else `open`. Claims are allowed the same day, up to the end time.
 - Businesses insert and edit their own club nights directly (RLS: members of that business). Only `claim-club-night` sets the claim columns.
 - On claim, a deal is created: same business, `starts_at`/`ends_at` = the night's window, `visibility = 'link_only'`, `students_only = true`, no discount, title "<club> night", giveback in the description.
+- **Review discrepancy (#113):** the existing `claim_club_night` SQL checks only whether the night has ended; it does not enforce the same-date claim restriction stated above. Its Edge wrapper adds no date check. Moses must reconcile the intended rule and hosted behavior; this posting change does not modify claim SQL/functions.
 
 ### `push_subscriptions`
 Stretch goal (possible future implementation); not built for the MVP.
@@ -288,7 +289,7 @@ type ClubNight = OpenClubNight & {
 
 ---
 
-## Business reads and writes (#73/#112/#74/#77 proposals for review)
+## Business reads and writes (#73/#112/#74/#77/#113 proposals for review)
 
 All adapters now follow the shared mock/real switch. The real path uses the signed-in browser session, checks membership, and remains subject to RLS. It never falls back to mocks. Local adapter tests use simulated responses; authorized grove-dev membership and real-database verification are pending acceptance checks for #73.
 
@@ -304,6 +305,7 @@ All adapters now follow the shared mock/real switch. The real path uses the sign
 | `getBusinessLocationOptions` | none | `Pick<BusinessPublic, "address" \| "lat" \| "lng">[]`; sample coordinates on mocks, `[]` on real data (no geocoder) | throws on transport failure |
 | `saveBusiness` | `SaveBusinessInput` | `{ ok: true, profile: BusinessProfile }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `IMAGE_STORAGE_UNAVAILABLE`, `INVALID_BUSINESS` (`fields: BusinessInputErrors`) |
 | `setRedemptionMode` | `SetRedemptionModeInput` | `{ ok: true, redemption_mode }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `INVALID_MODE`, `STAFF_SCAN_UNAVAILABLE`; throws on transport/query or unconfirmed write |
+| `createClubNight` | `CreateClubNightInput` | `{ ok: true, club_night: OpenClubNight }` (posting receipt, not a current claim-status snapshot) | `NOT_SIGNED_IN`, `NOT_OWNER` (legacy code for nonmember write), `INVALID_CLUB_NIGHT` (`fields`); throws on query/transport failure |
 
 ```ts
 type CreateDealInput = Pick<Deal,
@@ -324,6 +326,12 @@ type BusinessSticker = { business_id: string; business_name: string; qr_slug: st
 type SetRedemptionModeInput = { business_id: string; redemption_mode: RedemptionMode };
 type SetRedemptionModeResult = { ok: true; redemption_mode: RedemptionMode } |
   { ok: false; error: "NOT_SIGNED_IN" | "NOT_OWNER" | "INVALID_MODE" | "STAFF_SCAN_UNAVAILABLE" };
+
+type CreateClubNightInput = Pick<OpenClubNight, "business_id" | "night_date" | "start_time" | "end_time" | "giveback">;
+type CreateClubNightErrors = Partial<Record<keyof CreateClubNightInput, string>>;
+type CreateClubNightResult = { ok: true; club_night: OpenClubNight } |
+  { ok: false; error: "NOT_SIGNED_IN" | "NOT_OWNER" } |
+  { ok: false; error: "INVALID_CLUB_NIGHT"; fields: CreateClubNightErrors };
 type SaveBusinessInput = Pick<BusinessPublic,
   "name" | "address" | "lat" | "lng" | "hours" | "logo_url" | "is_truck"
 > & { business_id: string };
@@ -338,6 +346,8 @@ Writes return `Promise` results; errors are `{ ok: false, error, fields? }`. Rea
 - `pin_ready: null` means unknown on real data: no query reads `staff_pin`. Onboarding preserves existing PINs and never treats unknown as unset. Mocks retain known boolean readiness. Only an explicitly known `false` runs the first-PIN flow; `setPin` still returns a PIN once and it is never logged or persisted.
 - **Settings (#77 proposal):** `setRedemptionMode` checks signed-in owner membership, validates the mode and updates only `businesses.redemption_mode`, returning only the confirmed mode. It never reads/writes PINs or slugs. Existing SQL grants/policies support this update. However, #20 remains open and `issue-code`/`staff-redeem` are absent on main: the real helper refuses activating `staff_scan` with `STAFF_SCAN_UNAVAILABLE`, and the real UI disables that option. An existing Staff scan configuration can return to Sticker. Mocks support both modes. Remove the guard/disabled state only after backend readiness is verified; complete live mode-switch acceptance is pending.
 - **Reset PIN (#77):** uses the existing `setPin({ business_id })` Edge Function wrapper unchanged, only after explicit owner confirmation. No current PIN read or automatic reset. Only a validated four-digit success response is displayed, held temporarily in component state; manual hide, page/tab exit and a 60-second timeout discard it. It cannot be revealed again. No browser storage, clipboard, logs, or screenshot/report output. Prevent duplicate submission and ignore late responses after navigation; a reset returning while hidden is never revealed later. Transport failures explain that the reset may have completed and require a new explicit confirmation, never an automatic retry. Staff controls are read-only; permission changes lock writes until profile reload. Unknown PIN readiness remains preserved unless a confirmed reset succeeds.
+- **Open club-night posting (#113 proposal):** signed-in owner or staff members may insert using existing member RLS. Validation accepts a real campus date (today or future), minute-precision `HH:MM` endpoints with end after start on the same date, and a trimmed 1–500-character giveback (proposed client limit, not a new SQL constraint). The end instant must still be in the future; a same-day night may already be in progress. Resolve endpoints in campus time and reject ambiguous/nonexistent DST endpoints. Insert only the five allowlisted columns; never set claim columns, status, PIN, or deal IDs, and do not create a deal. Return an explicit safe posting receipt. Matching mocks add the unclaimed record to existing club-night queries without mutating deals/PINs.
+- `getClubNights` management reads now require signed-in membership (`BusinessAccessError` on `NOT_SIGNED_IN`/`NOT_MEMBER`), preventing a former member's student-visible public nights from appearing as management data. #113 shows up to 20 posted receipts with last-read status only; club names and verified-visit results remain #114. Transport or interrupted-post uncertainty locks retry until a fresh list read and an explicit new-draft action; there is no automatic POST retry. There is no schema idempotency key or uniqueness guarantee, so this is manual receipt recovery, not exactly-once insertion. Hosted owner/staff/nonmember RLS, persistence, browser/database clock agreement, and downstream claiming remain acceptance checks; no backend objects are changed.
 - Image Storage buckets/policies/uploads are absent. Real posting requires `photo_url: null`; real business saves may retain the exact existing logo URL or remove it. New images return `IMAGE_STORAGE_UNAVAILABLE` without a write. Mock data URLs remain memory-only. HTTPS URLs permit existing Storage logos to pass shared validation; this is not proof an upload exists.
 - Mutations recheck current state and constrain updates/deletes by business and schedule. FK constraints preserve redemptions and club-night references racing deletion. Browser UTC supplies write timestamps as in existing adapters; verify clock and race behavior against the real database before acceptance.
 - `getBusinessSticker` (#74) checks the signed-in user's owner/staff membership, then selects only `businesses.id, name, qr_slug`. Existing SQL column grants permit this; no migration, function, or write is needed. `qr_slug` remains excluded from `BusinessPublic`. A missing slug returns null; no slug is invented. The mock returns only the sample owner's sticker and rejects other businesses with `NOT_MEMBER`.

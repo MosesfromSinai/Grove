@@ -122,8 +122,8 @@ test("getOpenClubNights drops nights that already ended", async () => {
 
 test("getClubNights computes status and visit counts", async () => {
   const unclaimed = { claimed_club_name: null, claimed_at: null, deal_id: null, deals: null };
-  use({
-    tables: {
+  use({ userId: "u1",
+    tables: { business_members: { role: "owner" },
       club_nights: [
         { ...night, ...unclaimed, id: "open", night_date: campusDate(2) },
         { ...night, ...unclaimed, id: "expired", night_date: campusDate(-3) },
