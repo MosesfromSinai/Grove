@@ -13,9 +13,11 @@ type Api = Pick<
   | "getBusinessBySlug"
   | "getMyRedemptions"
   | "getBusinessStats"
+  | "getBusinessOverview"
   | "getMyDeals"
   | "getOpenClubNights"
   | "getClubNights"
+  | "createClubNight"
   | "getStaff"
   | "subscribeToRedemptions"
   | "redeem"
@@ -24,8 +26,16 @@ type Api = Pick<
   | "staffRedeem"
   | "claimClubNight"
   | "setPin"
+  | "setRedemptionMode"
   | "addStaff"
   | "notifyDeal"
+  | "getMyBusiness"
+  | "getBusinessSticker"
+  | "getBusinessLocationOptions"
+  | "saveBusiness"
+  | "createDeal"
+  | "endDeal"
+  | "cancelDeal"
 >;
 
 // Both assignments fail to compile if a real wrapper and its mock ever differ.
@@ -40,9 +50,11 @@ export const {
   getBusinessBySlug,
   getMyRedemptions,
   getBusinessStats,
+  getBusinessOverview,
   getMyDeals,
   getOpenClubNights,
   getClubNights,
+  createClubNight,
   getStaff,
   subscribeToRedemptions,
   redeem,
@@ -51,9 +63,13 @@ export const {
   staffRedeem,
   claimClubNight,
   setPin,
+  setRedemptionMode,
   addStaff,
   notifyDeal,
+  getMyBusiness, getBusinessSticker, getBusinessLocationOptions, saveBusiness, createDeal, endDeal, cancelDeal,
 } = api;
 
 export * from "./types";
 export { campusClock, dealStatus, liveUntil, openNow } from "./deal-status";
+
+export const isMockData = process.env.NEXT_PUBLIC_DATA_SOURCE !== "supabase";
