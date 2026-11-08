@@ -253,16 +253,19 @@ export async function getBusinessStats(input: {
   from: string;
   to: string;
 }): Promise<BusinessStats> {
-  if (input.businessId !== "biz-opt") return delay({ perDeal: [], perHour: [], total: 0 });
-  const days = (new Date(input.to).getTime() - new Date(input.from).getTime()) / 86_400_000;
-  const src = days > 7 ? orangePeelStats.last30 : orangePeelStats.last7;
-  const perDeal = src.perDeal.map(([deal_id, count]) => ({
-    deal_id,
-    title: deals.find((d) => d.id === deal_id)?.title ?? "",
-    count,
-  }));
-  const perHour = src.perHour.map(([hour, count]) => ({ hour, count }));
-  return delay({ perDeal, perHour, total: perDeal.reduce((sum, d) => sum + d.count, 0) });
+  if (input.businessId !== mockOwner.business_id) throw new BusinessAccessError("NOT_MEMBER");
+  const from = Date.parse(input.from); const to = Date.parse(input.to);
+  if (!Number.isFinite(from) || !Number.isFinite(to) || from >= to) throw new Error("Invalid reporting period.");
+  const visits = redemptions.filter(row => row.business_id === input.businessId && Date.parse(row.redeemed_at) >= from && Date.parse(row.redeemed_at) < to);
+  const perDeal = new Map<string, { deal_id: string; title: string; count: number }>();
+  const perHour = new Map<number, number>();
+  for (const row of visits) {
+    const deal = perDeal.get(row.deal_id) ?? { deal_id: row.deal_id, title: deals.find(deal => deal.id === row.deal_id)?.title ?? "", count: 0 };
+    deal.count++; perDeal.set(row.deal_id, deal);
+    const hour = Number(campusClock(new Date(row.redeemed_at)).time.slice(0, 2));
+    perHour.set(hour, (perHour.get(hour) ?? 0) + 1);
+  }
+  return delay({ perDeal: [...perDeal.values()].sort((a, b) => b.count - a.count || a.deal_id.localeCompare(b.deal_id)), perHour: [...perHour].map(([hour, count]) => ({ hour, count })).sort((a, b) => a.hour - b.hour), total: visits.length });
 }
 
 export async function getMyDeals(input: { businessId: string }): Promise<MyDeal[]> {
