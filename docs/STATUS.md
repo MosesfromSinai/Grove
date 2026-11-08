@@ -2,7 +2,7 @@
 
 The project's live memory. Read this first every session. Overwrite it (don't append) whenever the current state changes, so it always describes **now**. History goes in `LOG.md`, not here.
 
-_Last updated: 2026-11-07 by Adolfo_
+_Last updated: 2026-11-08 by Adolfo_
 
 ---
 
@@ -25,7 +25,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 | Moses | Done: sign-in gate, RLS, `redeem`, `redeem-pin`, `set-pin`, `claim-club-night`, Realtime, typed queries, all on grove-dev. Next: staff-scan design (#19) with Celso by Nov 1, the #18 gate test, then `issue-code` and `staff-redeem` (#20) |
 | Celso | #127 and #128 merged; sign-in gate passed. Next: #38, #106, #39 (staff-scan review by Nov 1) |
 | Edward | #129 merged: shell, feed, deal page, scanner calling `redeem()`, Redeemed screen (#49–#52, #55, #56 done). Next: phone test of the scanner (#53), PIN backup link and screen (#54, #58), sticker page (#57) |
-| Adolfo | Stack through #114 is published (`fc404ad`); #115 committed locally as `53f85f2`, not pushed. #76 mock Stats page implemented/locally verified on `adolfo/business-stats`, local commit approved, no push requested. Local checklist implementation: Week 2 6/6, Week 3 5/7; next #78/#122. Real reporting gated on #21; shared/hosted/physical acceptance remains pending; live Staff scan gated on #20 |
+| Adolfo | Stack through #76 is published, including #115 (`53f85f2`) and #76 (`dc21ea4`). #78 implemented/locally verified on `adolfo/staff-scanner`; local commit approved, no push requested. Next #122 (last new local engineering feature). Real reporting gated on #21 and live Staff scan on #20; shared/hosted/physical acceptance remains pending |
 | Hikaru | `/map` merged (#125; #86, #87 done). #85 awaits the Mapbox token (#84) and canvas check; then `deals_nearby` (#88); `deal_status()` is live |
 
 ## Open PRs
@@ -49,6 +49,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 - **Adolfo (#113/#114):** posting and claimed-club/verified-visit results are implemented locally, using existing member policies and `getClubNights` with paged history and strict aggregate checks. Shared review, authorized RLS/persistence/aggregate behavior, clock consistency and downstream claim/redemption checks remain pending. Current claim SQL lacks the same-date restriction stated in the contract; Moses must reconcile it. No backend objects or remote data changed.
 - **Adolfo (#115):** per-deal advertising links and QR PNGs are implemented/tested locally using existing deal reads, with no backend changes. Review, configured deployment origin, authorized hosted/link-only landing, actual phone clipboard/camera and printed-flyer acceptance remain pending. QR scanning opens `/deals/<id>`; it never redeems by itself.
 - **Adolfo (#76):** mock Stats page implemented/locally verified with Recharts and fixture-derived counts. Real reporting is unavailable in the UI until #21 completes: the existing raw-row reader lacks membership/pagination guarantees and must not be treated as complete stats. Mock/contract changes need Moses's review. Exact design-canvas comparison, authorized real reporting/RLS/counts/date boundaries and physical devices remain pending. No backend deployment or remote data changes.
+- **Adolfo (#78):** local staff scanner implemented/tested with single-flight requests, camera cleanup and uncertain-result protection; actual decoder checked with a synthetic camera. Real mode remains unavailable until #20's absent functions are ready and verified. Shared review of mock expiry, hosted membership/business binding/one-time token behavior, student-code confirmation and physical HTTPS camera/phone testing remain pending. No backend objects or remote data changes.
 - **Settings (done):** Vercel Authentication is off for preview deployments, so anyone with a preview link can open it. Supabase Auth on grove-dev is Google-only: Email is disabled, Google is enabled, and redirect URLs cover production, localhost, and `grove-*-mosesfromsinais-projects.vercel.app` previews.
 - **RLS is live on grove-dev (#128).** The shared switch selects real query/function wrappers, including the local #73 business adapters; hosted acceptance and unsupported provisioning/uploads remain pending.
 - **Everyone:** CI ("Lint, typecheck, build") runs on every PR and must pass to merge; it now runs `npm test` (vitest) too. Run `npm run lint && npm run typecheck && npm test && npm run build` before pushing.

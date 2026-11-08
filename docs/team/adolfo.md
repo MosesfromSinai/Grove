@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-11-07_
+_Last updated: 2026-11-08_
 
 ---
 
@@ -43,7 +43,7 @@ _Last updated: 2026-11-07_
 ### Week 3 — Stats, settings, staff scanner, club nights (Nov 2–8)
 - [ ] Stats: redemptions per deal and busiest hours (Recharts) (#76) — implemented/tested locally on mocks; real reporting gated on #21, shared review/canvas/hosted/phone acceptance pending
 - [ ] Redemption settings: Sticker vs. Staff scan selector; Reset PIN calls `set-pin` and shows the new PIN once (#77) — implemented/tested locally; live Staff scan activation gated on #20, shared review and authorized hosted checks pending
-- [ ] Staff scanner: camera via `html5-qrcode`, calls `staff-redeem`, green "Verified" or red "Not valid" with reason, "Scan next" (#78)
+- [ ] Staff scanner: camera via `html5-qrcode`, calls `staff-redeem`, green "Verified" or red "Not valid" with reason, "Scan next" (#78) — implemented/tested locally on mocks; real mode gated on #20, shared/hosted/physical-phone acceptance pending
 - [ ] Post an open club night: date, time window, giveback text (e.g. "15% back to your club") (#113) — implemented/tested locally; shared review, authorized hosted RLS/persistence and downstream claim checks pending
 - [ ] Club night results on the dashboard: claimed club name and verified visits per night (#114) — implemented/tested locally; shared review and authorized hosted/end-to-end acceptance pending
 - [ ] Deal link and QR download for flyers and group chats (`/deals/<id>`; it opens the deal only, never redeems) (#115) — implemented/tested locally; review, configured hosted origin/link-only landing and physical-phone acceptance pending
@@ -64,6 +64,12 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 ---
 
 ## Notes and session log
+
+### 2026-11-08
+- **Publication / #78 start:** Pushed approved #115 (`53f85f2`, `adolfo/deal-sharing`) and #76 (`dc21ea4`, `adolfo/business-stats`); no PR/merge. Fetched unchanged main (`7daf9ed`), no newer teammate decisions or #78 comments; #20 remains open and its functions are absent. Started `adolfo/staff-scanner` from main plus the preserved stack.
+- **#78 Did:** Added Staff scanner navigation/page and explicit Start camera through `html5-qrcode`, one token/check at a time, current-business canonical success, friendly reasons for all contract errors, Scan next and explicit camera retry. Stops/discards on tab hiding/navigation; interrupted/transport/malformed-result uncertainty never auto-retries. No scanned tokens/student identities in UI, logs or persistent storage. Real mode remains unavailable until #20 is verified; mocks require Staff scan mode. Added camera startup/cleanup safeguards for late streams, reused preview IDs and the library's ignored video-play promise. Corrected mock expiry to reject at the exact deadline; shared review required. No backend objects or remote data changes.
+- **#78 Checks/review:** Lint, typecheck, 192 tests (21 DB skipped) and production build passed. Tests cover canonical green results, all 14 friendly contract errors, duplicate scans, camera denial/startup/stop races, access changes, hidden/pending navigation, uncertain responses and no automatic retry; mock issue-code→staff-redeem tests prove one visit/event, reuse/expiry/business/ended-deal behavior. Production browser checks used a synthetic Y4M camera through the actual decoder: owner-enabled mode, no camera before Start, expired-token rejection/Scan next, media-track cleanup on result/stop/navigation, simulated denial/retry, keyboard focus, five widths and six WCAG scans passed with no page errors. Actual-client simulated profile HTTP confirmed the real-mode guard with zero camera/Edge calls and two more WCAG scans. Inspected desktop/tablet/phone states. An initial browser run found an unhandled library play rejection on removal; the scoped video-promise guard and regression fix passed the rerun. Synthetic camera/fixtures/reports remain outside Grove; this does not verify physical cameras or hosted staff-redeem.
+- **#78 Save approval/Next:** Adolfo approved staging and a local #78 commit after review; no push requested. Valid/uncertain UI responses are covered by component tests; actual paired student-code/confirmation, physical HTTPS cameras, hosted auth/business binding/atomic single-use/live-deal behavior and shared review remain pending on #20. Next: #122 staff list against matching mocks while #121 is unavailable. Local engineering implementation is 12/13; one feature remains, with integration/acceptance work still pending.
 
 ### 2026-11-07
 - **#115 Saved / #76 start:** Committed approved #115 locally as `53f85f2` (`#115 Add deal links and QR downloads`), no push. Fetched unchanged main (`7daf9ed`) and started `adolfo/business-stats` with the preserved stack. #76/#21 remain open; #76 has no comments and no newer teammate LOG decisions. Stats will use matching mocks until Moses completes/reviews real reporting.

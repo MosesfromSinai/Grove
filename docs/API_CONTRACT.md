@@ -6,7 +6,7 @@ The shapes everyone builds against. Frontend work uses `mocks/` that match this 
 **Rule:** any change here goes in a pull request reviewed by the people it affects, plus a line in `docs/LOG.md`.
 **Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together. Screens import from `lib/supabase` (`index.ts`), which serves `mocks/` or the real wrappers in `queries.ts` depending on `NEXT_PUBLIC_DATA_SOURCE`; a compile-time check keeps their signatures identical. The wrappers are browser-only: call them from client components so they run with the signed-in user's session.
 
-_Last updated: 2026-11-07_
+_Last updated: 2026-11-08_
 
 ---
 
@@ -380,6 +380,8 @@ All return either `{ ok: true, ... }` or `{ ok: false, error: ErrorCode }`. `lib
 `set-pin` and `add-staff` errors: `NOT_SIGNED_IN`, `NOT_OWNER` (only the business's owner; staff get `NOT_OWNER`). A new business's `qr_slug` comes from its name (accents removed, lowercase, dashes), plus a short suffix if taken.
 
 `claim-club-night` errors: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT`, `CLUB_NIGHT_EXPIRED`, `ALREADY_CLAIMED` (one claim per club night; the claim is a single conditional update, so two claims at once can't both win), `RATE_LIMITED` (Celso). An unknown night is `CLUB_NIGHT_EXPIRED`. The club name is trimmed and cut to 60 characters; a blank name is a bad request (HTTP 400, the wrapper throws), so the claim screen requires one.
+
+**Staff scanner (#78, review):** no input/output signature changes. The scanner reads an opaque `issueCode` token, never follows QR URLs or infers verification from their contents. Only explicit camera start opens `html5-qrcode`; one detection calls `staffRedeem({ token })` once, stops capture, and waits for Scan next. A green result requires a canonical successful `staff_scan` redemption for the selected business. All `ErrorCode` values get friendly reasons; lost access locks scanning until business reload. Transport, interrupted and malformed/cross-business success responses stay unconfirmed and never auto-retry. Camera/media cleanup and late-response suppression apply on Stop, tab hiding and cached navigation. Scanned tokens are not rendered, logged or persisted. Mock mode requires Staff scan settings and uses the existing issuance/redemption flow, with expiry at `now >= expires_at`. **Real mode remains gated on #20**, whose functions are absent; it requests no camera and calls no Edge Function. Hosted auth/business binding, atomic single-use/DST/live-deal checks, student confirmation and physical HTTPS camera/phone verification remain pending. No SQL/functions/deployment in #78.
 
 ### Redeem with repeat days and link-only deals
 The two-QR rule and the redemption checks are in `CLAUDE.md` → Redemption rules. What that means for the functions:

@@ -410,7 +410,7 @@ export async function issueCode(input: { deal_id: string }): Promise<IssueCodeRe
 
 export async function staffRedeem(input: { token: string }): Promise<StaffRedeemResult> {
   const code = codes.get(input.token);
-  if (!code || code.expires < Date.now()) return delay({ ok: false, error: "CODE_EXPIRED" });
+  if (!code || code.expires <= Date.now()) return delay({ ok: false, error: "CODE_EXPIRED" });
   const d = deals.find((x) => x.id === code.deal_id);
   if (!d) return delay({ ok: false, error: "CODE_EXPIRED" });
   if (d.business_id !== mockStaff.business_id) return delay({ ok: false, error: "NOT_STAFF" });

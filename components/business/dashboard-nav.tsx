@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, CalendarDays, LayoutDashboard, Plus, QrCode, Store, Tags } from "lucide-react";
+import { BarChart3, CalendarDays, LayoutDashboard, Plus, QrCode, ScanLine, Store, Tags } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -11,6 +11,7 @@ const items = [
   { href: "/dashboard/deals", label: "My deals", icon: Tags },
   { href: "/dashboard/club-nights", label: "Club nights", icon: CalendarDays },
   { href: "/dashboard/stats", label: "Stats", icon: BarChart3 },
+  { href: "/dashboard/scan", label: "Staff scanner", icon: ScanLine },
   { href: "/dashboard/settings", label: "QR sticker & PIN", icon: QrCode },
   { href: "/dashboard/onboarding", label: "Business setup", icon: Store },
 ];
