@@ -25,7 +25,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 | Moses | Done: sign-in gate, RLS, `redeem`, `redeem-pin`, `set-pin`, `claim-club-night`, Realtime, typed queries, all on grove-dev. Next: staff-scan design (#19) with Celso by Nov 1, the #18 gate test, then `issue-code` and `staff-redeem` (#20) |
 | Celso | #127 and #128 merged; sign-in gate passed. Next: #38, #106, #39 (staff-scan review by Nov 1) |
 | Edward | #129 merged: shell, feed, deal page, scanner calling `redeem()`, Redeemed screen (#49–#52, #55, #56 done). Next: phone test of the scanner (#53), PIN backup link and screen (#54, #58), sticker page (#57) |
-| Adolfo | Stack through #76 is published, including #115 (`53f85f2`) and #76 (`dc21ea4`). #78 implemented/locally verified on `adolfo/staff-scanner`; local commit approved, no push requested. Next #122 (last new local engineering feature). Real reporting gated on #21 and live Staff scan on #20; shared/hosted/physical acceptance remains pending |
+| Adolfo | Stack through #76 published; #78 saved as `cbdfe9b`. #122 staff settings implemented/locally verified on `adolfo/staff-management`; #78/#122 feature-branch commit/publication approved. Shared review remains pending. PDF checklist local implementation: Week 2 4/4, Week 3 9/9; hosted acceptance still pending. Real reporting/staff scan/staff settings gated on #21/#20/#121; provisioning/Storage, shared review and physical checks remain |
 | Hikaru | `/map` merged (#125; #86, #87 done). #85 awaits the Mapbox token (#84) and canvas check; then `deals_nearby` (#88); `deal_status()` is live |
 
 ## Open PRs

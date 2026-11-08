@@ -8,9 +8,11 @@ import { copyHours, validateBusinessInput } from "../lib/supabase/business-input
 import { BusinessAccessError } from "../lib/supabase/business-errors";
 import { overviewPeriod } from "../lib/supabase/overview-period";
 import { validateCreateClubNight } from "../lib/supabase/club-night-input";
+import { staffEmail } from "../lib/supabase/staff-input";
 import { campusDateTimeToISO } from "../lib/supabase/deal-input";
 import type {
   AddStaffResult,
+  RemoveStaffResult,
   BusinessPublic,
   BusinessStats,
   BusinessOverview,
@@ -554,7 +556,8 @@ export async function setPin(input: { business_id: string }): Promise<SetPinResu
 // Adds a staff member by Google email; they become active on their first sign-in.
 export async function addStaff(input: { business_id: string; email: string }): Promise<AddStaffResult> {
   if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
-  const email = input.email.trim().toLowerCase();
+  const email = staffEmail(input.email);
+  if (!email) throw new Error("Invalid staff email");
   let m = businessMembers.find((x) => x.business_id === input.business_id && x.email === email);
   if (!m) {
     m = { business_id: input.business_id, user_id: null, email, role: "staff" };
@@ -564,7 +567,19 @@ export async function addStaff(input: { business_id: string; email: string }): P
 }
 
 export async function getStaff(input: { businessId: string }): Promise<StaffMember[]> {
+  if (input.businessId !== mockOwner.business_id) throw new BusinessAccessError("NOT_MEMBER");
   return delay(businessMembers.filter((m) => m.business_id === input.businessId).map(toStaffMember));
+}
+
+export async function removeStaff(input: { business_id: string; email: string }): Promise<RemoveStaffResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  const email = staffEmail(input.email);
+  if (!email) throw new Error("Invalid staff email");
+  const index = businessMembers.findIndex(m => m.business_id === input.business_id && m.email === email);
+  if (index < 0) return delay({ ok: false, error: "STAFF_NOT_FOUND" });
+  if (businessMembers[index].role !== "staff" || businessMembers[index].user_id === mockOwner.id) return delay({ ok: false, error: "OWNER_PROTECTED" });
+  businessMembers.splice(index, 1);
+  return delay({ ok: true, email });
 }
 
 // Campus date and time right now, handy for showing "today" on club night screens.

@@ -217,4 +217,5 @@ export type StaffRedeemResult = { ok: true; redemption: Redemption; deal_title: 
 export type ClaimClubNightResult = { ok: true; club_night: ClubNight; deal_id: string } | Failure;
 export type SetPinResult = { ok: true; pin: string } | Failure; // the only time the PIN is ever returned
 export type AddStaffResult = { ok: true; member: StaffMember } | Failure;
+export type RemoveStaffResult = { ok: true; email: string } | { ok: false; error: "NOT_SIGNED_IN" | "NOT_OWNER" | "OWNER_PROTECTED" | "STAFF_NOT_FOUND" };
 export type NotifyDealResult = { ok: true; sent: number } | Failure;

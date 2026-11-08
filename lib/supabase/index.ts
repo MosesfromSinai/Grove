@@ -28,6 +28,7 @@ type Api = Pick<
   | "setPin"
   | "setRedemptionMode"
   | "addStaff"
+  | "removeStaff"
   | "notifyDeal"
   | "getMyBusiness"
   | "getBusinessSticker"
@@ -65,6 +66,7 @@ export const {
   setPin,
   setRedemptionMode,
   addStaff,
+  removeStaff,
   notifyDeal,
   getMyBusiness, getBusinessSticker, getBusinessLocationOptions, saveBusiness, createDeal, endDeal, cancelDeal,
 } = api;

@@ -10,8 +10,10 @@ import { validateCreateDealInput } from "./deal-input";
 import { BusinessAccessError } from "./business-errors";
 import { overviewPeriod } from "./overview-period";
 import { validateCreateClubNight } from "./club-night-input";
+import { staffEmail } from "./staff-input";
 import type {
   AddStaffResult,
+  RemoveStaffResult,
   BusinessPublic,
   BusinessStats,
   BusinessOverview,
@@ -382,12 +384,42 @@ export async function createClubNight(input: CreateClubNightInput): Promise<Crea
 // ---------- Business settings ----------
 
 export async function getStaff(input: { businessId: string }): Promise<StaffMember[]> {
-  const rows = list(await db().from("business_members").select("*").eq("business_id", input.businessId));
+  const role = await membership(input.businessId);
+  if (role === "NOT_SIGNED_IN") throw new BusinessAccessError(role);
+  if (!role) throw new BusinessAccessError("NOT_MEMBER");
+  const rows: Tables<"business_members">[] = [];
+  for (let from = 0; ; from += 500) {
+    const page = list(await db().from("business_members")
+      .select("business_id, email, user_id, role").eq("business_id", input.businessId)
+      .order("email", { ascending: true }).range(from, from + 499));
+    rows.push(...page);
+    if (page.length < 500) break;
+  }
   return rows.map((m) => ({
     ...m,
     role: m.role as StaffMember["role"],
     status: m.user_id ? "active" : "invited",
   }));
+}
+
+// Existing owner RLS is authoritative. Never delete an owner or an entire roster.
+export async function removeStaff(input: { business_id: string; email: string }): Promise<RemoveStaffResult> {
+  const email = staffEmail(input.email);
+  if (!email) throw new Error("Invalid staff email");
+  const role = await membership(input.business_id);
+  if (role === "NOT_SIGNED_IN") return { ok: false, error: role };
+  if (role !== "owner") return { ok: false, error: "NOT_OWNER" };
+  const target = check(await db().from("business_members").select("role")
+    .eq("business_id", input.business_id).eq("email", email).maybeSingle());
+  if (!target) return { ok: false, error: "STAFF_NOT_FOUND" };
+  if (target.role !== "staff") return { ok: false, error: "OWNER_PROTECTED" };
+  const result = await db().from("business_members").delete()
+    .eq("business_id", input.business_id).eq("email", email).eq("role", "staff").select("email").maybeSingle();
+  if (result.error?.code === "42501") return { ok: false, error: "NOT_OWNER" };
+  const removed = check(result);
+  if (!removed) return { ok: false, error: "STAFF_NOT_FOUND" };
+  if (removed.email !== email) throw new Error("Unexpected staff removal receipt");
+  return { ok: true, email };
 }
 
 // ---------- Edge Functions ----------
@@ -415,7 +447,11 @@ export const claimClubNight = (input: { club_night_id: string; club_name: string
 
 export const setPin = (input: { business_id: string }) => invoke<SetPinResult>("set-pin", input);
 
-export const addStaff = (input: { business_id: string; email: string }) => invoke<AddStaffResult>("add-staff", input);
+export async function addStaff(input: { business_id: string; email: string }): Promise<AddStaffResult> {
+  const email = staffEmail(input.email);
+  if (!email) throw new Error("Invalid staff email");
+  return invoke<AddStaffResult>("add-staff", { business_id: input.business_id, email });
+}
 
 // Stretch goal: there is no notify-deal function yet.
 export const notifyDeal = (input: { deal_id: string }) => invoke<NotifyDealResult>("notify-deal", input);

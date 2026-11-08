@@ -24,6 +24,7 @@ function fakeClient({ tables = {}, invoke, userId }: Fake) {
       get: (_, prop) =>
         prop === "then"
           ? (resolve: (r: unknown) => void) => resolve({ data, error: null, count: null })
+          : prop === "maybeSingle" ? () => chain(Array.isArray(data) ? data[0] ?? null : data)
           : () => chain(data),
     });
   return {
@@ -139,6 +140,7 @@ test("getClubNights computes status and visit counts", async () => {
 
 test("getStaff marks members without a user id as invited", async () => {
   use({
+    userId: "u1",
     tables: {
       business_members: [
         { business_id: "b1", user_id: "u1", email: "owner@x.example", role: "owner" },
