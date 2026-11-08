@@ -18,6 +18,15 @@ beforeEach(async () => {
 const now = Date.now();
 afterEach(() => vi.useRealTimers());
 
+test("club results count only the night's linked deal across all successful redemption methods", async () => {
+  const api = await import("../mocks/index"); const club = fixtures.clubNights.find(n => n.id === "cn-opt-film");
+  const before = (await api.getClubNights({ businessId: "biz-opt" })).find(n => n.id === club.id).visit_count;
+  for (const method of ["sticker", "pin", "staff_scan"]) fixtures.redemptions.push({ id: `result-${method}`, business_id: "biz-opt", deal_id: club.deal_id, student_id: `fixture-${method}`, method, redeemed_at: new Date().toISOString() });
+  fixtures.redemptions.push({ id: "unrelated", business_id: "biz-opt", deal_id: "deal-opt-burrito", student_id: "fixture-other", method: "sticker", redeemed_at: new Date().toISOString() });
+  const results = await api.getClubNights({ businessId: "biz-opt" }); const night = results.find(n => n.id === club.id);
+  assert.equal(night.visit_count, before + 3); assert.equal(night.claimed_club_name, club.claimed_club_name); assert.equal("claimed_by" in night, false); assert.ok(results.every(n => n.business_id === "biz-opt"));
+});
+
 test("posting a mock club night makes an unclaimed night visible without creating a deal or resetting a PIN", async () => {
   vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-11-06T20:00:00Z"));
   const api = await import("../mocks/index"); const beforeDeals = fixtures.deals.length;

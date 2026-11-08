@@ -482,7 +482,7 @@ export async function getClubNights(input: { businessId: string }): Promise<Club
   if (input.businessId !== mockOwner.business_id) throw new BusinessAccessError("NOT_MEMBER");
   const mine = clubNights
     .filter((c) => c.business_id === input.businessId)
-    .sort((a, b) => b.starts_at.localeCompare(a.starts_at));
+    .sort((a, b) => b.starts_at.localeCompare(a.starts_at) || b.id.localeCompare(a.id));
   return delay(mine.map(toClubNight));
 }
 

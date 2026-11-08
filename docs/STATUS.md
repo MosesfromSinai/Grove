@@ -2,7 +2,7 @@
 
 The project's live memory. Read this first every session. Overwrite it (don't append) whenever the current state changes, so it always describes **now**. History goes in `LOG.md`, not here.
 
-_Last updated: 2026-11-06 by Adolfo_
+_Last updated: 2026-11-07 by Adolfo_
 
 ---
 
@@ -25,11 +25,13 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 | Moses | Done: sign-in gate, RLS, `redeem`, `redeem-pin`, `set-pin`, `claim-club-night`, Realtime, typed queries, all on grove-dev. Next: staff-scan design (#19) with Celso by Nov 1, the #18 gate test, then `issue-code` and `staff-redeem` (#20) |
 | Celso | #127 and #128 merged; sign-in gate passed. Next: #38, #106, #39 (staff-scan review by Nov 1) |
 | Edward | #129 merged: shell, feed, deal page, scanner calling `redeem()`, Redeemed screen (#49–#52, #55, #56 done). Next: phone test of the scanner (#53), PIN backup link and screen (#54, #58), sticker page (#57) |
-| Adolfo | #69/#71, #73/#112, and #74 pushed on their feature branches (`18701ce`, `8db37e6`, `7eb0be6`); no PR/merge. #75/#77 commits (`8028de5`, `81c27f1`) and #113 on `adolfo/open-club-nights` have branch-publication approval after local review/checks. Next #114. Live Staff scan gated on #20; shared/hosted/physical acceptance and PR CI remain pending |
+| Adolfo | Completed local stack through #113 is published; open PRs #140/#141 carry posting/settings and earlier work. #114 implemented and locally verified on `adolfo/club-night-results`; local commit approved, no push requested. Next #115, then #76/#78/#122. Shared/hosted/physical acceptance remains pending; live Staff scan gated on #20 |
 | Hikaru | `/map` merged (#125; #86, #87 done). #85 awaits the Mapbox token (#84) and canvas check; then `deals_nearby` (#88); `deal_status()` is live |
 
 ## Open PRs
 
+- #140 (Adolfo, open): open club-night posting with the dashboard feature stack; shared review and hosted acceptance pending.
+- #141 (Adolfo, open): redemption settings with earlier dashboard work; overlaps #140's stack, so coordinate merge order before merging either.
 - #138 (Hikaru, draft): truck location/PWA and `deals_nearby`; migration review/application and hosted/physical-phone checks pending.
 - #139 (Edward, open): PIN backup and sticker page; not merged.
 
@@ -42,9 +44,9 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 - **Everyone:** accept the Supabase org invite, then copy the Supabase URL and anon key into your `.env.local` (see README → Getting started). The service-role key stays with Moses.
 - **Gate record (#18):** Nov 4 checklist reports the test passed; issue and main's LOG still need reconciliation. The feed remains dependent on #88/#138. Coordinate current Test Kitchen access/data with Moses; LOG's original deal ended Nov 4.
 - **Adolfo (#73/#74):** local adapters use the shared switch for membership/profile, provisioned-business updates, posting, My deals, End now/Cancel, and the new member-checked sticker slug read; no real operation falls back to mocks. Moses's review and authorized grove-dev verification remain pending. Provisioning and Storage uploads are unsupported; unknown PIN readiness preserves existing PINs. #74 also needs the configured deployment origin, Edward's landing page (#139), and physical print/phone checks. Mode (#77) and club-night posting (#113) wrappers are now local; staff removal remains later work. Moses is unavailable; local implementation/testing proceeds without remote changes.
-- **Adolfo (#75):** local overview uses a proposed member-checked exact-count/feed helper and optional Realtime connection status. Mock and simulated HTTP/WebSocket checks pass; authorized Test Kitchen counts, owner/staff/nonmember RLS, real Realtime recovery, browser/database clock agreement, and helper review remain pending. No new backend objects or remote data changes. Published prior branches have no GitHub Actions run until a PR is opened (CI runs on PR/main).
+- **Adolfo (#75):** local overview uses a proposed member-checked exact-count/feed helper and optional Realtime connection status. Mock and simulated HTTP/WebSocket checks pass; authorized Test Kitchen counts, owner/staff/nonmember RLS, real Realtime recovery, browser/database clock agreement, and helper review remain pending. No new backend objects or remote data changes. PR CI for #140/#141 needs separate review; local checks do not verify it.
 - **Adolfo (#77):** owner settings and one-time Reset PIN are implemented locally, with no automatic reset and no current PIN read. Mode writes use existing grants; live Staff scan activation is refused until #20's absent functions are ready. Mocks exercise both modes. Shared review and authorized hosted mode/RLS/Edge Function checks, old-PIN invalidation, and physical devices remain pending. No new backend objects or remote writes.
-- **Adolfo (#113):** local posting uses existing member insert policies with matching mocks and membership-checked management reads. Shared review, authorized RLS/persistence, clock consistency and downstream claims remain pending. Current claim SQL lacks the same-date restriction stated in the contract; Moses must reconcile it. No backend objects or remote data changed. Claimed club names and visit-count results remain #114.
+- **Adolfo (#113/#114):** posting and claimed-club/verified-visit results are implemented locally, using existing member policies and `getClubNights` with paged history and strict aggregate checks. Shared review, authorized RLS/persistence/aggregate behavior, clock consistency and downstream claim/redemption checks remain pending. Current claim SQL lacks the same-date restriction stated in the contract; Moses must reconcile it. No backend objects or remote data changed.
 - **Settings (done):** Vercel Authentication is off for preview deployments, so anyone with a preview link can open it. Supabase Auth on grove-dev is Google-only: Email is disabled, Google is enabled, and redirect URLs cover production, localhost, and `grove-*-mosesfromsinais-projects.vercel.app` previews.
 - **RLS is live on grove-dev (#128).** The shared switch selects real query/function wrappers, including the local #73 business adapters; hosted acceptance and unsupported provisioning/uploads remain pending.
 - **Everyone:** CI ("Lint, typecheck, build") runs on every PR and must pass to merge; it now runs `npm test` (vitest) too. Run `npm run lint && npm run typecheck && npm test && npm run build` before pushing.

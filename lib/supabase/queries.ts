@@ -334,24 +334,36 @@ export async function getClubNights(input: { businessId: string }): Promise<Club
   const role = await membership(input.businessId);
   if (role === "NOT_SIGNED_IN") throw new BusinessAccessError(role);
   if (!role) throw new BusinessAccessError("NOT_MEMBER");
-  const rows = list(
-    await db()
-      .from("club_nights")
-      .select(
-        "id, business_id, night_date, start_time, end_time, giveback, claimed_club_name, claimed_at, deal_id, businesses(name), deals(redemptions(count))",
-      )
-      .eq("business_id", input.businessId)
-      .order("night_date", { ascending: false })
-      .order("start_time", { ascending: false }),
-  );
-  return rows.map((c) => ({
-    ...toOpenClubNight(c),
-    status: c.claimed_club_name ? "claimed" : expired(c) ? "expired" : "open",
-    claimed_club_name: c.claimed_club_name,
-    claimed_at: c.claimed_at,
-    deal_id: c.deal_id,
-    visit_count: c.deals?.redemptions[0]?.count ?? 0,
-  }));
+  const pageSize = 500;
+  const page = (offset: number) => db()
+    .from("club_nights")
+    .select("id, business_id, night_date, start_time, end_time, giveback, claimed_club_name, claimed_at, deal_id, businesses(name), deals(redemptions(count))")
+    .eq("business_id", input.businessId)
+    .order("night_date", { ascending: false })
+    .order("start_time", { ascending: false })
+    .order("id", { ascending: false })
+    .range(offset, offset + pageSize - 1);
+  const rows = [...list(await page(0))];
+  let offset = pageSize;
+  while (rows.length === offset) {
+    const next = list(await page(offset));
+    rows.push(...next);
+    offset += pageSize;
+  }
+  return rows.map(c => {
+    const count = c.deal_id ? c.deals?.redemptions?.[0]?.count : c.claimed_club_name ? undefined : 0;
+    // A missing joined count is not evidence of zero visits. Refuse the read
+    // rather than hide a permission/relationship problem in a claimed result.
+    if (typeof count !== "number" || !Number.isSafeInteger(count) || count < 0) throw new Error("Club-night visit count unavailable.");
+    return {
+      ...toOpenClubNight(c),
+      status: c.claimed_club_name ? "claimed" : expired(c) ? "expired" : "open",
+      claimed_club_name: c.claimed_club_name,
+      claimed_at: c.claimed_at,
+      deal_id: c.deal_id,
+      visit_count: count,
+    };
+  });
 }
 
 export async function createClubNight(input: CreateClubNightInput): Promise<CreateClubNightResult> {

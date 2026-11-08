@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-11-06_
+_Last updated: 2026-11-07_
 
 ---
 
@@ -45,7 +45,7 @@ _Last updated: 2026-11-06_
 - [ ] Redemption settings: Sticker vs. Staff scan selector; Reset PIN calls `set-pin` and shows the new PIN once (#77) — implemented/tested locally; live Staff scan activation gated on #20, shared review and authorized hosted checks pending
 - [ ] Staff scanner: camera via `html5-qrcode`, calls `staff-redeem`, green "Verified" or red "Not valid" with reason, "Scan next" (#78)
 - [ ] Post an open club night: date, time window, giveback text (e.g. "15% back to your club") (#113) — implemented/tested locally; shared review, authorized hosted RLS/persistence and downstream claim checks pending
-- [ ] Club night results on the dashboard: claimed club name and verified visits per night (#114)
+- [ ] Club night results on the dashboard: claimed club name and verified visits per night (#114) — implemented/tested locally; shared review and authorized hosted/end-to-end acceptance pending
 - [ ] Deal link and QR download for flyers and group chats (`/deals/<id>`; it opens the deal only, never redeems) (#115)
 - [ ] Staff list in settings: add staff by Google email (`add-staff`), see invited vs. active (`getStaff`), remove staff (#122)
 
@@ -64,6 +64,12 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 ---
 
 ## Notes and session log
+
+### 2026-11-07
+- **Recovery/Did:** Recovered #114 on `adolfo/club-night-results` at `ef1a9b1`, after the completed #73/#112/#74/#75/#77/#113 stack. Protected all nine pre-existing changed/untracked files under `D:\CS175\.tools\grove-recovery-20261107`; nothing staged. No interrupted merge/rebase; stopped two orphaned build workers. Fetched unchanged main (`7daf9ed`), so no integration was needed. PRs #140 (posting stack) and #141 (settings stack) are now open; #138/#139 remain unmerged. No newer teammate LOG decisions.
+- **#114 Did:** Reviewed the partial results component, shared wall-time formatter, safe linked-deal aggregate checks, stable paged history and mock ordering. Added regressions for canonical refresh, stale data, access revocation and late navigation responses. Club names/counts use `getClubNights`; no student identities, backend changes or hosted writes.
+- **#114 Checks/review:** Lint, typecheck, 137 tests (21 DB skipped) and production build passed. Mock and actual-client simulated HTTP browser checks passed: 505-night paging/Show more, zero and 2,305→2,306 counts, all redemption methods/unrelated-deal exclusion, refresh/stale/missing-aggregate/access/staff/empty/error states, safe long names, and DST wall times with a Tokyo device timezone. Five widths, six WCAG A/AA scans and keyboard refresh passed; desktop/tablet/phone screenshots inspected. Local tools, fixtures and captures stay outside Grove. Review `/dashboard/club-nights` → Posted nights, claimed clubs/counts and Refresh posted nights.
+- **Save approval/Next:** Adolfo authorized staging and a local #114 commit after review; no push requested. Next: #115, then #76, #78, #122 in Moses's checklist order. Authorized Test Kitchen membership/current data, real aggregate/RLS/claim/redemption checks and physical devices remain pending. Existing provisioning/Storage and #21/#20/#121 dependencies remain; continue independent local work.
 
 ### 2026-11-06
 - **#113 Commit/publication approval:** Adolfo approved committing #113 and pushing the completed #75/#77/#113 feature branches. Prior verification remains valid; authorized hosted/shared acceptance stays pending. No PR or merge requested; GitHub Actions runs on PR/main, so branch pushes alone do not run CI. Next: #114.

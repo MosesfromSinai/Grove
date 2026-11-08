@@ -67,3 +67,30 @@ test("posting and management reads refuse missing membership, distinguish invali
   use([ok({ role: "staff" }), { data: null, error: { code: "42501", message: "denied" } }]); expect(await createClubNight(input)).toEqual({ ok: false, error: "NOT_OWNER" });
   use([ok({ role: "owner" }), { data: null, error: { message: "offline" } }]); await expect(createClubNight(input)).rejects.toThrow("offline");
 });
+
+test("club results preserve claimed zero counts and large aggregates without returning private identities", async () => {
+  const row = { ...input, id: "n1", businesses: { name: "Kitchen" }, claimed_club_name: "Student-entered club", claimed_at: "2026-11-06T20:00:00Z", deal_id: "d1", claimed_by: "private-user", deals: { redemptions: [{ count: 2305 }] } };
+  const calls = use([ok({ role: "staff" }), ok([row, { ...row, id: "n2", deals: { redemptions: [{ count: 0 }] } }])]);
+  const results = await getClubNights({ businessId: "b1" });
+  expect(results.map(n => n.visit_count)).toEqual([2305, 0]); expect(results[0].claimed_club_name).toBe("Student-entered club");
+  expect(results[0]).not.toHaveProperty("claimed_by"); expect(JSON.stringify(calls)).not.toContain("claimed_by");
+  expect(calls[1].ops).toContainEqual(["eq", ["business_id", "b1"]]); expect(calls[1].ops).toContainEqual(["range", [0, 499]]);
+});
+
+test("missing or invalid claimed-deal aggregates fail instead of reporting zero", async () => {
+  const row = { ...input, id: "n1", businesses: { name: "Kitchen" }, claimed_club_name: "Club", claimed_at: "2026-11-06T20:00Z", deal_id: "d1" };
+  for (const deals of [null, { redemptions: [] }, { redemptions: [{ count: null }] }, { redemptions: [{ count: -1 }] }, { redemptions: [{ count: 1.5 }] }]) {
+    use([ok({ role: "owner" }), ok([{ ...row, deals }])]); await expect(getClubNights({ businessId: "b1" })).rejects.toThrow("count unavailable");
+  }
+  use([ok({ role: "owner" }), ok([{ ...row, deal_id: null, deals: null }])]); await expect(getClubNights({ businessId: "b1" })).rejects.toThrow("count unavailable");
+});
+
+test("club-night reads retrieve older pages with stable ordering and fail rather than return a partial list", async () => {
+  const row = { ...input, businesses: { name: "Kitchen" }, claimed_club_name: null, claimed_at: null, deal_id: null, deals: null };
+  const first = Array.from({ length: 500 }, (_, i) => ({ ...row, id: `n${i}` }));
+  const calls = use([ok({ role: "owner" }), ok(first), ok([{ ...row, id: "older-night" }])]);
+  expect((await getClubNights({ businessId: "b1" })).at(-1)?.id).toBe("older-night");
+  expect(calls[2].ops).toContainEqual(["range", [500, 999]]); expect(calls[2].ops).toContainEqual(["order", ["id", { ascending: false }]]);
+  use([ok({ role: "owner" }), ok(first), { data: null, error: { message: "second page offline" } }]);
+  await expect(getClubNights({ businessId: "b1" })).rejects.toThrow("second page offline");
+});

@@ -52,7 +52,7 @@ test("an uncertain save locks retries until a fresh posted-night read and explic
   expect(container.textContent).toContain("may have been posted"); expect(button("Post open club night").disabled).toBe(true); expect(button("I’ve checked — start a new post").disabled).toBe(true);
   await submit(); expect(api.create).toHaveBeenCalledTimes(1);
   api.read.mockResolvedValueOnce([{ ...night, status: "claimed", claimed_club_name: "Private club", visit_count: 9 }]);
-  await click("Refresh posted nights"); expect(button("I’ve checked — start a new post").disabled).toBe(false); expect(container.textContent).toContain("Claimed at last refresh"); expect(container.textContent).not.toContain("Private club");
+  await click("Refresh posted nights"); expect(button("I’ve checked — start a new post").disabled).toBe(false); expect(container.textContent).toContain("Claimed at last refresh"); expect(container.textContent).toContain("Private club");
   await click("I’ve checked — start a new post"); expect(container.querySelector<HTMLInputElement>('#night-giveback')!.value).toBe(""); expect(button("Post open club night").disabled).toBe(false);
 });
 
@@ -61,6 +61,30 @@ test("read outages are retryable, while membership loss clears stale data and lo
   await click("Refresh posted nights"); expect(container.textContent).toContain("No posted club nights");
   api.read.mockRejectedValueOnce(new BusinessAccessError("NOT_MEMBER")); await click("Refresh posted nights"); expect(button("Post open club night").disabled).toBe(true);
   await click("Reload business"); expect(api.refresh).toHaveBeenCalledTimes(1); expect(api.create).not.toHaveBeenCalled();
+});
+
+test("refresh replaces claims and visit totals, retains labeled stale results on failure, and clears revoked access", async () => {
+  api.read.mockResolvedValueOnce([{ ...night, status: "open", claimed_club_name: null, claimed_at: null, deal_id: null, visit_count: 0 }]);
+  await show(); expect(container.textContent).toContain("Not claimed");
+  api.read.mockResolvedValueOnce([{ ...night, status: "claimed", claimed_club_name: "Campus club", claimed_at: "2026-11-06T20:01:00Z", deal_id: "d1", visit_count: 2305 }]);
+  await click("Refresh posted nights"); expect(container.textContent).toContain("Campus club"); expect(container.textContent).toContain("2,305verified visits");
+  api.read.mockRejectedValueOnce(new Error("offline")); await click("Refresh posted nights");
+  expect(container.textContent).toContain("Campus club"); expect(container.textContent).toContain("may be out of date");
+  api.read.mockRejectedValueOnce(new BusinessAccessError("NOT_MEMBER")); await click("Refresh posted nights");
+  expect(container.textContent).not.toContain("Campus club"); expect(container.textContent).not.toContain("2,305"); expect(container.textContent).not.toContain("Last refreshed");
+  expect(button("Post open club night").disabled).toBe(true);
+});
+
+test("a read completing after navigation cannot replace the fresh results on return", async () => {
+  let resolve: (rows: unknown[]) => void = () => {};
+  api.read.mockImplementationOnce(() => new Promise(done => { resolve = done; }));
+  const screen = (mode: "visible" | "hidden") => <Activity mode={mode}><ClubNightPosting /></Activity>;
+  await act(async () => root.render(screen("visible")));
+  await act(async () => root.render(screen("hidden")));
+  api.read.mockResolvedValueOnce([{ ...night, status: "claimed", claimed_club_name: "Current club", claimed_at: "2026-11-06T20:01:00Z", deal_id: "d1", visit_count: 4 }]);
+  await act(async () => root.render(screen("visible")));
+  await act(async () => resolve([{ ...night, status: "claimed", claimed_club_name: "Old club", visit_count: 1 }]));
+  expect(container.textContent).toContain("Current club"); expect(container.textContent).not.toContain("Old club");
 });
 
 test("server field errors remain editable and permission failures cannot be retried as another write", async () => {

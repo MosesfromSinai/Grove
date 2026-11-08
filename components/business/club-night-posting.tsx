@@ -1,23 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
-import { CalendarDays, Check, Clock3, HeartHandshake, Plus, RefreshCw } from "lucide-react";
+import { Check, HeartHandshake, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClubNight, getClubNights, isMockData, type ClubNight, type CreateClubNightErrors, type CreateClubNightInput, type OpenClubNight } from "@/lib/supabase";
 import { BusinessAccessError } from "@/lib/supabase/business-errors";
 import { MAX_GIVEBACK_LENGTH, validateCreateClubNight } from "@/lib/supabase/club-night-input";
 import { CAMPUS_TZ } from "@/lib/supabase/deal-status";
-import { campusDateTimeToISO } from "@/lib/supabase/deal-input";
 import { BusinessLoading, useBusiness } from "./business-context";
+import { ClubNightResults } from "./club-night-results";
+import { clubNightSchedule } from "./club-night-format";
 
 const empty = { night_date: "", start_time: "", end_time: "", giveback: "" };
 const control = "mt-2 block min-h-12 w-full min-w-0 rounded-button border border-border-strong bg-surface px-3 py-2.5 text-base outline-none focus-visible:border-green focus-visible:ring-2 focus-visible:ring-green/30 aria-invalid:border-destructive";
-const dateFormat = new Intl.DateTimeFormat("en-US", { timeZone: CAMPUS_TZ, year: "numeric", month: "short", day: "numeric" });
-const timeFormat = new Intl.DateTimeFormat("en-US", { timeZone: CAMPUS_TZ, hour: "numeric", minute: "2-digit" });
 function schedule(night: Pick<OpenClubNight, "night_date" | "start_time" | "end_time">) {
-  const start = campusDateTimeToISO(`${night.night_date}T${night.start_time}`);
-  const end = campusDateTimeToISO(`${night.night_date}T${night.end_time}`);
-  return start && end ? `${dateFormat.format(new Date(start))} · ${timeFormat.format(new Date(start))}–${timeFormat.format(new Date(end))}` : "Choose a date and time window";
+  return clubNightSchedule(night, "Choose a date and time window");
 }
 
 export function ClubNightPosting() {
@@ -38,6 +35,7 @@ function Posting({ businessId, businessName }: { businessId: string; businessNam
   const [nights, setNights] = useState<ClubNight[] | null>(null);
   const [listError, setListError] = useState("");
   const [listBusy, setListBusy] = useState(false);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [focusRequest, setFocusRequest] = useState(0);
   const summary = useRef<HTMLDivElement>(null);
   const success = useRef<HTMLElement>(null);
@@ -58,10 +56,10 @@ function Posting({ businessId, businessName }: { businessId: string; businessNam
     if (forCheck) setChecked(false);
     try {
       const rows = await getClubNights({ businessId });
-      if (life.current.active && request === life.current.listVersion) { setNights(rows); setListError(""); if (forCheck) setChecked(true); }
+      if (life.current.active && request === life.current.listVersion) { setNights(rows); setUpdatedAt(new Date().toISOString()); setListError(""); if (forCheck) setChecked(true); }
     } catch (error) {
       if (life.current.active && request === life.current.listVersion) {
-        if (error instanceof BusinessAccessError) { setNights(null); setBlocked(true); setListError("Your business access has changed. Reload the business to continue."); }
+        if (error instanceof BusinessAccessError) { setNights(null); setUpdatedAt(null); setBlocked(true); setListError("Your business access has changed. Reload the business to continue."); }
         else setListError("We could not refresh posted nights. Any previous list may be out of date.");
       }
     } finally { if (life.current.active && request === life.current.listVersion) setListBusy(false); }
@@ -101,7 +99,6 @@ function Posting({ businessId, businessName }: { businessId: string; businessNam
   }
 
   const errorFor = (key: keyof typeof empty) => errors[key] ? <p id={`${key}-error`} className="mt-2 text-sm font-bold text-destructive">{errors[key]}</p> : null;
-  const postedNights = nights?.slice(0, 20);
   return <>
     <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
       {saved ? <section ref={success} tabIndex={-1} aria-labelledby="night-saved-heading" className="rounded-card bg-surface-dashboard p-6 shadow-card outline-none focus-visible:ring-2 focus-visible:ring-green sm:p-8">
@@ -125,11 +122,6 @@ function Posting({ businessId, businessName }: { businessId: string; businessNam
       </form>}
       <aside aria-label="Club night preview" className="min-w-0 rounded-card border border-border-strong bg-peach p-5 sm:p-6"><span className="inline-flex rounded-button bg-surface-dashboard p-3 text-brown"><HeartHandshake aria-hidden="true" className="size-6" /></span><h2 className="mt-4 text-xl">Open night preview</h2><p className="mt-3 text-sm font-bold [overflow-wrap:anywhere]">{businessName}</p><p className="mt-3 text-sm leading-relaxed text-brown [overflow-wrap:anywhere]">{schedule(saved ?? values)}</p><p className="mt-2 text-xs text-brown">UC Riverside time</p><p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-ink-muted [overflow-wrap:anywhere]">{(saved?.giveback ?? values.giveback).trim() || "Your giveback offer appears here."}</p><p className="mt-4 text-xs leading-relaxed text-brown">Open for a student club to claim. No club has been assigned by this form.</p>{isMockData && <p className="mt-3 text-xs font-bold text-brown">Demo preview</p>}</aside>
     </div>
-    <section aria-labelledby="open-nights-heading" className="mt-6 rounded-card border border-border bg-surface-dashboard p-5 shadow-card sm:p-7">
-      <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="open-nights-heading" className="text-2xl">Posted nights</h2><Button variant="outline" disabled={listBusy || saving} onClick={() => { void loadNights(uncertain); }}><RefreshCw aria-hidden="true" className="size-4" />{listBusy ? "Refreshing…" : "Refresh posted nights"}</Button></div>
-      <p className="mt-3 text-xs text-ink-fine">Most recent 20 nights from the last refresh, including claimed and expired nights. Refresh to check the current status.</p>
-      {listError && <p role="alert" className="mt-4 text-sm text-destructive">{listError}</p>}{blocked && saved && <Button variant="outline" onClick={refresh} className="mt-3">Reload business</Button>}
-      {!nights ? <p role="status" className="mt-5 text-sm text-ink-muted">{listError ? "Posted nights unavailable." : "Loading posted nights…"}</p> : !postedNights?.length ? <p className="mt-5 text-sm text-ink-muted">No posted club nights from the last refresh.</p> : <ul className="mt-4 divide-y divide-border-soft">{postedNights.map(night => <li key={night.id} className="py-4"><p className="flex items-center gap-2 text-sm font-bold"><CalendarDays aria-hidden="true" className="size-4 shrink-0 text-green" />{schedule(night)}</p><p className="mt-2 whitespace-pre-line text-sm text-ink-muted [overflow-wrap:anywhere]">{night.giveback}</p><p className="mt-2 inline-flex items-center gap-1 text-xs text-green-dark"><Clock3 aria-hidden="true" className="size-3.5" />{night.status === "claimed" ? "Claimed" : night.status === "expired" ? "Expired" : "Open"} at last refresh · UC Riverside time</p></li>)}</ul>}
-    </section>
+    <ClubNightResults nights={nights} busy={listBusy} disabled={saving} error={listError} updatedAt={updatedAt} onRefresh={() => { void loadNights(uncertain); }} onReloadBusiness={blocked && saved ? refresh : undefined} />
   </>;
 }
