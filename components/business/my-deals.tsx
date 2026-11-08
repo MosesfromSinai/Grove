@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { Plus, Tags } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
+import { Plus, Share2, Tags } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cancelDeal, endDeal, getMyDeals, isMockData } from "@/lib/supabase";
 import { BusinessAccessError } from "@/lib/supabase/business-errors";
@@ -10,6 +10,7 @@ import { CAMPUS_TZ } from "@/lib/supabase/deal-status";
 import type { DealMutationError, DealStatus, MyDeal } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
 import { BusinessLoading, useBusiness } from "@/components/business/business-context";
+import { DealShareDialog } from "./deal-share-dialog";
 
 const tabs = [{ status: "live", label: "Active" }, { status: "scheduled", label: "Scheduled" }, { status: "ended", label: "Expired" }] as const;
 const dateTime = new Intl.DateTimeFormat("en-US", { timeZone: CAMPUS_TZ, year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
@@ -34,11 +35,14 @@ export function MyDeals() {
   const [revision, setRevision] = useState(0);
   const [checkedAt, setCheckedAt] = useState(0);
   const [confirmation, setConfirmation] = useState<{ deal: MyDeal; action: "end" | "cancel" } | null>(null);
+  const [shareId, setShareId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
   const tabButtons = useRef<(HTMLButtonElement | null)[]>([]);
   const inFlight = useRef(false);
   const generation = useRef(0);
+
+  useLayoutEffect(() => () => setShareId(null), []);
 
   useEffect(() => {
     if (!businessId) return;
@@ -49,10 +53,10 @@ export function MyDeals() {
       const request = ++generation.current;
       try {
         const rows = await getMyDeals({ businessId: currentBusinessId });
-        if (active && request === generation.current) { setDeals(rows); setCheckedAt(Date.now()); setLoadError(""); }
+        if (active && request === generation.current) { setDeals(rows); setShareId(id => rows.some(deal => deal.id === id) ? id : null); setCheckedAt(Date.now()); setLoadError(""); }
       } catch (error) {
         if (active && request === generation.current) {
-          if (error instanceof BusinessAccessError) setDeals(null);
+          if (error instanceof BusinessAccessError) { setDeals(null); setShareId(null); }
           setLoadError(error instanceof BusinessAccessError ? "Sign in with a current business membership to see your deals." : "We could not load your deals. Please try again.");
         }
       }
@@ -125,6 +129,7 @@ export function MyDeals() {
 
   if (!profile) return <BusinessLoading />;
   const visibleDeals = deals?.filter(deal => deal.status === tab) ?? [];
+  const sharedDeal = deals?.find(deal => deal.id === shareId);
   return (
     <>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -165,7 +170,8 @@ export function MyDeals() {
                 {deal.active_days && <p className="mt-1 text-sm text-ink-fine">Repeats {deal.active_days.join(", ")} · {deal.daily_start}–{deal.daily_end} campus time</p>}
               </div>
               <p className="text-sm text-ink-muted"><span className="font-heading text-2xl font-extrabold tabular-nums text-ink">{deal.redemption_count.toLocaleString()}</span><span className="ml-2 xl:ml-0 xl:block">redemptions</span></p>
-              <div className="justify-self-start xl:justify-self-end">
+              <div className="flex flex-wrap gap-2 justify-self-start xl:justify-self-end">
+                <Button variant="outline" disabled={busy} onClick={() => setShareId(deal.id)} aria-label={`Share deal: ${deal.title}`}><Share2 aria-hidden="true" className="size-4" />Share</Button>
                 {canEnd ? <Button variant="destructive" disabled={busy} onClick={() => ask(deal, "end")} className="rounded-button">End now</Button>
                   : deal.status === "scheduled" ? (deal.redemption_count === 0 ? <Button variant="outline" disabled={busy} onClick={() => ask(deal, "cancel")} className="rounded-button">Cancel</Button> : <p className="text-xs text-ink-fine">Recorded visits prevent cancellation.</p>)
                     : <span className="text-sm font-bold text-ink-fine">Ended</span>}
@@ -174,6 +180,8 @@ export function MyDeals() {
           })}
         </ul>}
       </section>
+
+      {sharedDeal && <DealShareDialog key={sharedDeal.id} deal={sharedDeal} onClose={() => setShareId(null)} />}
 
       <dialog ref={dialog} aria-labelledby="deal-action-heading" aria-describedby="deal-action-description" aria-busy={busy} onCancel={event => { if (inFlight.current) event.preventDefault(); else setConfirmation(null); }} onClose={() => setConfirmation(null)} className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-card border border-border bg-surface-dashboard p-6 text-ink shadow-card backdrop:bg-ink/40">
         {confirmation && <>
