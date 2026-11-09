@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { nightDateLabel, timeWindowLabel } from "./format";
+import { nightDateLabel, redemptionWhenLabel, timeWindowLabel } from "./format";
 
 test("night dates read as written, whatever the phone's timezone", () => {
   expect(nightDateLabel("2026-11-10")).toBe("Tue, Nov 10");
@@ -13,4 +13,12 @@ test.each([
   ["21:00", "00:00", "9 PM–12 AM"],
 ])("%s to %s is %s", (start, end, label) => {
   expect(timeWindowLabel(start, end)).toBe(label);
+});
+
+test("redemptions today show the campus time, earlier ones the date", () => {
+  const now = Date.parse("2026-11-09T22:00:00Z"); // 2 PM Mon, Nov 9 in Riverside
+  expect(redemptionWhenLabel("2026-11-09T20:41:00Z", now)).toBe("Today · 12:41 PM");
+  expect(redemptionWhenLabel("2026-11-09T17:00:00Z", now)).toBe("Today · 9:00 AM");
+  expect(redemptionWhenLabel("2026-11-09T07:30:00Z", now)).toBe("Sun, Nov 8"); // 11:30 PM campus time
+  expect(redemptionWhenLabel("2026-10-16T19:00:00Z", now)).toBe("Fri, Oct 16");
 });

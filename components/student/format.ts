@@ -1,4 +1,4 @@
-import type { DiscountType } from "@/lib/supabase";
+import { campusClock, type DiscountType } from "@/lib/supabase";
 
 export function discountLabel(type: DiscountType | null, value: number | null): string | null {
   switch (type) {
@@ -47,4 +47,12 @@ export function timeWindowLabel(start: string, end: string): string {
   const a = clock(start);
   const b = clock(end);
   return a.half === b.half ? `${a.label}–${b.label} ${b.half}` : `${a.label} ${a.half}–${b.label} ${b.half}`;
+}
+
+// When a redemption happened, in campus time: "Today · 12:41 PM", else "Fri, Oct 16".
+export function redemptionWhenLabel(redeemedAt: string, nowMs: number): string {
+  const at = campusClock(new Date(redeemedAt));
+  if (at.date !== campusClock(new Date(nowMs)).date) return nightDateLabel(at.date);
+  const { label, half } = clock(at.time);
+  return `Today · ${label.includes(":") ? label : `${label}:00`} ${half}`;
 }
