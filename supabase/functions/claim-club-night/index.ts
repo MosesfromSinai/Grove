@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
   // The claim screen requires a name, so a blank one is a bad request (the wrapper throws).
   const club = typeof club_name === "string" ? club_name.trim().slice(0, 60).trim() : "";
   if (!club) return json({ error: "club_name is required" }, 400);
-  // TODO(#106): return RATE_LIMITED from Celso's per-student claim limit once it lands.
+  // claim_club_night() returns RATE_LIMITED past 3 claims per student in 7 days (#106).
 
   const { data, error } = await admin.rpc("claim_club_night", { p_student: student.id, p_night: club_night_id, p_club: club });
   return error ? serverError(error) : json(data);
