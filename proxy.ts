@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { NEXT_COOKIE, safeNextPath } from "@/lib/auth/next-path";
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -43,7 +44,19 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/icons/");
 
   if (!user && !isPublic) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
+    const redirect = NextResponse.redirect(new URL("/sign-in", request.url));
+    // Remember the page (e.g. a shared deal link) so the callback can return to it (#109).
+    const next = safeNextPath(pathname + request.nextUrl.search);
+    if (next) {
+      redirect.cookies.set(NEXT_COOKIE, next, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: request.nextUrl.protocol === "https:",
+        path: "/",
+        maxAge: 600,
+      });
+    }
+    return redirect;
   }
 
   return supabaseResponse;
