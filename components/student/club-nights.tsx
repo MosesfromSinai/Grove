@@ -55,6 +55,9 @@ function ClaimForm({ night, onClaimed, onGone }: { night: OpenClubNight; onClaim
 export function ClubNights() {
   const [nights, setNights] = useState<OpenClubNight[] | undefined>(undefined); // undefined = loading
   const [failed, setFailed] = useState(false);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [, setClaimed] = useState<Claimed | null>(null);
 
   const load = useCallback(() => {
     let cancelled = false;
@@ -79,6 +82,7 @@ export function ClubNights() {
       <p className="mt-1 text-sm text-ink-muted">
         Claim a night for your club. Members visit with Grove, and the restaurant gives part of the sales back to your club.
       </p>
+      {notice && <p role="alert" className="mt-4 rounded-button bg-peach px-4 py-3 text-sm text-brown">{notice}</p>}
       {nights.length === 0 ? (
         <p className="py-10 text-center text-ink-muted">No open club nights right now. Check back soon.</p>
       ) : (
@@ -92,6 +96,15 @@ export function ClubNights() {
               <span className="mt-3 inline-block rounded-pill bg-peach px-3 py-1 text-sm font-semibold text-brown">
                 {night.giveback}
               </span>
+              {openId === night.id ? (
+                <ClaimForm night={night} onClaimed={setClaimed}
+                  onGone={(error) => (setOpenId(null), setNotice(errorMessages[error]), load())} />
+              ) : (
+                <button onClick={() => (setOpenId(night.id), setNotice(null))}
+                  className="mt-4 block min-h-11 w-full rounded-button bg-ink px-6 font-semibold text-white">
+                  Claim for my club
+                </button>
+              )}
             </li>
           ))}
         </ul>
