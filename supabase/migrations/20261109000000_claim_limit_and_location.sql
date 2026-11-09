@@ -61,3 +61,41 @@ begin
     'claimed_at', c.claimed_at, 'deal_id', c.deal_id, 'visit_count', 0));
 end;
 $function$;
+
+CREATE OR REPLACE FUNCTION public.redeem_sticker(p_student uuid, p_deal uuid, p_qr_slug text, p_lat double precision, p_lng double precision)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare
+  d public.deals;
+  v_slug text;
+  v_business extensions.geography;
+  v_here extensions.geography;
+begin
+  select * into d from public.deals where id = p_deal;
+  if not found then
+    return jsonb_build_object('ok', false, 'error', 'DEAL_NOT_LIVE');
+  end if;
+  select qr_slug, location into v_slug, v_business from public.businesses where id = d.business_id;
+  if v_slug is distinct from p_qr_slug then
+    return jsonb_build_object('ok', false, 'error', 'WRONG_BUSINESS');
+  end if;
+  if public.deal_status(d) <> 'live' then
+    return jsonb_build_object('ok', false, 'error', 'DEAL_NOT_LIVE');
+  end if;
+  if p_lat is null or p_lng is null then
+    return jsonb_build_object('ok', false, 'error', 'LOCATION_REQUIRED');
+  end if;
+  -- #38: coordinates no phone can report get a clean error instead of a geography exception.
+  if p_lat not between -90 and 90 or p_lng not between -180 and 180 then
+    return jsonb_build_object('ok', false, 'error', 'INVALID_LOCATION');
+  end if;
+  v_here := extensions.st_setsrid(extensions.st_makepoint(p_lng, p_lat), 4326)::extensions.geography;
+  if not extensions.st_dwithin(v_business, v_here, 150) then
+    return jsonb_build_object('ok', false, 'error', 'TOO_FAR');
+  end if;
+  return public.record_redemption(p_student, p_deal, 'sticker', v_here);
+end;
+$function$;
