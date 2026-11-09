@@ -4,6 +4,7 @@
 // the club name, then shares the link-only deal it creates with members.
 import { useCallback, useEffect, useState } from "react";
 import { claimClubNight, getOpenClubNights, type ErrorCode, type OpenClubNight } from "@/lib/supabase";
+import { ClubNightClaimed } from "./club-night-claimed";
 import { errorMessages } from "./error-messages";
 import { nightDateLabel, timeWindowLabel } from "./format";
 
@@ -57,7 +58,7 @@ export function ClubNights() {
   const [failed, setFailed] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [, setClaimed] = useState<Claimed | null>(null);
+  const [claimed, setClaimed] = useState<Claimed | null>(null);
 
   const load = useCallback(() => {
     let cancelled = false;
@@ -74,6 +75,7 @@ export function ClubNights() {
   if (failed) {
     return <p className="py-10 text-center text-ink-muted">Couldn&apos;t load club nights. Check your connection and try again.</p>;
   }
+  if (claimed) return <ClubNightClaimed claimed={claimed} />;
   if (nights === undefined) return <p className="py-10 text-center text-ink-muted">Loading club nights…</p>;
 
   return (
