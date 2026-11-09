@@ -76,7 +76,7 @@ Ticked here, not in teammates' files. Staff-scan issues (#39, #40, #60, #61) are
 - [x] Location before scan with PIN link (#54), sticker page (#57), PIN screen (#58), from Edward's #139
 - [x] Keep the deal link through sign-in (#109)
 - [ ] Verify link-only hidden from feed (#108) and no mock imports (#59) on real data
-- [ ] Claim club night screen (#110)
+- [x] Claim club night screen (#110)
 - [ ] Profile page (#62)
 - [ ] Rate-limit club night claims (#106) and reject out-of-range coordinates (#38)
 - [ ] Onboarding routing (#33): done in `app/page.tsx`; owners added by hand (`STATUS.md`)
