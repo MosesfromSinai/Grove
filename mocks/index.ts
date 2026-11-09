@@ -247,6 +247,11 @@ export async function getMyProfile(): Promise<MyProfile | null> {
   return delay({ full_name, email, campus_name, verified_student });
 }
 
+// Mocks have no session to end.
+export async function signOut(): Promise<void> {
+  return delay(undefined);
+}
+
 export async function getBusinessStats(input: {
   businessId: string;
   from: string;

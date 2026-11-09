@@ -184,6 +184,12 @@ export async function getMyProfile(): Promise<MyProfile | null> {
   return { ...profile, campus_name: campuses?.name ?? null };
 }
 
+// Ends the browser session (clears the auth cookies). The caller then reloads to /sign-in.
+export async function signOut(): Promise<void> {
+  const { error } = await db().auth.signOut();
+  if (error) throw new Error(error.message);
+}
+
 // Counts verified visits in [from, to), per deal and per campus hour. #21 may move this into SQL.
 export async function getBusinessStats(input: { businessId: string; from: string; to: string }): Promise<BusinessStats> {
   const rows = list(

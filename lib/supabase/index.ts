@@ -14,6 +14,7 @@ type Api = Pick<
   | "getBusinessBySlug"
   | "getMyRedemptions"
   | "getMyProfile"
+  | "signOut"
   | "getBusinessStats"
   | "getMyDeals"
   | "getOpenClubNights"
@@ -43,6 +44,7 @@ export const {
   getBusinessBySlug,
   getMyRedemptions,
   getMyProfile,
+  signOut,
   getBusinessStats,
   getMyDeals,
   getOpenClubNights,
