@@ -10,11 +10,16 @@ import { nightDateLabel, timeWindowLabel } from "./format";
 export function ClubNightClaimed({ claimed }: { claimed: Claimed }) {
   const { night, club, dealId } = claimed;
   const [url, setUrl] = useState("");
+  const [qr, setQr] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const link = `${window.location.origin}/deals/${dealId}`;
     let cancelled = false;
+    import("qrcode")
+      .then((QRCode) => QRCode.toDataURL(link, { margin: 2, width: 480, errorCorrectionLevel: "M" }))
+      .then((png) => !cancelled && setQr(png))
+      .catch(() => {}); // the link still works without the QR image
     queueMicrotask(() => !cancelled && setUrl(link));
     return () => {
       cancelled = true;
@@ -57,6 +62,15 @@ export function ClubNightClaimed({ claimed }: { claimed: Claimed }) {
             </button>
           )}
         </div>
+        {qr && (
+          <div className="mt-5 flex flex-col items-center">
+            {/* eslint-disable-next-line @next/next/no-img-element -- generated data URL */}
+            <img src={qr} alt={`QR code for ${title}`} className="h-56 w-56" />
+            <a href={qr} download={`${club}-night-qr.png`} className="mt-2 flex min-h-11 items-center font-semibold text-green-dark underline">
+              Download QR
+            </a>
+          </div>
+        )}
       </div>
 
       <p className="mt-4 text-sm text-ink-muted">
