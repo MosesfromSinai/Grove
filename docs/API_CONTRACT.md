@@ -150,6 +150,8 @@ Moses owns `lib/supabase/` and writes the wrappers; the owner listed writes the 
 | `getDeal` | `{ id }` | `DealDetail \| null`, public or link-only, via `deal_by_id()` (this is how a deal link opens) | Edward |
 | `getBusinessBySlug` | `{ slug }` | `{ business: BusinessPublic, liveDeals: Deal[] } \| null`, live public deals only | Edward (sticker landing) |
 | `getMyRedemptions` | none | `Redemption[]`, newest first | Edward |
+| `getMyProfile` | none | `MyProfile \| null`: the signed-in user's own name, email, campus name and verified flag (RLS: own row only); null when signed out | Edward (profile) |
+| `signOut` | none | `void`. Ends the browser session; the screen then reloads to `/sign-in`. Throws on failure | Edward (profile) |
 | `getBusinessStats` | `{ businessId, from, to }` | `BusinessStats` | Adolfo |
 | `getMyDeals` | `{ businessId }` | `MyDeal[]`, newest start first, both visibilities | Adolfo |
 | `getOpenClubNights` | none | `OpenClubNight[]`, open nights at the student's campus, soonest first | Edward (claim screen) |
@@ -247,6 +249,13 @@ type Redemption = {
   method: RedemptionMethod;
   deal_title: string;
   business_name: string;
+};
+
+type MyProfile = {
+  full_name: string | null;
+  email: string;
+  campus_name: string | null;  // from campuses.name
+  verified_student: boolean;
 };
 
 type BusinessStats = {
