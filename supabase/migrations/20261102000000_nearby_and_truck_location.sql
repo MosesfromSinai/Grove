@@ -59,30 +59,13 @@ begin
     d.students_only, d.photo_url
   from nearby b left join public.deals d
     on d.business_id = b.id and d.visibility = 'public' and public.deal_status(d) = 'live'
-  where (not deals_nearby.open_now or b.is_open) and (not has_deals or d.id is not null)
+  where (not deals_nearby.open_now or b.is_open) and (not deals_nearby.has_deals or d.id is not null)
   order by b.metres, b.id, d.id;
 end;
 $$;
 
 revoke execute on function public.deals_nearby(float8, float8, int, boolean, boolean) from public;
 grant execute on function public.deals_nearby(float8, float8, int, boolean, boolean) to anon, authenticated, service_role;
-
--- The owner dashboard needs its actual business ID to move a truck. Return only
--- the existing BusinessProfile contract, never owner_id or the staff PIN hash.
-create function public.get_my_business()
-returns jsonb language sql stable security definer set search_path = '' as $$
-  select jsonb_build_object('business', jsonb_build_object(
-    'id', b.id, 'name', b.name, 'address', b.address, 'lat', b.lat, 'lng', b.lng,
-    'hours', b.hours, 'logo_url', b.logo_url, 'is_truck', b.is_truck,
-    'redemption_mode', b.redemption_mode,
-    'open_now', public.business_is_open(b.hours, c.timezone)),
-    'pin_ready', b.staff_pin is not null)
-  from public.businesses b join public.campuses c on c.id = b.campus_id
-  where public.is_business_owner(b.id)
-  order by b.id limit 1;
-$$;
-revoke execute on function public.get_my_business() from public, anon;
-grant execute on function public.get_my_business() to authenticated;
 
 create function public.update_truck_location(business_id uuid, lat float8, lng float8)
 returns jsonb language plpgsql security definer set search_path = '' as $$

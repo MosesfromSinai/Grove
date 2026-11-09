@@ -52,8 +52,6 @@ select set_config('request.jwt.claim.sub', 'a0000000-0000-4000-8000-000000000002
 select is((select count(*) from deals where id = 'd0000000-0000-4000-8000-000000000003'), 1::bigint, 'owner can read own link-only deal directly');
 select is((select count(*) from deals_nearby(33.9737,-117.3281,3000) where deal_id = 'd0000000-0000-4000-8000-000000000003'), 0::bigint, 'discovery hides link-only deals even from their owner');
 select set_config('request.jwt.claim.sub', 'a0000000-0000-4000-8000-000000000001', true);
-select is(get_my_business() -> 'business' ->> 'id', 'b0000000-0000-4000-8000-000000000001', 'dashboard returns the signed-in owner’s actual business');
-select ok(not (get_my_business() -> 'business' ? 'staff_pin'), 'dashboard never returns the staff PIN hash');
 select is(update_truck_location('b0000000-0000-4000-8000-000000000002',33.97,-117.32) ->> 'error', 'NOT_OWNER', 'owner cannot move another owner’s truck');
 select is(update_truck_location('b0000000-0000-4000-8000-000000000001',91,-117.32) ->> 'error', 'INVALID_LOCATION', 'invalid coordinates leave pin alone');
 select is(update_truck_location('b0000000-0000-4000-8000-000000000001',33.99,-117.35) ->> 'ok', 'true', 'owner can move own truck');
