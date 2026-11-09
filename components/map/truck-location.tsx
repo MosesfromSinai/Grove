@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { LocateFixed } from "lucide-react";
-import { useBusiness } from "@/components/business/business-context";
 import { Button } from "@/components/ui/button";
 import { updateTruckLocation } from "@/lib/supabase/business";
 
@@ -13,27 +12,29 @@ const messages = {
   INVALID_LOCATION: "Your browser returned an invalid location. Try again.",
 };
 
-export function TruckLocation() {
-  const { profile, updateProfile } = useBusiness();
+// The dashboard renders this only for food trucks and passes the business id;
+// onMoved lets it refresh its own copy of the pin.
+type Props = {
+  businessId: string;
+  onMoved?: (location: { lat: number; lng: number }) => void;
+};
+
+export function TruckLocation({ businessId, onMoved }: Props) {
   const [status, setStatus] = useState<
     "idle" | "locating" | "saving" | "saved" | "error"
   >("idle");
   const [error, setError] = useState("");
   const request = useRef(0);
-  const businessId = profile?.business.id;
   useEffect(
     () => () => {
       request.current += 1;
     },
     [businessId],
   );
-  if (!profile?.business.is_truck) return null;
-  const business = profile.business;
   const busy = status === "locating" || status === "saving";
   const sample = process.env.NEXT_PUBLIC_DATA_SOURCE !== "supabase";
 
   function locate() {
-    if (!profile) return;
     const current = ++request.current;
     if (!window.isSecureContext || !navigator.geolocation) {
       setStatus("error");
@@ -50,7 +51,7 @@ export function TruckLocation() {
         setStatus("saving");
         try {
           const result = await updateTruckLocation({
-            business_id: business.id,
+            business_id: businessId,
             lat: coords.latitude,
             lng: coords.longitude,
           });
@@ -60,14 +61,7 @@ export function TruckLocation() {
             setError(messages[result.error]);
             return;
           }
-          updateProfile({
-            ...profile,
-            business: {
-              ...business,
-              lat: result.location.lat,
-              lng: result.location.lng,
-            },
-          });
+          onMoved?.({ lat: result.location.lat, lng: result.location.lng });
           setStatus("saved");
         } catch {
           if (current !== request.current) return;
@@ -99,12 +93,8 @@ export function TruckLocation() {
         Where’s your truck today?
       </h2>
       <p className="mt-2 text-sm text-ink-muted">
-        Move {business.name}’s map pin to your current location. Your address
-        and hours stay the same.
-      </p>
-      <p className="mt-2 text-xs text-ink-fine">
-        {sample ? "Sample pin" : "Current pin"}: {business.lat.toFixed(5)},{" "}
-        {business.lng.toFixed(5)}
+        Move your truck’s map pin to your current location. Your address and
+        hours stay the same.
       </p>
       <Button type="button" onClick={locate} disabled={busy} className="mt-4">
         <LocateFixed aria-hidden="true" size={18} />
