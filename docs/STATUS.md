@@ -57,6 +57,30 @@ No self-signup for businesses. In the grove-dev SQL editor, **before the owner's
 
 If the owner already signed in before step 2, also run `update profiles set role = 'business' where email = '<owner email>';` and set `business_members.user_id` to their profile id.
 
+## Test data on grove-dev
+
+The seed deals have expired. To test the feed, map, sticker page (`/b/orange-peel-tacos`), and club night claims on real data, run in the grove-dev SQL editor:
+
+```sql
+-- Live public deal at a seed business for the next 4 hours
+insert into deals (business_id, title, description, discount_type, discount_value, students_only, starts_at, ends_at)
+select id, '[test] $2 off any taco', 'Test deal', 'amount_off', 2, true, now(), now() + interval '4 hours'
+from businesses where qr_slug = 'orange-peel-tacos' returning id;
+
+-- Open club night tomorrow, 6–9 PM
+insert into club_nights (business_id, night_date, start_time, end_time, giveback)
+select id, (now() at time zone 'America/Los_Angeles')::date + 1, '18:00', '21:00', '[test] 15% back to your club'
+from businesses where qr_slug = 'orange-peel-tacos' returning id;
+
+-- Clean up when done (redemptions first; also removes a claimed night's link-only deal)
+delete from redemptions where deal_id in (select id from deals where title like '[test]%'
+  union select deal_id from club_nights where giveback like '[test]%');
+with n as (delete from club_nights where giveback like '[test]%' returning deal_id)
+delete from deals where title like '[test]%' or id in (select deal_id from n);
+```
+
+Redeeming by sticker needs you within 150 m of the business (seed coordinates are near UCR). The PIN backup needs a PIN set for that business first. Re-running `supabase/seed.sql` also refreshes the seed deals, but fails once real redemptions exist on them.
+
 ## Open decisions
 
 | Decision | Owner | Needed by |

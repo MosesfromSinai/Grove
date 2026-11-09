@@ -27,6 +27,7 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-11-09:** Shared deal links survive sign-in: `proxy.ts` remembers the page in a 10-minute `grove_next` cookie, and the auth callback sends students back to it (business users still go to `/dashboard`). Only plain same-site paths pass (`lib/auth/next-path.ts`). Added a test-data snippet to `STATUS.md` (#109).
 - **2026-11-09:** Finished Edward's #139 on `moses/sticker-and-pin`: PIN backup link on the scanner, PIN screen, and sticker page, which now loads in the browser like the deal page (#54, #57, #58).
 - **2026-11-04:** Week 2 gate passed (#18): a test redemption with one printed sticker and two phones succeeded, and a second try the same day was blocked as already used today (`ALREADY_REDEEMED_TODAY`).
 - **2026-11-09:** Finished Hikaru's #138 on `moses/nearby-and-trucks`: `deals_nearby`, map on the data switch, pin bottom sheet, truck-location RPC, PWA manifest and icons (#88, #89, #90, #117, #119). Fixed the `deal_status` SQL test dates so they don't expire; all SQL tests pass locally.
