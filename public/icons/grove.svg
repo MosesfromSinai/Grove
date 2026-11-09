@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>Grove</title>
+  <path fill="#1E7A46" d="M0 0h512v512H0z"/>
+  <path fill="#FBF7EF" d="M256 368c-3-93-106-74-108-162 76-12 123 22 108 87 20-99 29-148 112-149 16 104-74 126-99 176l-1 48z"/>
+  <path fill="none" stroke="#1E7A46" stroke-linecap="round" stroke-width="12" d="m256 318 68-115m-71 101-58-55"/>
+</svg>
