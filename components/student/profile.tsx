@@ -3,7 +3,7 @@
 // Profile (#62): who's signed in, past redemptions, and sign-out. Matches canvas screen 9,
 // without its Deal alerts toggle (push is a stretch goal).
 import { useEffect, useState } from "react";
-import { campusClock, getMyProfile, getMyRedemptions, type MyProfile, type Redemption } from "@/lib/supabase";
+import { campusClock, getMyProfile, getMyRedemptions, signOut, type MyProfile, type Redemption } from "@/lib/supabase";
 import { redemptionWhenLabel } from "./format";
 
 type Loaded = { profile: MyProfile | null; redemptions: Redemption[]; now: number };
@@ -16,6 +16,22 @@ function initials(text: string): string {
 export function Profile() {
   const [data, setData] = useState<Loaded | undefined>(undefined); // undefined = loading
   const [failed, setFailed] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutFailed, setSignOutFailed] = useState(false);
+
+  async function leave() {
+    setSigningOut(true);
+    setSignOutFailed(false);
+    try {
+      await signOut();
+      // A full reload on purpose: no cached screen state survives, and the proxy sees no session.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.assign("/sign-in");
+    } catch {
+      setSignOutFailed(true);
+      setSigningOut(false);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -87,6 +103,15 @@ export function Profile() {
           </ul>
         )}
       </section>
+
+      <button onClick={leave} disabled={signingOut}
+        className="flex h-13 items-center justify-center gap-2 rounded-button border-2 border-border-strong bg-surface font-extrabold text-destructive disabled:opacity-50">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5" /><path d="M21 12H9" />
+        </svg>
+        {signingOut ? "Signing out…" : "Sign out"}
+      </button>
+      {signOutFailed && <p role="alert" className="-mt-2 text-center text-sm font-semibold text-brown">Couldn&apos;t sign out. Try again.</p>}
     </div>
   );
 }
