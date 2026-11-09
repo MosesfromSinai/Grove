@@ -74,7 +74,8 @@ Ticked here, not in teammates' files. Staff-scan issues (#39, #40, #60, #61) are
 - [x] `deals_nearby` PostGIS function (#88), map on real data (#89), pin bottom sheet (#90), link-only hidden from the map (#117), PWA manifest and icons (#119), from Hikaru's #138
 - [ ] Food-truck location update (#94): component and RPC merged; Adolfo places it on the dashboard
 - [x] Location before scan with PIN link (#54), sticker page (#57), PIN screen (#58), from Edward's #139
-- [ ] Keep the deal link through sign-in (#109); verify link-only hidden from feed (#108) and no mock imports (#59)
+- [x] Keep the deal link through sign-in (#109)
+- [ ] Verify link-only hidden from feed (#108) and no mock imports (#59) on real data
 - [ ] Claim club night screen (#110)
 - [ ] Profile page (#62)
 - [ ] Rate-limit club night claims (#106) and reject out-of-range coordinates (#38)
