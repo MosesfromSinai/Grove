@@ -1,10 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
-import {
-  getMyBusiness,
-  updateTruckLocation,
-  getDealsNearby,
-  setClient,
-} from "./queries";
+import { updateTruckLocation, getDealsNearby, setClient } from "./queries";
 
 afterEach(() => setClient(null as unknown as Parameters<typeof setClient>[0]));
 function useRpc(data: unknown, error: { message: string } | null = null) {
@@ -41,15 +36,6 @@ test("RPC failures reject so the UI cannot report a successful move", async () =
   await expect(
     updateTruckLocation({ business_id: "truck", lat: 34, lng: -118 }),
   ).rejects.toThrow("permission denied");
-});
-
-test("owner profile comes from the authenticated boundary; no profile is an error", async () => {
-  const profile = { business: { id: "actual-business" }, pin_ready: true };
-  const rpc = useRpc(profile);
-  expect(await getMyBusiness()).toEqual(profile);
-  expect(rpc).toHaveBeenCalledWith("get_my_business");
-  useRpc(null);
-  await expect(getMyBusiness()).rejects.toThrow("No owned business");
 });
 
 test("nearby wrapper sends all filters and propagates database errors", async () => {

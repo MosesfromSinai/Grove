@@ -8,7 +8,6 @@ import { campusClock, dealStatus, openNow } from "./deal-status";
 import type {
   AddStaffResult,
   BusinessPublic,
-  BusinessProfile,
   UpdateTruckLocationInput,
   UpdateTruckLocationResult,
   BusinessStats,
@@ -306,13 +305,6 @@ export async function getClubNights(input: { businessId: string }): Promise<Club
 }
 
 // ---------- Business settings ----------
-
-export async function getMyBusiness(): Promise<BusinessProfile> {
-  const result = await (db() as unknown as SupabaseClient).rpc("get_my_business");
-  const profile = check(result) as BusinessProfile | null;
-  if (!profile) throw new Error("No owned business found");
-  return profile;
-}
 
 export async function updateTruckLocation(input: UpdateTruckLocationInput): Promise<UpdateTruckLocationResult> {
   if (!Number.isFinite(input.lat) || Math.abs(input.lat) > 90 || !Number.isFinite(input.lng) || Math.abs(input.lng) > 180) {
