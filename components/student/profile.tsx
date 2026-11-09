@@ -3,9 +3,10 @@
 // Profile (#62): who's signed in, past redemptions, and sign-out. Matches canvas screen 9,
 // without its Deal alerts toggle (push is a stretch goal).
 import { useEffect, useState } from "react";
-import { getMyProfile, getMyRedemptions, type MyProfile, type Redemption } from "@/lib/supabase";
+import { campusClock, getMyProfile, getMyRedemptions, type MyProfile, type Redemption } from "@/lib/supabase";
+import { redemptionWhenLabel } from "./format";
 
-type Loaded = { profile: MyProfile | null; redemptions: Redemption[] };
+type Loaded = { profile: MyProfile | null; redemptions: Redemption[]; now: number };
 
 function initials(text: string): string {
   const words = text.split(/[\s@._-]+/).filter(Boolean);
@@ -19,7 +20,7 @@ export function Profile() {
   useEffect(() => {
     let cancelled = false;
     Promise.all([getMyProfile(), getMyRedemptions()])
-      .then(([profile, redemptions]) => !cancelled && setData({ profile, redemptions }))
+      .then(([profile, redemptions]) => !cancelled && setData({ profile, redemptions, now: Date.now() }))
       .catch(() => !cancelled && setFailed(true));
     return () => {
       cancelled = true;
@@ -29,7 +30,9 @@ export function Profile() {
   if (failed) return <p className="py-10 text-center text-ink-muted">Couldn&apos;t load your profile. Check your connection and try again.</p>;
   if (!data) return <p className="py-10 text-center text-ink-muted">Loading your profile…</p>;
 
-  const { profile } = data;
+  const { profile, redemptions, now } = data;
+  const month = campusClock(new Date(now)).date.slice(0, 7);
+  const thisMonth = redemptions.filter((r) => r.redeemed_on.startsWith(month)).length;
   const name = profile?.full_name?.trim() || profile?.email || "Student";
 
   return (
@@ -55,6 +58,35 @@ export function Profile() {
           )}
         </div>
       </header>
+
+      <section aria-labelledby="past-h" className="flex flex-col gap-2.5">
+        <div className="flex items-baseline justify-between">
+          <h2 id="past-h" className="font-sans text-xs font-extrabold tracking-widest text-ink-muted">PAST REDEMPTIONS</h2>
+          {thisMonth > 0 && <span className="text-sm font-bold text-green-dark">{thisMonth} this month</span>}
+        </div>
+        {redemptions.length === 0 ? (
+          <p className="rounded-card bg-surface px-4 py-6 text-center text-sm text-ink-muted">
+            No redemptions yet. Find a deal on the Deals tab.
+          </p>
+        ) : (
+          <ul className="divide-y divide-border-soft rounded-card bg-surface px-4 py-1">
+            {redemptions.map((r) => (
+              <li key={r.id} className="flex items-center gap-3 py-3">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-peach font-heading text-sm font-extrabold text-brown">
+                  {initials(r.business_name)}
+                </span>
+                <span className="flex min-w-0 grow flex-col gap-0.5">
+                  <span className="truncate font-extrabold">{r.deal_title}</span>
+                  <span className="truncate text-sm text-ink-muted">{r.business_name}</span>
+                </span>
+                <span className="whitespace-nowrap text-right text-xs font-bold text-ink-muted">
+                  {redemptionWhenLabel(r.redeemed_at, now)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }
