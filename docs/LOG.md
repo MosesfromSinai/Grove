@@ -27,6 +27,8 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-11-09:** Finished Edward's #139 on `moses/sticker-and-pin`: PIN backup link on the scanner, PIN screen, and sticker page, which now loads in the browser like the deal page (#54, #57, #58).
+- **2026-11-04:** Week 2 gate passed (#18): a test redemption with one printed sticker and two phones succeeded, and a second try the same day was blocked as already used today (`ALREADY_REDEEMED_TODAY`).
 - **2026-11-09:** Finished Hikaru's #138 on `moses/nearby-and-trucks`: `deals_nearby`, map on the data switch, pin bottom sheet, truck-location RPC, PWA manifest and icons (#88, #89, #90, #117, #119). Fixed the `deal_status` SQL test dates so they don't expire; all SQL tests pass locally.
 - **2026-11-09:** **Decision** (affects Adolfo, Hikaru): `getMyBusiness` stays mock-backed until #73 (no `get_my_business` RPC), and `TruckLocation` takes `businessId` as a prop. Adolfo places it on the dashboard for trucks, which finishes #94. Replaces Hikaru's 2026-11-02 decision.
 - **2026-11-09:** **Decision** (affects Adolfo): pilot owners are added by hand through an invite row (steps in `STATUS.md`); no self-signup for businesses.
