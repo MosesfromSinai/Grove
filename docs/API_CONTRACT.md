@@ -291,7 +291,7 @@ type ClubNight = OpenClubNight & {
 | `createDeal` | `CreateDealInput` | `{ ok: true, deal: MyDeal }` | `NOT_OWNER`, `INVALID_DEAL` (`fields: CreateDealErrors`) |
 | `endDeal` | `{ business_id, deal_id }` | `{ ok: true, deal: MyDeal }` | `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_LIVE` |
 | `cancelDeal` | `{ business_id, deal_id }` | `{ ok: true, deal_id: string }` | `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_SCHEDULED`, `DEAL_HAS_REDEMPTIONS`, `DEAL_IN_USE` |
-| `getMyBusiness` | none | `BusinessProfile` | Throws if no owned business |
+| `getMyBusiness` | none | `BusinessProfile` | none |
 | `updateTruckLocation` | `{ business_id, lat, lng }` | `{ ok: true, location: { business_id, lat, lng } }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `NOT_A_TRUCK`, `INVALID_LOCATION` |
 | `getBusinessLocationOptions` (mock helper) | none | `Pick<BusinessPublic, "address" \| "lat" \| "lng">[]` | none |
 | `saveBusiness` | `SaveBusinessInput` | `{ ok: true, profile: BusinessProfile }` | `NOT_OWNER`, `INVALID_BUSINESS` (`fields: BusinessInputErrors`) |
@@ -308,9 +308,9 @@ type SaveBusinessInput = Pick<BusinessPublic,
 type BusinessInputErrors = Partial<Record<keyof SaveBusinessInput, string>>;
 ```
 
-`getMyBusiness` and `updateTruckLocation` use the shared mock/real switch. Real reads call owner-only `get_my_business()` and expose a `pin_ready` boolean, never the PIN hash. Location updates call owner-only `update_truck_location(business_id uuid, lat float8, lng float8)`, lock the business row, and update its PostGIS location; generated `lat`/`lng` follow automatically. Staff and other owners cannot move the pin. The migration must be applied before enabling these RPCs.
+`updateTruckLocation` uses the shared mock/real switch. It calls owner-only `update_truck_location(business_id uuid, lat float8, lng float8)`, which locks the business row and updates its PostGIS location; generated `lat`/`lng` follow automatically. Staff and other owners cannot move the pin. The dashboard renders `<TruckLocation businessId={…} />` (from `components/map/`) only for food trucks.
 
-Other business writes remain mock-backed until Adolfo's #73. Real dashboard settings/onboarding/posting are therefore still pending even though the truck-location action supports real data.
+`getMyBusiness` and the other business writes stay mock-backed until Adolfo's #73.
 
 Writes return `Promise` results; errors are `{ ok: false, error, fields? }`. Read helpers return `Promise` values. `setPin` retains its Edge Function signature below.
 
