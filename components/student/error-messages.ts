@@ -7,6 +7,7 @@ export const errorMessages: Record<ErrorCode, string> = {
   WRONG_BUSINESS: "That sticker is for a different restaurant. Scan the one at this counter.",
   TOO_FAR: "You need to be at the restaurant to redeem. Move closer and try again.",
   LOCATION_REQUIRED: "Turn on location so we can confirm you're at the restaurant.",
+  INVALID_LOCATION: "Your phone sent a location we can't use. Turn location off and on, then try again.",
   ALREADY_REDEEMED_TODAY: "You already used this deal today. Come back tomorrow.",
   BAD_PIN: "That PIN isn't right. Try again.",
   CODE_EXPIRED: "That code expired. Ask for a new one.",

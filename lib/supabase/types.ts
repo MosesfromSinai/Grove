@@ -194,6 +194,7 @@ export type ErrorCode =
   | "WRONG_BUSINESS"
   | "TOO_FAR"
   | "LOCATION_REQUIRED"
+  | "INVALID_LOCATION"
   | "ALREADY_REDEEMED_TODAY"
   | "BAD_PIN"
   | "CODE_EXPIRED"
