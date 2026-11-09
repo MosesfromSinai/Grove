@@ -380,6 +380,7 @@ export async function redeem(input: {
   if (b.qr_slug !== input.qr_slug) return delay({ ok: false, error: "WRONG_BUSINESS" });
   if (dealStatus(d) !== "live") return delay({ ok: false, error: "DEAL_NOT_LIVE" });
   if (input.lat === null || input.lng === null) return delay({ ok: false, error: "LOCATION_REQUIRED" });
+  if (Math.abs(input.lat) > 90 || Math.abs(input.lng) > 180) return delay({ ok: false, error: "INVALID_LOCATION" });
   if (distanceM(input.lat, input.lng, b.lat, b.lng) > REDEEM_RADIUS_M) return delay({ ok: false, error: "TOO_FAR" });
   if (redeemedToday(d.id)) return delay({ ok: false, error: "ALREADY_REDEEMED_TODAY" });
   return delay({ ok: true, redemption: record(d, "sticker") });
@@ -483,7 +484,14 @@ export async function getClubNights(input: { businessId: string }): Promise<Club
   return delay(mine.map(toClubNight));
 }
 
+// Same cap as claim_club_night(): 3 claims per student in 7 days.
+const CLAIM_CAP = 3;
+const CLAIM_WINDOW_MS = 7 * 86_400_000;
+
 export async function claimClubNight(input: { club_night_id: string; club_name: string }): Promise<ClaimClubNightResult> {
+  const since = Date.now() - CLAIM_WINDOW_MS;
+  const recent = clubNights.filter((x) => x.claimed_by === mockStudent.id && x.claimed_at && Date.parse(x.claimed_at) > since);
+  if (recent.length >= CLAIM_CAP) return delay({ ok: false, error: "RATE_LIMITED" });
   const c = clubNights.find((x) => x.id === input.club_night_id);
   if (!c || clubNightStatus(c) === "expired") return delay({ ok: false, error: "CLUB_NIGHT_EXPIRED" });
   if (c.claimed_club_name) return delay({ ok: false, error: "ALREADY_CLAIMED" });
