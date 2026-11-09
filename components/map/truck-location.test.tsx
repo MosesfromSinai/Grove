@@ -2,19 +2,12 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import type { BusinessProfile } from "@/lib/supabase/types";
 import { TruckLocation } from "./truck-location";
 
 const mock = vi.hoisted(() => ({
-  profile: null as BusinessProfile | null,
-  updateProfile: vi.fn(),
+  businessId: "truck-1",
+  onMoved: vi.fn(),
   save: vi.fn(),
-}));
-vi.mock("@/components/business/business-context", () => ({
-  useBusiness: () => ({
-    profile: mock.profile,
-    updateProfile: mock.updateProfile,
-  }),
 }));
 vi.mock("@/lib/supabase/business", () => ({ updateTruckLocation: mock.save }));
 let root: Root;
@@ -31,22 +24,8 @@ beforeEach(() => {
     failure = f;
   });
   vi.stubGlobal("navigator", { geolocation: { getCurrentPosition: locate } });
-  mock.profile = {
-    pin_ready: true,
-    business: {
-      id: "truck-1",
-      name: "Test truck",
-      address: "Original address",
-      lat: 33,
-      lng: -117,
-      hours: {},
-      logo_url: null,
-      is_truck: true,
-      open_now: false,
-      redemption_mode: "sticker",
-    },
-  };
-  mock.updateProfile.mockReset();
+  mock.businessId = "truck-1";
+  mock.onMoved.mockReset();
   mock.save
     .mockReset()
     .mockResolvedValue({
@@ -63,7 +42,7 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 const render = async () => {
-  await act(async () => root.render(<TruckLocation />));
+  await act(async () => root.render(<TruckLocation businessId={mock.businessId} onMoved={mock.onMoved} />));
 };
 const click = async () => {
   await act(async () => container.querySelector("button")!.click());
@@ -72,7 +51,7 @@ const position = {
   coords: { latitude: 34, longitude: -118 },
 } as GeolocationPosition;
 
-test("saves only an explicitly granted device position and updates the owner profile", async () => {
+test("saves only an explicitly granted device position and reports the new pin", async () => {
   await render();
   expect(locate).not.toHaveBeenCalled();
   await click();
@@ -83,10 +62,7 @@ test("saves only an explicitly granted device position and updates the owner pro
     lat: 34,
     lng: -118,
   });
-  expect(mock.updateProfile).toHaveBeenCalledWith({
-    ...mock.profile,
-    business: { ...mock.profile!.business, lat: 34, lng: -118 },
-  });
+  expect(mock.onMoved).toHaveBeenCalledWith({ lat: 34, lng: -118 });
   expect(container.textContent).toContain("Sample pin moved");
 });
 
@@ -95,7 +71,7 @@ test("denied location never saves a campus fallback or changes the pin", async (
   await click();
   await act(async () => failure({ code: 1 } as GeolocationPositionError));
   expect(mock.save).not.toHaveBeenCalled();
-  expect(mock.updateProfile).not.toHaveBeenCalled();
+  expect(mock.onMoved).not.toHaveBeenCalled();
   expect(container.querySelector('[role="alert"]')!.textContent).toContain(
     "Your pin hasn’t moved",
   );
@@ -108,7 +84,7 @@ test.each(["NOT_OWNER", "NOT_A_TRUCK", "INVALID_LOCATION", "NOT_SIGNED_IN"])(
     await render();
     await click();
     await act(async () => success(position));
-    expect(mock.updateProfile).not.toHaveBeenCalled();
+    expect(mock.onMoved).not.toHaveBeenCalled();
     expect(container.querySelector('[role="alert"]')).not.toBeNull();
   },
 );
@@ -118,7 +94,7 @@ test("network failure allows retry and does not report success", async () => {
   await render();
   await click();
   await act(async () => success(position));
-  expect(mock.updateProfile).not.toHaveBeenCalled();
+  expect(mock.onMoved).not.toHaveBeenCalled();
   expect(container.querySelector("button")!.disabled).toBe(false);
   expect(container.textContent).toContain("couldn’t save");
 });
@@ -126,19 +102,18 @@ test("network failure allows retry and does not report success", async () => {
 test("a callback after switching businesses cannot move either pin", async () => {
   await render();
   await click();
-  mock.profile = {
-    ...mock.profile!,
-    business: { ...mock.profile!.business, id: "truck-2" },
-  };
+  mock.businessId = "truck-2";
   await render();
   await act(async () => success(position));
   expect(mock.save).not.toHaveBeenCalled();
 });
 
-test("restaurants do not show the truck action", async () => {
-  mock.profile!.business.is_truck = false;
+test("a restaurant gets the not-a-truck message", async () => {
+  mock.save.mockResolvedValue({ ok: false, error: "NOT_A_TRUCK" });
   await render();
-  expect(container.querySelector("button")).toBeNull();
+  await click();
+  await act(async () => success(position));
+  expect(container.textContent).toContain("only available for food trucks");
 });
 
 test("insecure location support fails closed before prompting or saving", async () => {
