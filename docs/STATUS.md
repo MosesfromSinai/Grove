@@ -37,6 +37,26 @@ One `moses/` branch at a time; each merges when CI passes.
 - **Settings (done):** Vercel Authentication is off for previews. Supabase Auth on grove-dev is Google-only, with redirect URLs for production, localhost, and `grove-*-mosesfromsinais-projects.vercel.app` previews.
 - **Everyone:** CI ("Lint, typecheck, build") runs `npm test` too. Run `npm run lint && npm run typecheck && npm test && npm run build` (Node 22) before pushing. SQL tests: `npx supabase@2.122.0 db reset && npx supabase@2.122.0 test db` with Docker running.
 
+## Pilot owner setup (Moses, by hand)
+
+No self-signup for businesses. In the grove-dev SQL editor, **before the owner's first sign-in**:
+
+1. Create the business with your own profile as a temporary owner (`owner_id` is required):
+   ```sql
+   insert into businesses (owner_id, name, campus_id, location, address, hours, is_truck)
+   select '<your profile id>', 'Taco Place', c.id,
+     st_setsrid(st_makepoint(<lng>, <lat>), 4326)::geography, '<address>',
+     '{"mon": [["11:00", "21:00"]]}', false
+   from campuses c where c.email_domain = 'ucr.edu'
+   returning id;
+   ```
+2. Invite the owner: `insert into business_members (business_id, email, role) values ('<business id>', '<owner email, lower case>', 'owner');`
+3. The owner signs in with Google. `handle_new_user()` sets their role to `business` and links `user_id`.
+4. Hand over ownership: `update businesses set owner_id = (select id from profiles where email = '<owner email>') where id = '<business id>';`
+5. The owner opens `/dashboard` and sets the PIN; print the sticker for `/b/<qr_slug>`.
+
+If the owner already signed in before step 2, also run `update profiles set role = 'business' where email = '<owner email>';` and set `business_members.user_id` to their profile id.
+
 ## Open decisions
 
 | Decision | Owner | Needed by |
