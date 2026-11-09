@@ -1,21 +1,44 @@
-import { Suspense } from "react";
+"use client";
+
+// Client component: lib/supabase wrappers are browser-only, like the deal page.
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { getBusinessBySlug } from "@/lib/supabase";
 import { discountLabel } from "@/components/student/format";
 
-export default function StickerPage({ params }: { params: Promise<{ slug: string }> }) {
+type Sticker = Awaited<ReturnType<typeof getBusinessBySlug>>;
+
+export default function StickerPage() {
   return (
     <div className="mx-auto min-h-dvh w-full max-w-md bg-student px-4 py-6 text-ink">
       <Suspense fallback={<p className="pt-10 text-center text-ink-muted">Loading…</p>}>
-        <StickerContent params={params} />
+        <StickerContent />
       </Suspense>
     </div>
   );
 }
 
-async function StickerContent({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const result = await getBusinessBySlug({ slug });
+function StickerContent() {
+  const { slug } = useParams<{ slug: string }>();
+  const [result, setResult] = useState<Sticker | undefined>(undefined); // undefined = loading
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getBusinessBySlug({ slug })
+      .then((r) => !cancelled && setResult(r))
+      .catch(() => !cancelled && setFailed(true));
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  if (failed) {
+    return <p className="pt-10 text-center text-ink-muted">Couldn&apos;t load this restaurant. Check your connection and try again.</p>;
+  }
+
+  if (result === undefined) return <p className="pt-10 text-center text-ink-muted">Loading…</p>;
 
   if (!result) {
     return (
