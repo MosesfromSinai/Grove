@@ -19,12 +19,17 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 ---
 
 ## Team
+- **2026-11-09:** **Decision** (affects everyone): staff-scan mode moves to the stretch goal: #19, #20, #39, #40, #60, #61, #121, and Adolfo's #78 and #122 (labeled `stretch`). Sticker scans plus the PIN backup cover every redemption for the demo and pilot.
+- **2026-11-09:** **Decision** (affects Celso, Edward, Hikaru): the feature freeze has passed, so Moses takes over every open Week 2 and Week 3 code issue of Celso, Edward, and Hikaru, finishing them on `moses/` branches. Adolfo keeps his own. Business tasks stay with each person.
 - **2026-10-24:** **Decision** (affects everyone): Grove is a marketing company first (restaurants pay to bring in students, especially Mon–Wed). MVP adds repeat days, link-only deals, club nights (no club accounts; giveback paid outside the app), and a shareable deal link and QR (advertising only; redeeming still needs the counter sticker). Push moves to a stretch goal. Weeks 2–3 are front-loaded; feature freeze at the end of Nov 8 (`CLAUDE.md`).
 - **2026-10-19:** Assigned engineering and business roles (see `CLAUDE.md` → Team).
 - **2026-10-09:** Lean Canvas: Problem, Solution, UVP, Customer Segments filled.
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-11-09:** Finished Hikaru's #138 on `moses/nearby-and-trucks`: `deals_nearby`, map on the data switch, pin bottom sheet, truck-location RPC, PWA manifest and icons (#88, #89, #90, #117, #119). Fixed the `deal_status` SQL test dates so they don't expire; all SQL tests pass locally.
+- **2026-11-09:** **Decision** (affects Adolfo, Hikaru): `getMyBusiness` stays mock-backed until #73 (no `get_my_business` RPC), and `TruckLocation` takes `businessId` as a prop. Adolfo places it on the dashboard for trucks, which finishes #94. Replaces Hikaru's 2026-11-02 decision.
+- **2026-11-09:** **Decision** (affects Adolfo): pilot owners are added by hand through an invite row (steps in `STATUS.md`); no self-signup for businesses.
 - **2026-10-28:** Finished and merged Edward's #129 (scanner handles a failed `redeem()`, deal page loads in the browser, his LOG line and ticks); documented that `lib/supabase` wrappers are browser-only. Added #18 test data on grove-dev: Grove Test Kitchen (`grove-test-kitchen`, 33.973732, -117.323060) with a live deal until Nov 4, ids starting `7e57`, to delete after #18.
 - **2026-10-27:** Week 1 sign-in gate passed: a UCR Google sign-in on production created a verified student profile at UC Riverside on grove-dev. Closed #29 and #31.
 - **2026-10-27:** `redeem-pin` and `set-pin` deployed to grove-dev with the `qr_slug` default for new businesses; `redeem` now returns `RATE_LIMITED` after 10 attempts a minute (#15, #120, PR #137).
@@ -103,6 +108,8 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-25:** **Decision** (affects Moses, Celso): onboarding configures the existing mock owner's business with explicit coordinates; provisioning, geocoding, and real PIN integration remain #73.
 
 ## Hikaru
+- **2026-11-02:** Recovered/synced Grove and implemented the Week 3 truck-location action and PWA install assets, plus carried-over PostGIS discovery, shared-boundary map data, and the shared-card pin bottom sheet (`hikaru/food-trucks-and-pwa`). Component/data tests and a local Chrome fixture cover interaction and install metadata; the new migration requires database verification and Moses’s review/application before real RPCs are available.
+- **2026-11-02:** **Decision** (affects Moses, Celso, Adolfo): `getMyBusiness` and new `updateTruckLocation` follow the shared mock/real switch. Other business writes remain mock-backed until #73; the location RPC is owner-only and returns coordinates only. Discovery uses an invoker function plus an explicit public visibility condition, including for owners/past redeemers. Manifest adds installation metadata without push or offline caching.
 - **2026-10-25:** Synced latest main and prepared `hikaru/map-foundation` for team review. Fixed real-map keyboard focus on selection; added Mapbox lifecycle and location-race regression tests plus `npm test` in the required CI job. #84 and real-map verification for #85 remain blocked on the restricted token.
 - **2026-10-25:** Implemented the Week 1 map at `/map` on `hikaru/map-foundation`: grouped orange/green mock pins, combinable filters (#86), and location with campus fallback (#87). Mapbox wiring is in place, with a labeled pin preview until #84 supplies a restricted token; #85 remains open for actual-map and canvas verification. Four data tests and local browser checks cover filtering and synthetic location outcomes (`components/map/README.md`).
 - **2026-10-25:** **Decision** (affects Edward, Moses): map defaults to a 3 km search radius; Walking distance narrows it to 800 m in a straight line, explicitly labeled as proximity rather than a route. The API contract and mocks are unchanged.

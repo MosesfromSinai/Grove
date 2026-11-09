@@ -8,6 +8,8 @@ import { campusClock, dealStatus, openNow } from "./deal-status";
 import type {
   AddStaffResult,
   BusinessPublic,
+  UpdateTruckLocationInput,
+  UpdateTruckLocationResult,
   BusinessStats,
   ClaimClubNightResult,
   ClubNight,
@@ -303,6 +305,14 @@ export async function getClubNights(input: { businessId: string }): Promise<Club
 }
 
 // ---------- Business settings ----------
+
+export async function updateTruckLocation(input: UpdateTruckLocationInput): Promise<UpdateTruckLocationResult> {
+  if (!Number.isFinite(input.lat) || Math.abs(input.lat) > 90 || !Number.isFinite(input.lng) || Math.abs(input.lng) > 180) {
+    return { ok: false, error: "INVALID_LOCATION" };
+  }
+  const result = await (db() as unknown as SupabaseClient).rpc("update_truck_location", input);
+  return one(result) as UpdateTruckLocationResult;
+}
 
 export async function getStaff(input: { businessId: string }): Promise<StaffMember[]> {
   const rows = list(await db().from("business_members").select("*").eq("business_id", input.businessId));

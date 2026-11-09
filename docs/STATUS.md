@@ -2,47 +2,60 @@
 
 The project's live memory. Read this first every session. Overwrite it (don't append) whenever the current state changes, so it always describes **now**. History goes in `LOG.md`, not here.
 
-_Last updated: 2026-10-28 by Moses_
+_Last updated: 2026-11-09 by Moses_
 
 ---
 
 ## Current phase
 
-**Phase 2: Core loop** (week 2 of 4, Oct 26–Nov 1): scan-to-redeem end to end, repeat days, visibility, club nights, live-now check.
-**Next gate:** First test redemption (one sticker, two phones); a link-only deal stays out of the feed and map.
-**Week 1 gate passed (2026-10-27):** a UCR Google sign-in on production creates a verified student profile.
+**Phase 4: Finish and pilot** (week 4 of 4, Nov 9–15). The feature freeze passed on Nov 8; Moses is finishing the open Week 2–3 code issues (see `LOG.md` → Team, 2026-11-09), then pilot, phone testing, and demo prep.
+**Week 2 gate passed (2026-11-04):** first test redemption with one sticker and two phones (#18).
+**Next gates:** a link-only deal stays out of the feed and map (needs `deals_nearby` on grove-dev); a club claims a club night and a member redeems from its link; first real redemption at a business near UCR.
 **Production:** https://grove-jade.vercel.app (every PR also gets a preview link).
 
-Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove is, MVP scope, Week plan.
-
-**Feature freeze at the end of Nov 8** (see `CLAUDE.md` → Week plan).
+Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove is, MVP scope, Week plan. **Staff-scan mode is now a stretch goal** (#19, #20, #39, #40, #60, #61, #121, #78, #122).
 
 ## This week's focus
 
 | Person | Focus |
 |---|---|
-| Moses | Done: sign-in gate, RLS, `redeem`, `redeem-pin`, `set-pin`, `claim-club-night`, Realtime, typed queries, all on grove-dev. Next: staff-scan design (#19) with Celso by Nov 1, the #18 gate test, then `issue-code` and `staff-redeem` (#20) |
-| Celso | #127 and #128 merged; sign-in gate passed. Next: #38, #106, #39 (staff-scan review by Nov 1) |
-| Edward | #129 merged: shell, feed, deal page, scanner calling `redeem()`, Redeemed screen (#49–#52, #55, #56 done). Next: phone test of the scanner (#53), PIN backup link and screen (#54, #58), sticker page (#57) |
-| Adolfo | #126 merged (#70, #72 done; business writes final in the contract). Canvas check for #69 and #71, then repeat days and visibility on the post-deal form (#112), and #73 |
-| Hikaru | `/map` merged (#125; #86, #87 done). #85 awaits the Mapbox token (#84) and canvas check; then `deals_nearby` (#88); `deal_status()` is live |
+| Moses | Finishing the taken-over code issues on `moses/` branches, in order: nearby deals and truck pin (#138's work), sticker and PIN screens (#139's work), deal link through sign-in (#109), claim club night (#110), profile (#62), claim limit and location checks (#106, #38). Then the real-data switch in Vercel |
+| Celso | Business: competitor analysis (#45), interviews (#46, #107), attendance cell (#47). Security test pass (#41) once the screens are merged |
+| Edward | Business: student survey (#67), interviews (#68, #111) |
+| Adolfo | Dashboard branches (his own). Place `<TruckLocation businessId={…} />` on the dashboard for trucks to finish #94 |
+| Hikaru | Business: Lean Canvas (#97), pricing (#98), interviews (#99, #118). Mapbox token (#84) to Moses by one-time link |
 
 ## Open PRs (merge in this order)
 
-No open PRs. Moses re-checks each PR when its author pushes fixes; it merges when CI passes and every item in its review is done.
-
+One `moses/` branch at a time; each merges when CI passes.
 
 ## Blockers
 
-- **Hikaru (#84–85):** restricted Mapbox token still needs creation and transfer to Moses for Vercel. The preview works without tiles; actual Mapbox rendering, canvas screen 3 comparison, and HTTPS phone location testing are pending. Edward can integrate `/map` into the student shell.
+- **Real data:** `20261102000000_nearby_and_truck_location.sql` passes all SQL tests locally but isn't applied to grove-dev yet (Moses). The feed and map stay empty on real data until it is. Then set `NEXT_PUBLIC_DATA_SOURCE=supabase` in Vercel.
+- **Mapbox (#84):** the restricted token still needs to reach Moses for Vercel; without it the map shows the labeled pin preview, no tiles.
+- **Test data:** delete Grove Test Kitchen (ids starting `7e57`) from grove-dev before the switch; it would show as a pin near campus.
+- **Settings (done):** Vercel Authentication is off for previews. Supabase Auth on grove-dev is Google-only, with redirect URLs for production, localhost, and `grove-*-mosesfromsinais-projects.vercel.app` previews.
+- **Everyone:** CI ("Lint, typecheck, build") runs `npm test` too. Run `npm run lint && npm run typecheck && npm test && npm run build` (Node 22) before pushing. SQL tests: `npx supabase@2.122.0 db reset && npx supabase@2.122.0 test db` with Docker running.
 
-- **Everyone: review your team file.** Moses edited all five on 2026-10-24 (one-time exception, like setup) for the Activity 2 changes: new tasks, interview work, dependencies, and the week plan. Fix anything that's wrong in your own file.
-- **Everyone:** accept the Supabase org invite, then copy the Supabase URL and anon key into your `.env.local` (see README → Getting started). The service-role key stays with Moses.
-- **Gate test (#18):** the full path is merged (deal page → Redeem in store → scanner → `redeem()` → Redeemed screen). Waiting on a test business at the test location and `NEXT_PUBLIC_DATA_SOURCE=supabase` in Vercel (Moses). The feed stays empty on real data until `deals_nearby` (#88), so the test opens the deal by its link.
-- **Settings (done):** Vercel Authentication is off for preview deployments, so anyone with a preview link can open it. Supabase Auth on grove-dev is Google-only: Email is disabled, Google is enabled, and redirect URLs cover production, localhost, and `grove-*-mosesfromsinais-projects.vercel.app` previews.
-- **RLS is live on grove-dev (#128).** Screens can switch to real data once `NEXT_PUBLIC_DATA_SOURCE=supabase` is set; until then they use mocks.
-- **Everyone:** CI ("Lint, typecheck, build") runs on every PR and must pass to merge; it now runs `npm test` (vitest) too. Run `npm run lint && npm run typecheck && npm test && npm run build` before pushing.
-- **Everyone:** import data functions from `@/lib/supabase` (not `@/mocks`). It serves mocks until `NEXT_PUBLIC_DATA_SOURCE=supabase` is set in Vercel (Moses), now possible since RLS is live. Same names and types, so nothing else changes.
+## Pilot owner setup (Moses, by hand)
+
+No self-signup for businesses. In the grove-dev SQL editor, **before the owner's first sign-in**:
+
+1. Create the business with your own profile as a temporary owner (`owner_id` is required):
+   ```sql
+   insert into businesses (owner_id, name, campus_id, location, address, hours, is_truck)
+   select '<your profile id>', 'Taco Place', c.id,
+     st_setsrid(st_makepoint(<lng>, <lat>), 4326)::geography, '<address>',
+     '{"mon": [["11:00", "21:00"]]}', false
+   from campuses c where c.email_domain = 'ucr.edu'
+   returning id;
+   ```
+2. Invite the owner: `insert into business_members (business_id, email, role) values ('<business id>', '<owner email, lower case>', 'owner');`
+3. The owner signs in with Google. `handle_new_user()` sets their role to `business` and links `user_id`.
+4. Hand over ownership: `update businesses set owner_id = (select id from profiles where email = '<owner email>') where id = '<business id>';`
+5. The owner opens `/dashboard` and sets the PIN; print the sticker for `/b/<qr_slug>`.
+
+If the owner already signed in before step 2, also run `update profiles set role = 'business' where email = '<owner email>';` and set `business_members.user_id` to their profile id.
 
 ## Open decisions
 
@@ -51,7 +64,6 @@ No open PRs. Moses re-checks each PR when its author pushes fixes; it merges whe
 | Pricing: per verified visit (~$0.50–1, monthly cap) plus a flat fee for club nights; first deal free for pilots. Still to be validated | Hikaru (with everyone's interviews) | Before the pitch deck |
 | MVP demo date (week dates assume a demo around Nov 16–20; re-date the plan once it's set) | Team | Next sync |
 | Final name ("Grove" may be trademarked) | Team | Before slides are final |
-| Staff-scan token design: Moses recommends a `redemption_codes` table (write-up on #19) | Celso reviews | Nov 1 |
 | Which campus channels to pursue (clubs, fraternities, student ambassadors); none confirmed | Team | Before club night outreach |
 
 ## Business status

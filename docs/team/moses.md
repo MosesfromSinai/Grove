@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-10-27_
+_Last updated: 2026-11-09_
 
 ---
 
@@ -68,6 +68,19 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 - [ ] Pilot support and bug fixes (#24)
 - [ ] Demo script (sticker redemption live on stage) (#25)
 - [ ] Pitch deck, built from real interview numbers (#26)
+
+### Taken over (2026-11-09; see `LOG.md` → Team)
+Ticked here, not in teammates' files. Staff-scan issues (#39, #40, #60, #61) are stretch.
+- [x] `deals_nearby` PostGIS function (#88), map on real data (#89), pin bottom sheet (#90), link-only hidden from the map (#117), PWA manifest and icons (#119), from Hikaru's #138
+- [ ] Food-truck location update (#94): component and RPC merged; Adolfo places it on the dashboard
+- [ ] Location before scan with PIN link (#54), sticker page (#57), PIN screen (#58), from Edward's #139
+- [ ] Keep the deal link through sign-in (#109); verify link-only hidden from feed (#108) and no mock imports (#59)
+- [ ] Claim club night screen (#110)
+- [ ] Profile page (#62)
+- [ ] Rate-limit club night claims (#106) and reject out-of-range coordinates (#38)
+- [ ] Onboarding routing (#33): done in `app/page.tsx`; owners added by hand (`STATUS.md`)
+- [ ] Mapbox token (#84) and canvas check for the map (#85)
+- [ ] Security test pass (#41)
 
 ### Business
 - [ ] 1–2 restaurant interviews (hypotheses 1–4, see `CLAUDE.md` → Business); notes in the shared Drive folder (#27)

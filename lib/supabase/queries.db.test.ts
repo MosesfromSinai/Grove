@@ -106,8 +106,13 @@ describe.skipIf(!process.env.SUPABASE_DB_TESTS)("queries on the local seed", () 
     expect(heard[0]).not.toHaveProperty("student_location");
   }, 60_000);
 
-  test("blocked until #88: deals_nearby doesn't exist yet", async () => {
-    await expect(getDealsNearby({ lat: 33.9737, lng: -117.3281, radiusM: 3000 })).rejects.toThrow();
+  test("deals_nearby returns safe rows and respects hasDeals", async () => {
+    const rows = await getDealsNearby({ lat: 33.9737, lng: -117.3281, radiusM: 3000 });
+    expect(new Set(rows.map((row) => row.business_id)).size).toBe(8);
+    expect(rows.every((row) => row.distance_m >= 0 && row.distance_m <= 3000)).toBe(true);
+    const deals = await getDealsNearby({ lat: 33.9737, lng: -117.3281, radiusM: 3000, hasDeals: true });
+    expect(deals.length).toBeGreaterThan(0);
+    expect(deals.every((row) => row.has_deal)).toBe(true);
   });
 
   test("with RLS (#128), the browser's anon key reads a sticker page", async () => {

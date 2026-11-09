@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-10-25_
+_Last updated: 2026-11-02_
 
 ---
 
@@ -15,14 +15,14 @@ _Last updated: 2026-10-25_
 `app/(student)/map/`, `components/map/`, `lib/geo/`, `public/manifest.json`, `public/icons/`, the `deals_nearby` SQL function (Moses reviews the migration). Stretch goal: `lib/push/`, `public/sw.js`, `supabase/functions/notify-deal`.
 
 ## Depends on
-- **Moses:** mocks, tables, and `visibility` are on main; real-data wiring waits on `deal_status()` and typed queries.
-- **Celso:** RLS policies before browser access to real data.
-- **Edward:** deal card component. (The theme is done; the install prompt only matters for push, now a stretch goal.)
-- **Adolfo:** places your "I'm here now" button on the dashboard (week 3).
+- **Moses:** tables, `visibility`, `deal_status()`, and typed queries are on main. Reviews/applies the new discovery and truck-location migration to grove-dev and refreshes generated DB types.
+- **Celso:** RLS is on main; owner-only location RPC is ready for security review.
+- **Edward:** shared deal card is on main and used in the pin bottom sheet. (The theme is done; the install prompt only matters for push, now a stretch goal.)
+- **Adolfo:** dashboard integration of the truck button is included in this change; real onboarding/settings/posting still await #73.
 
 ## Others depend on you
 - **Edward:** `getDealsNearby` for the feed (distance and open-now come from your query).
-- **Adolfo:** the "I'm here now" button component (week 3), which he places on the dashboard.
+- **Adolfo:** `components/map/truck-location.tsx` is integrated into the dashboard; reuse it while completing #73.
 
 ---
 
@@ -38,11 +38,13 @@ Map code for #85 is implemented on `hikaru/map-foundation` at `/map`, including 
 
 ### Week 2 — Real data and link-only deals (Oct 26–Nov 1)
 - [ ] `deals_nearby` PostGIS function (radius, open now from `hours`, has deals; live now via `deal_status()`, so repeating deals show only in their window) (#88)
-- [ ] Wire map and filters to real data (#89)
-- [ ] Pin tap opens a bottom sheet: name, open/closed, distance, today's deal (#90)
+- [x] Wire map and filters through the shared mock/real boundary (#89; real database validation awaits the new migration)
+- [x] Pin tap opens a bottom sheet: name, open/closed, distance, today's deal using Edward's shared card (#90)
 - [ ] Hide link-only deals from `deals_nearby` and the map (`visibility = 'public'` only) (#117)
 
 ### Week 3 — Food trucks and PWA install (Nov 2–8)
+
+Both implementations are on `hikaru/food-trucks-and-pwa`: the dashboard truck button supports the mock/real data switch, and manifest/icons/Apple metadata are in place. Keep #94 and #119 open until the server migration and physical phone install checks below are verified.
 - [ ] Food-truck "I'm here now": a button component in `components/map/` that updates the business's `location`; Adolfo places it on the dashboard (#94)
 - [ ] PWA `manifest.json` and app icons so Grove is installable without push (name, colors from the theme, icons in `public/`) (#119)
 
@@ -68,12 +70,18 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 ## Notes and decisions
 _Record things only you need to remember. Decisions that affect others go in `docs/LOG.md` as **Decision** lines._
 
-- Run locally at `/map`; setup and verification details are in `components/map/README.md`. The page uses the existing contract-compatible `getDealsNearby` mock and groups rows by `business_id`.
+- `/map` uses `@/lib/supabase` and groups rows by `business_id`. The default stays mocks; `NEXT_PUBLIC_DATA_SOURCE=supabase` uses the real RPCs after the new migration is applied. Setup, test scope, and remaining checks: `components/map/README.md`.
 - Mapbox token creation and transfer (#84) remain manual: create a domain-restricted token in the Mapbox account, keep it in `.env.local`, and send it to Moses through the agreed one-time link for Vercel. No token is included in this change.
 
 ---
 
 ## Session log
+
+### 2026-11-02
+- **Did:** Recovered the surviving clean checkout and pulled current main as `hika583`. Built #94’s owner truck-location action plus real owner-profile read, #119’s manifest/PNG/maskable/Apple icons and root metadata, #88’s PostGIS discovery with campus hours and repeat windows, #89’s data-switch wiring, #90’s shared-card bottom sheet, and #117’s explicit public-only join. Added RPC, component, manifest, and pgTAP tests.
+- **Verified:** Lint/typecheck and component/data tests; local Chrome fixture confirms bottom-sheet interaction, successful synthetic truck movement and denied-location no-op, refreshed mock map, valid manifest and zero Chrome installability errors. The temporary theme fixture was restored; no auth bypass was committed. SQL/security review fixed an ambiguous coordinate reference and tightened malformed hours.
+- **Next:** Moses reviews/applies `20261102000000_nearby_and_truck_location.sql`, runs the pgTAP/DB suites, and regenerates database types. Verify actual map tiles with #84’s restricted token and install on iPhone Safari/Android Chrome over HTTPS.
+- **Blockers:** Docker contains active Nanka work; isolated database permission was requested and no database execution is claimed without it. No Supabase credentials or Mapbox token are in this checkout. Real dashboard settings/posting still await Adolfo’s #73; interviews require real participants.
 _Newest at the top. One entry per session._
 
 ### 2026-10-25 — publish map foundation
