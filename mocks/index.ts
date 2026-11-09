@@ -28,6 +28,7 @@ import type {
   DealDetail,
   IssueCodeResult,
   MyDeal,
+  MyProfile,
   NotifyDealResult,
   RedeemResult,
   Redemption,
@@ -38,6 +39,7 @@ import type {
 import {
   businessMembers,
   businesses,
+  campuses,
   clubNights,
   deals,
   mockOwner,
@@ -237,6 +239,17 @@ export async function getMyRedemptions(): Promise<Redemption[]> {
     .filter((r) => r.student_id === mockStudent.id)
     .sort((a, b) => b.redeemed_at.localeCompare(a.redeemed_at));
   return delay(mine.map(toRedemption));
+}
+
+export async function getMyProfile(): Promise<MyProfile | null> {
+  const { full_name, email, verified_student, campus_id } = mockStudent;
+  const campus_name = campuses.find((c) => c.id === campus_id)?.name ?? null;
+  return delay({ full_name, email, campus_name, verified_student });
+}
+
+// Mocks have no session to end.
+export async function signOut(): Promise<void> {
+  return delay(undefined);
 }
 
 export async function getBusinessStats(input: {

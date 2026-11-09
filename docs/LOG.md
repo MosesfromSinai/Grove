@@ -27,6 +27,7 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-11-09:** Built the Profile screen: name, school, verified badge, past redemptions with campus times and a month count, and a working sign-out (#62). **Decision** (affects Edward): added `getMyProfile` and `signOut` to `lib/supabase` and the API contract; the canvas's Deal alerts toggle is left out until push leaves stretch.
 - **2026-11-09:** Added the claim club night screen at `/club-nights`, linked from the feed: open nights list, inline claim by club name, then the link-only deal's link (copy, share) and QR to download. `ALREADY_CLAIMED` and `CLUB_NIGHT_EXPIRED` show friendly messages (#110).
 - **2026-11-09:** Preview sign-in fixed: `NEXT_PUBLIC_SITE_URL` is Production-only in Vercel, so previews no longer send Google back to production.
 - **2026-11-09:** Shared deal links survive sign-in: `proxy.ts` remembers the page in a 10-minute `grove_next` cookie, and the auth callback sends students back to it (business users still go to `/dashboard`). Only plain same-site paths pass (`lib/auth/next-path.ts`). Added a test-data snippet to `STATUS.md` (#109).
