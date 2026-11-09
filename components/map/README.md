@@ -14,10 +14,9 @@ Use Node 22, `npm ci`, then `npm run dev`. Screens import `@/lib/supabase`: mock
 Review/apply `supabase/migrations/20261102000000_nearby_and_truck_location.sql` on the normal migration path, then regenerate database types. It adds:
 
 - `deals_nearby(lat, lng, radius_m, open_now, has_deals)`: PostGIS geography radius/distance, campus-local split/overnight hours, live public deals via `deal_status()`, and exact repeating-window end timestamps. Radius must be 1–50,000 m. A `nearby_deal_card` composite return type preserves the existing RPC argument and row names. Invoker security respects column grants/RLS, and the explicit public-only join also hides link-only deals from their owners and past redeemers.
-- `get_my_business()`: the existing `BusinessProfile` shape for the signed-in owner; returns a PIN-ready boolean and safe public fields, never the hash.
 - `update_truck_location(business_id, lat, lng)`: authenticated owner-only, validated coordinates, locked business row, truck-only update, safe coordinate response. Generated lat/lng follow PostGIS location automatically.
 
-`getMyBusiness` and truck updates now use the data switch; other dashboard writes are still mocks until Adolfo’s #73. Real onboarding/settings/posting are not established by this change. No hosted database has been changed during this session.
+Truck updates use the data switch; `getMyBusiness` and other dashboard writes stay mocks until Adolfo’s #73. `TruckLocation` takes `businessId` (and an optional `onMoved`) as props; the dashboard renders it only for food trucks.
 
 ## Checks and evidence
 
