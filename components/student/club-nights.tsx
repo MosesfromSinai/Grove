@@ -3,8 +3,54 @@
 // Claim a club night (#110). Lists open nights; a student claims one for their club by typing
 // the club name, then shares the link-only deal it creates with members.
 import { useCallback, useEffect, useState } from "react";
-import { getOpenClubNights, type OpenClubNight } from "@/lib/supabase";
+import { claimClubNight, getOpenClubNights, type ErrorCode, type OpenClubNight } from "@/lib/supabase";
+import { errorMessages } from "./error-messages";
 import { nightDateLabel, timeWindowLabel } from "./format";
+
+export type Claimed = { night: OpenClubNight; club: string; dealId: string };
+
+function ClaimForm({ night, onClaimed, onGone }: { night: OpenClubNight; onClaimed: (c: Claimed) => void; onGone: (error: ErrorCode) => void }) {
+  const [club, setClub] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<ErrorCode | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    const name = club.trim();
+    if (!name || busy) return;
+    setBusy(true);
+    setError(null);
+    setFailed(false);
+    try {
+      const result = await claimClubNight({ club_night_id: night.id, club_name: name });
+      if (result.ok) return onClaimed({ night, club: name, dealId: result.deal_id });
+      // A night someone else claimed (or that ended) leaves the list, so the list shows the message.
+      if (result.error === "ALREADY_CLAIMED" || result.error === "CLUB_NIGHT_EXPIRED") return onGone(result.error);
+      setError(result.error);
+    } catch {
+      setFailed(true);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={submit} className="mt-4">
+      <label htmlFor={`club-${night.id}`} className="text-sm text-ink-muted">Your club&apos;s name</label>
+      <input id={`club-${night.id}`} value={club} maxLength={60} required autoComplete="off"
+        onChange={(e) => setClub(e.target.value)}
+        className="mt-1 block min-h-12 w-full rounded-button border border-border-strong bg-surface px-4" />
+      {error && <p className="mt-3 text-sm font-semibold text-brown">{errorMessages[error]}</p>}
+      {failed && <p className="mt-3 text-sm font-semibold text-brown">Couldn&apos;t claim this night. Check your connection and try again.</p>}
+      <button type="submit" disabled={busy || !club.trim()}
+        className="mt-3 min-h-12 w-full rounded-button bg-orange px-6 font-bold text-ink disabled:opacity-50">
+        {busy ? "Claiming…" : "Claim night"}
+      </button>
+      <p className="mt-2 text-xs text-ink-fine">The restaurant pays the giveback to your club directly, outside Grove.</p>
+    </form>
+  );
+}
 
 export function ClubNights() {
   const [nights, setNights] = useState<OpenClubNight[] | undefined>(undefined); // undefined = loading
