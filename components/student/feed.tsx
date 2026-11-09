@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getDealsNearby } from "@/lib/supabase";
 import { useLocation } from "@/lib/geo/use-location";
@@ -66,6 +67,14 @@ export function Feed() {
           </button>
         )}
       </div>
+
+      <Link
+        href="/club-nights"
+        className="mb-4 flex min-h-11 items-center justify-between rounded-button bg-green-tint px-4 py-3 text-sm font-semibold text-green-dark"
+      >
+        <span>Club nights: claim a night for your club</span>
+        <span aria-hidden="true">→</span>
+      </Link>
 
       {(status === "denied" || status === "unavailable" || status === "timeout") && (
         <p className="mb-4 rounded-button bg-peach px-4 py-3 text-sm text-brown">

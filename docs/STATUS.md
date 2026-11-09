@@ -34,7 +34,7 @@ One `moses/` branch at a time; each merges when CI passes.
 - **Real data:** `20261102000000_nearby_and_truck_location.sql` passes all SQL tests locally but isn't applied to grove-dev yet (Moses). The feed and map stay empty on real data until it is. Then set `NEXT_PUBLIC_DATA_SOURCE=supabase` in Vercel.
 - **Mapbox (#84):** the restricted token still needs to reach Moses for Vercel; without it the map shows the labeled pin preview, no tiles.
 - **Test data:** delete Grove Test Kitchen (ids starting `7e57`) from grove-dev before the switch; it would show as a pin near campus.
-- **Settings (done):** Vercel Authentication is off for previews. Supabase Auth on grove-dev is Google-only, with redirect URLs for production, localhost, and `grove-*-mosesfromsinais-projects.vercel.app` previews.
+- **Settings (done):** Vercel Authentication is off for previews. `NEXT_PUBLIC_SITE_URL` is set for Production only, so previews sign in on their own domain. Supabase Auth on grove-dev is Google-only; its Redirect URLs are `https://grove-jade.vercel.app/**`, `http://localhost:3000/**`, and `https://grove-*-mosesfromsinais-projects.vercel.app/**`.
 - **Everyone:** CI ("Lint, typecheck, build") runs `npm test` too. Run `npm run lint && npm run typecheck && npm test && npm run build` (Node 22) before pushing. SQL tests: `npx supabase@2.122.0 db reset && npx supabase@2.122.0 test db` with Docker running.
 
 ## Pilot owner setup (Moses, by hand)
