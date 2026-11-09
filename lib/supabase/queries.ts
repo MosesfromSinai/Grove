@@ -19,6 +19,7 @@ import type {
   Hours,
   IssueCodeResult,
   MyDeal,
+  MyProfile,
   NotifyDealResult,
   OpenClubNight,
   RedeemResult,
@@ -170,6 +171,17 @@ export async function getMyRedemptions(): Promise<Redemption[]> {
     deal_title: deals?.title ?? "",
     business_name: businesses?.name ?? "",
   }));
+}
+
+export async function getMyProfile(): Promise<MyProfile | null> {
+  const id = await userId();
+  if (!id) return null;
+  const row = check(
+    await db().from("profiles").select("full_name, email, verified_student, campuses(name)").eq("id", id).maybeSingle(),
+  );
+  if (!row) return null;
+  const { campuses, ...profile } = row;
+  return { ...profile, campus_name: campuses?.name ?? null };
 }
 
 // Counts verified visits in [from, to), per deal and per campus hour. #21 may move this into SQL.

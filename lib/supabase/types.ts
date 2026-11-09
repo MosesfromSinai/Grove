@@ -150,6 +150,14 @@ export type BusinessStats = {
   total: number;
 };
 
+// The signed-in student's own profile, for the Profile screen.
+export type MyProfile = {
+  full_name: string | null;
+  email: string;
+  campus_name: string | null;
+  verified_student: boolean;
+};
+
 // What a student sees when choosing a club night to claim.
 export type OpenClubNight = {
   id: string;
