@@ -101,6 +101,12 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-26:** **Decision** (affects Moses, Edward, Adolfo): the .edu check runs only in the `handle_new_user()` trigger (#128), never from the browser; `/auth/callback` only reads `profiles.role` to route.
 
 ## Edward
+- **2026-11-09:Test on iPhone Safari and Android Chrome over HTTPS (#64): Tested website over iPhone Safari. Sign-in, feed, tab bar, deal pages, location prompt, camera prompt, wrong sticker, not a Grove QR, and Denied location screens to work. Could not get th ePIN back and redeemed screen to work, but because it was based off of the mock data. 
+]Loading, empty, and error messages on bad deals is, bad sticker slug, scan with no deal, and offline page to work (#65). Tap targets, screen reader labels work.(#66)
+- **2026-11-09:** Add sticker page (`/b/[slug]`), PIN screen, and PIN backup link on the scanner (#54, #57, #58).
+or every `ErrorCode` (#55, #56).
+- **2026-11-09:** Add student shell with Map, Deals, Profile tabs, deal card, feed on `getDealsNearby`, and deal page (#49, #50, #51, #52).
+- **2026-11-09:** Move student components into `components/student/`; remove `lib/deals.ts`, `lib/redeem.ts`, and `app/api/redeem/`.
 - **2026-10-28:** Student app on `@/lib/supabase`: app shell with Map, Deals, Profile tabs, deal card, deals feed on `getDealsNearby`, deal page with Redeem in store, scanner (location first, `html5-qrcode`, sticker slug) calling `redeem()` with a message for every `ErrorCode`, and the live Redeemed screen (#49–#52, #55, #56; PR #129). Phone test (#53) and the PIN backup link (#54) still to do.
 
 ## Adolfo
