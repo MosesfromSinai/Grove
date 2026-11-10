@@ -80,7 +80,7 @@ Ticked here, not in teammates' files. Staff-scan issues (#39, #40, #60, #61) are
 - [x] Profile page (#62)
 - [x] Rate-limit club night claims (#106) and reject out-of-range coordinates (#38)
 - [ ] Onboarding routing (#33): done in `app/page.tsx`; owners added by hand (`STATUS.md`)
-- [ ] Mapbox token (#84) and canvas check for the map (#85)
+- [x] Mapbox token (#84) and canvas check for the map (#85)
 - [x] Security test pass (#41)
 
 ### Business
