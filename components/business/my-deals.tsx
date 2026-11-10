@@ -9,6 +9,7 @@ import { BusinessAccessError } from "@/lib/supabase/business-errors";
 import { CAMPUS_TZ } from "@/lib/supabase/deal-status";
 import type { DealMutationError, DealStatus, MyDeal } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
+import { DealShare } from "./deal-share";
 import { BusinessLoading, useBusiness } from "@/components/business/business-context";
 
 const tabs = [{ status: "live", label: "Active" }, { status: "scheduled", label: "Scheduled" }, { status: "ended", label: "Expired" }] as const;
@@ -154,7 +155,7 @@ export function MyDeals() {
         ) : <ul className="divide-y divide-border-soft">
           {visibleDeals.map(deal => {
             const canEnd = deal.status === "live" || (deal.active_days !== null && deal.status === "scheduled" && Date.parse(deal.starts_at) < checkedAt);
-            return <li key={deal.id} className="grid min-w-0 gap-5 p-5 sm:p-6 xl:grid-cols-[minmax(0,1fr)_120px_120px] xl:items-center">
+            return <li key={deal.id} className="grid min-w-0 gap-5 p-5 sm:p-6 xl:grid-cols-[minmax(0,1fr)_120px_auto] xl:items-center">
               <div className="min-w-0">
                 <h2 className="break-words text-xl">{deal.title}</h2>
                 <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold">
@@ -165,7 +166,8 @@ export function MyDeals() {
                 {deal.active_days && <p className="mt-1 text-sm text-ink-fine">Repeats {deal.active_days.join(", ")} · {deal.daily_start}–{deal.daily_end} campus time</p>}
               </div>
               <p className="text-sm text-ink-muted"><span className="font-heading text-2xl font-extrabold tabular-nums text-ink">{deal.redemption_count.toLocaleString()}</span><span className="ml-2 xl:ml-0 xl:block">redemptions</span></p>
-              <div className="justify-self-start xl:justify-self-end">
+              <div className="flex flex-wrap items-center gap-2 justify-self-start xl:justify-self-end">
+                <DealShare deal={deal} />
                 {canEnd ? <Button variant="destructive" disabled={busy} onClick={() => ask(deal, "end")} className="rounded-button">End now</Button>
                   : deal.status === "scheduled" ? (deal.redemption_count === 0 ? <Button variant="outline" disabled={busy} onClick={() => ask(deal, "cancel")} className="rounded-button">Cancel</Button> : <p className="text-xs text-ink-fine">Recorded visits prevent cancellation.</p>)
                     : <span className="text-sm font-bold text-ink-fine">Ended</span>}

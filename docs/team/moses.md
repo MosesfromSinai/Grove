@@ -84,6 +84,7 @@ Ticked here, not in teammates' files. Staff-scan issues (#39, #40, #60, #61) are
 - [x] Security test pass (#41)
 - [x] Stats page (#76), from Adolfo's Week 3
 - [x] Club night results (#114) and cancel an open club night, from Adolfo's Week 3
+- [x] Deal link and QR download (#115), from Adolfo's Week 3
 
 ### Business
 - [ ] 1–2 restaurant interviews (hypotheses 1–4, see `CLAUDE.md` → Business); notes in the shared Drive folder (#27)
