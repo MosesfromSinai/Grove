@@ -25,21 +25,19 @@ async function render() { await act(async () => root.render(<RedemptionSettings 
 function button(name: string) { return [...container.querySelectorAll<HTMLButtonElement>("button")].find(b => b.textContent === name)!; }
 async function click(name: string) { await act(async () => button(name).click()); }
 async function reset() { await click("Reset PIN"); await click("Reset PIN now"); await render(); }
-async function selectStaff() { await act(async () => container.querySelector<HTMLInputElement>('input[value="staff_scan"]')!.click()); }
+async function selectSticker() { await act(async () => container.querySelector<HTMLInputElement>('input[value="sticker"]')!.click()); }
 
-test("settings never reset on load; mode confirmation preserves PIN readiness and current mode until saved", async () => {
+test("settings never reset on load, and staff scan (stretch) isn't offered", async () => {
   await render(); expect(state.pin).not.toHaveBeenCalled(); expect(state.mode).not.toHaveBeenCalled();
-  await selectStaff(); expect(container.textContent).toContain("Current mode: Sticker");
-  await click("Save redemption mode"); expect(state.mode).not.toHaveBeenCalled(); await click("Keep current settings"); expect(state.mode).not.toHaveBeenCalled();
-  await click("Save redemption mode"); await click("Confirm mode change"); await render();
-  expect(state.mode).toHaveBeenCalledWith({ business_id: "b1", redemption_mode: "staff_scan" }); expect(state.pin).not.toHaveBeenCalled();
-  expect(state.profile!.pin_ready).toBeNull(); expect(container.textContent).toContain("Current mode: Staff scan");
+  expect(container.querySelector('input[value="staff_scan"]')).toBeNull();
+  expect(container.querySelector<HTMLInputElement>('input[value="sticker"]')!.checked).toBe(true);
+  expect(button("Save redemption mode").disabled).toBe(true);
 });
 
 test("live staff activation is unavailable while an existing staff mode can return to Sticker", async () => {
   state.mock = false; state.profile!.business.redemption_mode = "staff_scan"; state.mode.mockResolvedValue({ ok: true, redemption_mode: "sticker" }); await render();
   expect(container.querySelector<HTMLInputElement>('input[value="staff_scan"]')!.disabled).toBe(true);
-  expect(container.textContent).toContain("Staff scan setup is still pending");
+  expect(container.textContent).toContain("Staff scan isn't available yet");
   await act(async () => container.querySelector<HTMLInputElement>('input[value="sticker"]')!.click());
   await click("Save redemption mode"); await click("Confirm mode change"); await render(); expect(state.profile!.business.redemption_mode).toBe("sticker");
 });
@@ -90,8 +88,9 @@ test("Activity page caching discards the PIN before hiding and preserves no reve
 test("ambiguous network failures never claim success or automatically repeat a reset", async () => {
   state.pin.mockRejectedValueOnce(new Error("offline")); await render(); await reset();
   expect(container.textContent).toContain("reset may have completed"); expect(container.querySelector("output")).toBeNull(); expect(state.pin).toHaveBeenCalledTimes(1);
-  state.mode.mockRejectedValueOnce(new Error("offline")); await selectStaff(); await click("Save redemption mode"); await click("Confirm mode change");
-  expect(container.textContent).toContain("change may have saved"); expect(state.profile!.business.redemption_mode).toBe("sticker"); expect(button("Save redemption mode").disabled).toBe(true);
+  state.profile!.business.redemption_mode = "staff_scan"; await render();
+  state.mode.mockRejectedValueOnce(new Error("offline")); await selectSticker(); await click("Save redemption mode"); await click("Confirm mode change");
+  expect(container.textContent).toContain("change may have saved"); expect(state.profile!.business.redemption_mode).toBe("staff_scan"); expect(button("Save redemption mode").disabled).toBe(true);
   await click("Reload business"); expect(state.refresh).toHaveBeenCalledTimes(1);
 });
 

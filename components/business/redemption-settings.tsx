@@ -99,18 +99,21 @@ function Settings({ profile }: { profile: BusinessProfile }) {
     }
   }
 
+  // Staff scan is a stretch goal (#20 not built), so it's offered only to a business already in
+  // that mode, disabled, so it can switch back to Sticker.
   return <div className="mt-6 grid items-start gap-6 xl:grid-cols-2">
     <section aria-labelledby="redemption-settings-heading" className="min-w-0 rounded-card border border-border bg-surface-dashboard p-5 shadow-card sm:p-7">
       <div className="flex items-center gap-3"><span className="rounded-button bg-green-tint p-3 text-green"><ScanLine aria-hidden="true" className="size-5" /></span><h2 id="redemption-settings-heading" className="text-2xl">Redemption settings</h2></div>
       <p className="mt-4 text-sm leading-relaxed text-ink-muted">Choose how students verify a visit. Your permanent counter sticker link stays the same.</p>
       <p className="mt-3 text-sm font-bold">Current mode: {modeName[profile.business.redemption_mode]}</p>
       {!owner && <p className="mt-3 text-sm text-ink-muted">Only the business owner can change redemption settings or reset the PIN.</p>}
-      {isMockData ? <p className="mt-3 text-xs text-ink-fine">Demo settings. Changes reset on reload.</p> : <p className="mt-3 rounded-button bg-peach p-3 text-sm leading-relaxed text-brown">Staff scan setup is still pending. Use Sticker mode for live redemptions.</p>}
+      {isMockData && <p className="mt-3 text-xs text-ink-fine">Demo settings. Changes reset on reload.</p>}
+      {profile.business.redemption_mode === "staff_scan" && <p className="mt-3 rounded-button bg-peach p-3 text-sm leading-relaxed text-brown">Staff scan isn&apos;t available yet. Switch back to Sticker mode for live redemptions.</p>}
       <fieldset disabled={!owner || busy || blocked || modeUncertain} className="mt-5">
         <legend className="text-sm font-bold">Redemption mode</legend>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">{(["sticker", "staff_scan"] as const).map(value => {
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">{(profile.business.redemption_mode === "staff_scan" ? ["sticker", "staff_scan"] as const : ["sticker"] as const).map(value => {
           const Icon = value === "sticker" ? QrCode : ScanLine;
-          return <label key={value} className="relative cursor-pointer"><input type="radio" name="redemption-mode" value={value} checked={mode === value} disabled={value === "staff_scan" && !isMockData} onChange={() => { setMode(value); setModeError(""); setModeMessage(""); }} className="peer sr-only" />
+          return <label key={value} className="relative cursor-pointer"><input type="radio" name="redemption-mode" value={value} checked={mode === value} disabled={value === "staff_scan"} onChange={() => { setMode(value); setModeError(""); setModeMessage(""); }} className="peer sr-only" />
             <span className="flex min-h-28 flex-col gap-2 rounded-button border border-border-strong p-4 peer-checked:border-green peer-checked:bg-green-tint peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-green peer-disabled:cursor-not-allowed peer-disabled:opacity-60"><span className="flex items-center gap-2 text-sm font-bold"><Icon aria-hidden="true" className="size-4" />{modeName[value]}</span><span className="text-xs leading-relaxed text-ink-muted">{value === "sticker" ? "Students scan your counter sticker in Grove. A backup PIN helps if location fails." : "Students show a short-lived code for staff to scan and verify."}</span></span>
           </label>;
         })}</div>
