@@ -77,12 +77,13 @@ export function BusinessStats() {
 }
 
 function StatsView({ businessId }: { businessId: string }) {
-  const days = 7;
+  const [days, setDays] = useState<7 | 30>(7);
   const [stats, setStats] = useState<Stats | null>(null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let active = true;
+    queueMicrotask(() => active && setStats(null));
     const to = new Date();
     getBusinessStats({ businessId, from: new Date(to.getTime() - days * DAY_MS).toISOString(), to: to.toISOString() })
       .then((s) => active && (setStats(s), setFailed(false)))
@@ -94,11 +95,21 @@ function StatsView({ businessId }: { businessId: string }) {
 
   return (
     <>
-      <header className="mb-7">
+      <header className="mb-7 flex flex-wrap items-center justify-between gap-4">
+        <div>
         <h1 className="text-3xl sm:text-4xl">Stats</h1>
         <p className="mt-2 text-ink-muted">
           {stats ? <><b className="text-ink">{stats.total} verified redemptions</b> in the last {days} days</> : "See how your deals bring students through the door."}
         </p>
+        </div>
+        <div role="group" aria-label="Date range" className="flex gap-1 rounded-button bg-border p-1">
+          {([7, 30] as const).map((n) => (
+            <button key={n} type="button" aria-pressed={days === n} onClick={() => setDays(n)}
+              className={`min-h-10 rounded-[10px] px-3.5 text-sm ${days === n ? "bg-surface font-extrabold text-ink shadow-card" : "font-bold text-ink-nav"}`}>
+              Last {n} days
+            </button>
+          ))}
+        </div>
       </header>
       {failed ? (
         <p role="alert" className="rounded-card border border-destructive bg-surface-dashboard p-5 text-sm text-destructive">Couldn&apos;t load your stats. Check your connection and try again.</p>
