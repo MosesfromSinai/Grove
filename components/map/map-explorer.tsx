@@ -1,15 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Footprints,
-  LocateFixed,
-  MapPin,
-  SlidersHorizontal,
-  Store,
-  Tag,
-  Truck,
-} from "lucide-react";
+import { LocateFixed, MapPin, SlidersHorizontal, Store, Truck } from "lucide-react";
 import { getDealsNearby } from "@/lib/supabase";
 import { UCR_CENTER } from "@/lib/geo/nearby";
 import {
@@ -22,6 +14,7 @@ import {
 import { useLocation } from "@/lib/geo/use-location";
 import { NearbyMap } from "./nearby-map";
 import { PinDetails } from "./pin-details";
+import { StatusPill } from "./status-pill";
 
 const locationMessages = {
   campus:
@@ -82,9 +75,9 @@ export function MapExplorer() {
   }, [lat, lng, radiusM, filters.openNow, filters.hasDeals, retry]);
 
   const chips = [
-    { key: "openNow", label: "Open now", Icon: Store },
-    { key: "hasDeals", label: "Has deals", Icon: Tag },
-    { key: "walking", label: "Walking distance", Icon: Footprints },
+    { key: "openNow", label: "Open now" },
+    { key: "hasDeals", label: "Has deals" },
+    { key: "walking", label: "Walking distance" },
   ] as const;
   const selected = result.businesses.find(
     (business) => business.id === selectedId,
@@ -140,7 +133,7 @@ export function MapExplorer() {
         role="group"
         aria-label="Filter places"
       >
-        {chips.map(({ key, label, Icon }) => (
+        {chips.map(({ key, label }) => (
           <button
             key={key}
             type="button"
@@ -148,9 +141,8 @@ export function MapExplorer() {
             onClick={() =>
               setFilters((previous) => ({ ...previous, [key]: !previous[key] }))
             }
-            className={`flex min-h-11 items-center gap-2 rounded-pill border px-4 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 ${filters[key] ? "border-green bg-green-tint text-green-dark" : "bg-surface text-ink-muted hover:border-green"}`}
+            className={`flex min-h-11 items-center rounded-pill border px-4 text-sm font-bold shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 ${filters[key] ? "border-green bg-green text-white" : "border-border-strong bg-surface text-ink hover:border-green"}`}
           >
-            <Icon size={16} aria-hidden="true" />
             {label}
           </button>
         ))}
@@ -252,8 +244,8 @@ export function MapExplorer() {
                   </span>
                   <span className="min-w-0">
                     <span className="block font-bold">{business.name}</span>
-                    <span className="mt-1 block text-xs text-ink-muted">
-                      {business.openNow ? "Open now" : "Closed"} ·{" "}
+                    <span className="mt-1 flex items-center gap-2 text-xs text-ink-muted">
+                      <StatusPill open={business.openNow} />
                       {formatDistance(business.distanceM)}
                     </span>
                     <span

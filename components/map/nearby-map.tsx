@@ -6,6 +6,7 @@ import { MapPin } from "lucide-react";
 import type { Coordinates, MapBusiness } from "@/lib/geo/nearby";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "./nearby-map.css";
+import { DEAL_ICON, NO_DEAL_ICON, pinClass, pinElement, pinLabel } from "./pin-icons";
 
 type Props = {
   center: Coordinates;
@@ -102,22 +103,12 @@ export function NearbyMap({ center, businesses, selectedId, onSelect }: Props) {
           .addTo(map.current),
       );
       for (const business of businesses) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = `grove-map-pin ${business.deals.length ? "grove-map-deal" : "grove-map-regular"}`;
-        button.textContent = business.deals.length ? "%" : "•";
-        button.setAttribute(
-          "aria-label",
-          `${business.name}, ${business.deals.length ? "live deal" : "no live deal"}`,
-        );
-        button.setAttribute(
-          "aria-pressed",
-          String(business.id === selected.current),
-        );
+        const button = pinElement(business);
+        button.setAttribute("aria-pressed", String(business.id === selected.current));
         buttons.set(business.id, button);
         button.addEventListener("click", () => onSelect(business.id));
         markers.push(
-          new mapboxgl.Marker({ element: button })
+          new mapboxgl.Marker({ element: button, anchor: "bottom" })
             .setLngLat([business.lng, business.lat])
             .addTo(map.current),
         );
@@ -148,16 +139,19 @@ export function NearbyMap({ center, businesses, selectedId, onSelect }: Props) {
             <button
               key={business.id}
               type="button"
-              aria-label={`${business.name}, ${business.deals.length ? "live deal" : "no live deal"}`}
+              aria-label={pinLabel(business)}
               aria-pressed={business.id === selectedId}
               onClick={() => onSelect(business.id)}
-              className={`grove-map-previewPin grove-map-pin ${business.deals.length ? "grove-map-deal" : "grove-map-regular"}`}
+              className={`grove-map-previewPin ${pinClass(business)}`}
               style={{
                 left: `${50 + (business.lng - center.lng) * 1_500}%`,
                 top: `${50 - (business.lat - center.lat) * 1_600}%`,
               }}
             >
-              <MapPin size={20} aria-hidden="true" />
+              <span className="grove-map-pinName" aria-hidden="true">{business.name}</span>
+              {/* Static SVG strings from pin-icons.ts; no user data. */}
+              <span className="grove-map-pinCircle" dangerouslySetInnerHTML={{ __html: business.deals.length ? DEAL_ICON : NO_DEAL_ICON }} />
+              <span className="grove-map-pinTail" />
             </button>
           ))}
           <p className="grove-map-caption">
