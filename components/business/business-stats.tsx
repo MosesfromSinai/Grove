@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 import { getBusinessStats, type BusinessStats as Stats } from "@/lib/supabase";
 import { BusinessLoading, useBusiness } from "./business-context";
+import { hourLabel, hourRange, peakHour, quietestHour } from "./stats-format";
 
 const DAY_MS = 86_400_000;
 const card = "min-w-0 rounded-card border border-border bg-surface-dashboard p-6 shadow-card";
@@ -28,6 +29,44 @@ function PerDeal({ stats }: { stats: Stats }) {
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+function BusiestHours({ stats }: { stats: Stats }) {
+  const hours = hourRange(stats.perHour);
+  const peak = peakHour(hours);
+  const quiet = quietestHour(hours);
+  const max = Math.max(1, ...hours.map((h) => h.count));
+  const summary = peak ? `Busiest hour: ${hourLabel(peak.hour)}.${quiet && quiet.hour !== peak.hour ? ` Quietest hour with any visits: ${hourLabel(quiet.hour)}.` : ""}` : "";
+  return (
+    <section aria-labelledby="hours-heading" className={`${card} flex-[1.3_1_480px]`}>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 id="hours-heading" className="text-2xl">Busiest hours</h2>
+          <p className="mt-1 text-sm text-ink-muted">Redemptions by hour of day, campus time</p>
+        </div>
+        {peak && (
+          <span className="flex items-center gap-1.5 rounded-[10px] bg-peach px-2.5 py-1.5 text-sm font-extrabold text-brown">
+            <span className="size-2.5 rounded-[3px] bg-orange" aria-hidden="true" />Peak: {hourLabel(peak.hour)}
+          </span>
+        )}
+      </div>
+      <div role="img" aria-label={`Bar chart of redemptions by hour. ${summary}`} className="mt-5">
+        <div className="flex h-60 items-end gap-0.5 border-b-[1.5px] border-border-strong">
+          {hours.map((h) => (
+            <div key={h.hour} className="flex h-full flex-1 items-end justify-center px-[3px]">
+              <div title={`${hourLabel(h.hour)} · ${h.count}`} className={`w-full max-w-11 rounded-t-[4px] ${peak && h.hour === peak.hour ? "bg-orange" : "bg-green"}`}
+                style={{ height: `${Math.round((h.count / max) * 100)}%` }} />
+            </div>
+          ))}
+        </div>
+        <div className="mt-2 flex gap-0.5" aria-hidden="true">
+          {hours.map((h) => <span key={h.hour} className="flex-1 text-center text-xs text-ink-fine">{hourLabel(h.hour, true)}</span>)}
+        </div>
+      </div>
+      <ul className="sr-only">{hours.map((h) => <li key={h.hour}>{hourLabel(h.hour)}: {h.count}</li>)}</ul>
+      {summary && <p className="mt-4 text-sm leading-relaxed text-ink-muted">{summary}</p>}
     </section>
   );
 }
@@ -70,6 +109,7 @@ function StatsView({ businessId }: { businessId: string }) {
       ) : (
         <div className="flex flex-wrap items-stretch gap-5">
           <PerDeal stats={stats} />
+          <BusiestHours stats={stats} />
         </div>
       )}
     </>
