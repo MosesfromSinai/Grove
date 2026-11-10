@@ -1,5 +1,6 @@
 import { afterEach, expect, test } from "vitest";
 import { campusClock } from "./deal-status";
+const visits = (n: number) => Array.from({ length: n }, (_, i) => ({ id: `r${i}` }));
 import {
   getBusinessBySlug,
   getBusinessStats,
@@ -60,7 +61,7 @@ const dealRow = {
 afterEach(() => setClient(null as unknown as Parameters<typeof setClient>[0]));
 
 test("getMyDeals maps counts, HH:MM windows, and computed status", async () => {
-  use({ userId: "u1", tables: { business_members: { role: "owner" }, deals: [{ ...dealRow, redemptions: [{ count: 4 }] }] } });
+  use({ userId: "u1", tables: { business_members: { role: "owner" }, deals: [{ ...dealRow, redemptions: visits(4) }] } });
   const [deal] = await getMyDeals({ businessId: "b1" });
   expect(deal).toMatchObject({ redemption_count: 4, daily_start: "14:00", daily_end: "17:00" });
   expect(["live", "scheduled"]).toContain(deal.status);
@@ -127,7 +128,7 @@ test("getClubNights computes status and visit counts", async () => {
       club_nights: [
         { ...night, ...unclaimed, id: "open", night_date: campusDate(2) },
         { ...night, ...unclaimed, id: "expired", night_date: campusDate(-3) },
-        { ...night, id: "claimed", night_date: campusDate(-2), claimed_club_name: "Film Club", claimed_at: "x", deal_id: "d9", deals: { redemptions: [{ count: 18 }] } },
+        { ...night, id: "claimed", night_date: campusDate(-2), claimed_club_name: "Film Club", claimed_at: "x", deal_id: "d9", deals: { redemptions: visits(18) } },
       ],
     },
   });

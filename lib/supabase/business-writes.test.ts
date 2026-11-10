@@ -1,5 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { createDeal, endDeal, cancelDeal, getMyBusiness, getMyDeals, getBusinessSticker, saveBusiness, setRedemptionMode, setPin, setClient } from "./queries";
+const visits = (n: number) => Array.from({ length: n }, (_, i) => ({ id: `r${i}` }));
 import type { CreateDealInput, SaveBusinessInput } from "./types";
 
 type Result = { data: unknown; error: { code?: string; message: string } | null };
@@ -27,7 +28,7 @@ function fixture(results: Result[], user: string | null = "signed-in-owner") {
 }
 const now = "2026-11-06T20:00:00.000Z";
 const business = { id: "b1", name: "Test Kitchen", address: "Test address", lat: 33.97, lng: -117.32, hours: {}, logo_url: "https://storage.example/existing.png", is_truck: false, redemption_mode: "sticker" };
-const deal = { id: "d1", business_id: "b1", title: "Lunch", description: "Lunch special", discount_type: "amount_off", discount_value: 2, photo_url: null, starts_at: "2026-11-05T20:00:00Z", ends_at: null, active_days: ["mon"], daily_start: "14:00:00", daily_end: "17:00:00", visibility: "link_only", students_only: true, created_at: now, redemptions: [{ count: 3 }] };
+const deal = { id: "d1", business_id: "b1", title: "Lunch", description: "Lunch special", discount_type: "amount_off", discount_value: 2, photo_url: null, starts_at: "2026-11-05T20:00:00Z", ends_at: null, active_days: ["mon"], daily_start: "14:00:00", daily_end: "17:00:00", visibility: "link_only", students_only: true, created_at: now, redemptions: visits(3) };
 const post: CreateDealInput = { business_id: "b1", title: " Lunch ", description: " Special ", discount_type: "amount_off", discount_value: 2, photo_url: null, starts_at: now, ends_at: null, active_days: ["wed", "mon"], daily_start: "14:00", daily_end: "17:00", visibility: "link_only", students_only: true };
 const setup: SaveBusinessInput = { business_id: "b1", name: "Test Kitchen", address: "Test address", lat: 33.97, lng: -117.32, hours: { mon: [["11:00", "21:00"]] }, logo_url: business.logo_url, is_truck: false };
 afterEach(() => { setClient(null as unknown as Parameters<typeof setClient>[0]); vi.useRealTimers(); vi.unstubAllEnvs(); });
@@ -158,12 +159,12 @@ test("End now preserves history for a repeating deal outside its daily window", 
 
 test("Cancel protects counts, club-night references, and history added during deletion", async () => {
   freeze();
-  const future = { ...deal, starts_at: "2027-01-01T00:00:00Z", redemptions: [{ count: 0 }] };
-  fixture([ok({ role: "owner" }), ok({ ...future, redemptions: [{ count: 1 }] })]);
+  const future = { ...deal, starts_at: "2027-01-01T00:00:00Z", redemptions: visits(0) };
+  fixture([ok({ role: "owner" }), ok({ ...future, redemptions: visits(1) })]);
   expect(await cancelDeal({ business_id: "b1", deal_id: "d1" })).toMatchObject({ error: "DEAL_HAS_REDEMPTIONS" });
   fixture([ok({ role: "owner" }), ok(future), ok([{ id: "club1" }])]);
   expect(await cancelDeal({ business_id: "b1", deal_id: "d1" })).toMatchObject({ error: "DEAL_IN_USE" });
-  fixture([ok({ role: "owner" }), ok(future), ok([]), failure("23503"), ok({ ...future, redemptions: [{ count: 1 }] })]);
+  fixture([ok({ role: "owner" }), ok(future), ok([]), failure("23503"), ok({ ...future, redemptions: visits(1) })]);
   expect(await cancelDeal({ business_id: "b1", deal_id: "d1" })).toMatchObject({ error: "DEAL_HAS_REDEMPTIONS" });
 });
 
