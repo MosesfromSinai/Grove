@@ -19,7 +19,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 
 | Person | Focus |
 |---|---|
-| Moses | Finishing the taken-over code issues on `moses/` branches, in order: nearby deals and truck pin (#138's work), sticker and PIN screens (#139's work), deal link through sign-in (#109), claim club night (#110), profile (#62), claim limit and location checks (#106, #38). Then the real-data switch in Vercel |
+| Moses | Finishing the taken-over code issues on `moses/` branches, in order: nearby deals and truck pin (#138's work), sticker and PIN screens (#139's work), deal link through sign-in (#109), claim club night (#110), profile (#62), claim limit and location checks (#106, #38), all merged. Security pass recorded below (#41). The real-data switch has been live in Vercel since Nov 4 (`NEXT_PUBLIC_DATA_SOURCE=supabase`) |
 | Celso | Business: competitor analysis (#45), interviews (#46, #107), attendance cell (#47). Security test pass (#41) once the screens are merged |
 | Edward | Business: student survey (#67), interviews (#68, #111) |
 | Adolfo | Dashboard branches (his own). Place `<TruckLocation businessId={…} />` on the dashboard for trucks to finish #94 |
@@ -80,6 +80,31 @@ delete from deals where title like '[test]%' or id in (select deal_id from n);
 ```
 
 Redeeming by sticker needs you within 150 m of the business (seed coordinates are near UCR). The PIN backup needs a PIN set for that business first. Re-running `supabase/seed.sql` also refreshes the seed deals, but fails once real redemptions exist on them.
+
+## Security test results
+**2026-11-09, Moses (#41).** Fresh local `db reset`, then `npm run test:db` (7 pgTAP files, 137 checks; 22 served-function tests) and `npm test` (118 passed). Staff-scan cases are skipped (stretch). Celso's Security test log isn't edited; these rows are the #41 results.
+
+| Check | How | Result |
+|---|---|---|
+| Browser can't insert into `redemptions` | `rls_security.test.sql`; only security-definer functions insert | Pass |
+| `staff_pin`, `claimed_by` (and `owner_id`, `student_location`) never reach the browser | `rls_security.test.sql` column-grant checks | Pass |
+| Link-only deals stay out of `deals_nearby` and the sticker page | `nearby_and_truck_location.test.sql` (even for the owner); `deals_read_public` RLS; `getBusinessBySlug` filters public | Pass |
+| Service role key not in client bundles | Built `.next/static` (39 files): no `service_role`, no `SUPABASE_SERVICE_ROLE_KEY`, no key value; only JWT is the anon key | Pass |
+| Once per day | `redeem.test.sql`, `redeem.db.test.ts` (`ALREADY_REDEEMED_TODAY`) | Pass |
+| PIN lockout (5 bad PINs, per student per business) | `rls_security.test.sql` | Pass |
+| Redeem rate limit (10 attempts a minute) | `rls_security.test.sql` (counts attempts, not successes) | Pass |
+| Club night claim cap (3 per 7 days) | `claim_club_night.test.sql` | Pass |
+| Out-of-range location is `INVALID_LOCATION` | `redeem.test.sql`, `redeem.db.test.ts` | Pass |
+| `grove_next` can't open-redirect | `lib/auth/next-path.test.ts` (`//`, `/\`, schemes, control characters, `/auth/*` rejected); callback redirects only to a same-site path | Pass |
+| One business can't read or change another's deals, redemptions, club nights or pin | New `cross_business.test.sql` (12 checks, Orange Peel's owner against Pepper Tree) | Pass |
+
+**Phone checks on production (manual):**
+1. Screenshot a Redeemed screen and show it later: the live clock and animation give it away.
+2. Scan a photo of the Orange Peel sticker from far away: `TOO_FAR`.
+3. Deny location and tap Redeem: the location message and the PIN link show.
+4. Scan a `/deals/<id>` QR with the phone camera: it opens the deal only, no green screen.
+5. Sign out, press Back: no profile or redemption data shows.
+6. Sign in with a non-UCR Google account and try to redeem: `NOT_VERIFIED_STUDENT`.
 
 ## Open decisions
 
