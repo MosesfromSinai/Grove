@@ -78,7 +78,7 @@ Ticked here, not in teammates' files. Staff-scan issues (#39, #40, #60, #61) are
 - [ ] Verify link-only hidden from feed (#108) and no mock imports (#59) on real data
 - [x] Claim club night screen (#110)
 - [x] Profile page (#62)
-- [ ] Rate-limit club night claims (#106) and reject out-of-range coordinates (#38)
+- [x] Rate-limit club night claims (#106) and reject out-of-range coordinates (#38)
 - [ ] Onboarding routing (#33): done in `app/page.tsx`; owners added by hand (`STATUS.md`)
 - [ ] Mapbox token (#84) and canvas check for the map (#85)
 - [ ] Security test pass (#41)

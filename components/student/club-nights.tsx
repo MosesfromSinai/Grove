@@ -8,6 +8,9 @@ import { ClubNightClaimed } from "./club-night-claimed";
 import { errorMessages } from "./error-messages";
 import { nightDateLabel, timeWindowLabel } from "./format";
 
+// The claim cap is 3 nights per student per 7 days, so the generic "wait a minute" text would mislead.
+const CLAIM_LIMIT_MESSAGE = "You've claimed 3 club nights this week. Try again in a few days.";
+
 export type Claimed = { night: OpenClubNight; club: string; dealId: string };
 
 function ClaimForm({ night, onClaimed, onGone }: { night: OpenClubNight; onClaimed: (c: Claimed) => void; onGone: (error: ErrorCode) => void }) {
@@ -42,7 +45,11 @@ function ClaimForm({ night, onClaimed, onGone }: { night: OpenClubNight; onClaim
       <input id={`club-${night.id}`} value={club} maxLength={60} required autoComplete="off"
         onChange={(e) => setClub(e.target.value)}
         className="mt-1 block min-h-12 w-full rounded-button border border-border-strong bg-surface px-4" />
-      {error && <p className="mt-3 text-sm font-semibold text-brown">{errorMessages[error]}</p>}
+      {error && (
+        <p className="mt-3 text-sm font-semibold text-brown">
+          {error === "RATE_LIMITED" ? CLAIM_LIMIT_MESSAGE : errorMessages[error]}
+        </p>
+      )}
       {failed && <p className="mt-3 text-sm font-semibold text-brown">Couldn&apos;t claim this night. Check your connection and try again.</p>}
       <button type="submit" disabled={busy || !club.trim()}
         className="mt-3 min-h-12 w-full rounded-button bg-orange px-6 font-bold text-ink disabled:opacity-50">
