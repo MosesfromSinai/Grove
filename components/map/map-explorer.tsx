@@ -14,6 +14,7 @@ import {
 import { useLocation } from "@/lib/geo/use-location";
 import { NearbyMap } from "./nearby-map";
 import { PinDetails } from "./pin-details";
+import { StatusPill } from "./status-pill";
 
 const locationMessages = {
   campus:
@@ -243,8 +244,8 @@ export function MapExplorer() {
                   </span>
                   <span className="min-w-0">
                     <span className="block font-bold">{business.name}</span>
-                    <span className="mt-1 block text-xs text-ink-muted">
-                      {business.openNow ? "Open now" : "Closed"} ·{" "}
+                    <span className="mt-1 flex items-center gap-2 text-xs text-ink-muted">
+                      <StatusPill open={business.openNow} />
                       {formatDistance(business.distanceM)}
                     </span>
                     <span
