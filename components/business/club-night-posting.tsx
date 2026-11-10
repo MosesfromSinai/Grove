@@ -1,14 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
-import { CalendarDays, Check, Clock3, HeartHandshake, Plus, RefreshCw } from "lucide-react";
+import { Check, HeartHandshake, Plus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createClubNight, getClubNights, isMockData, type ClubNight, type CreateClubNightErrors, type CreateClubNightInput, type OpenClubNight } from "@/lib/supabase";
+import { cancelClubNight, createClubNight, getClubNights, isMockData, type ClubNight, type CreateClubNightErrors, type CreateClubNightInput, type OpenClubNight } from "@/lib/supabase";
 import { BusinessAccessError } from "@/lib/supabase/business-errors";
 import { MAX_GIVEBACK_LENGTH, validateCreateClubNight } from "@/lib/supabase/club-night-input";
 import { CAMPUS_TZ } from "@/lib/supabase/deal-status";
 import { campusDateTimeToISO } from "@/lib/supabase/deal-input";
 import { BusinessLoading, useBusiness } from "./business-context";
+import { ClubNightResults } from "./club-night-results";
 
 const empty = { night_date: "", start_time: "", end_time: "", giveback: "" };
 const control = "mt-2 block min-h-12 w-full min-w-0 rounded-button border border-border-strong bg-surface px-3 py-2.5 text-base outline-none focus-visible:border-green focus-visible:ring-2 focus-visible:ring-green/30 aria-invalid:border-destructive";
@@ -39,6 +40,13 @@ function Posting({ businessId, businessName }: { businessId: string; businessNam
   const [listError, setListError] = useState("");
   const [listBusy, setListBusy] = useState(false);
   const [focusRequest, setFocusRequest] = useState(0);
+  const [cancelTarget, setCancelTarget] = useState<ClubNight | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+  const cancelDialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (cancelTarget && !cancelDialog.current?.open) cancelDialog.current?.showModal();
+    if (!cancelTarget && cancelDialog.current?.open) cancelDialog.current.close();
+  }, [cancelTarget]);
   const summary = useRef<HTMLDivElement>(null);
   const success = useRef<HTMLElement>(null);
   const dateInput = useRef<HTMLInputElement>(null);
@@ -100,6 +108,23 @@ function Posting({ businessId, businessName }: { businessId: string; businessNam
     } finally { if (life.current.active && request === life.current.version) { life.current.posting = false; setSaving(false); } }
   }
 
+  async function cancelNight() {
+    if (!cancelTarget || cancelling) return;
+    setCancelling(true); setListError("");
+    try {
+      const result = await cancelClubNight({ business_id: businessId, club_night_id: cancelTarget.id });
+      if (!life.current.active) return;
+      if (result.ok) setNights(current => current?.filter(night => night.id !== result.club_night_id) ?? null);
+      else if (result.error === "ALREADY_CLAIMED") { setListError("A club claimed this night before it was cancelled, so it stays on."); void loadNights(); }
+      else if (result.error === "CLUB_NIGHT_NOT_FOUND") { setListError("This night was already removed."); void loadNights(); }
+      else { setBlocked(true); setListError("Your business access has changed. Reload the business to continue."); }
+    } catch {
+      if (life.current.active) setListError("We could not confirm the cancellation. Refresh posted nights to check.");
+    } finally {
+      if (life.current.active) { setCancelling(false); setCancelTarget(null); }
+    }
+  }
+
   const errorFor = (key: keyof typeof empty) => errors[key] ? <p id={`${key}-error`} className="mt-2 text-sm font-bold text-destructive">{errors[key]}</p> : null;
   const postedNights = nights?.slice(0, 20);
   return <>
@@ -129,7 +154,19 @@ function Posting({ businessId, businessName }: { businessId: string; businessNam
       <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="open-nights-heading" className="text-2xl">Posted nights</h2><Button variant="outline" disabled={listBusy || saving} onClick={() => { void loadNights(uncertain); }}><RefreshCw aria-hidden="true" className="size-4" />{listBusy ? "Refreshing…" : "Refresh posted nights"}</Button></div>
       <p className="mt-3 text-xs text-ink-fine">Most recent 20 nights from the last refresh, including claimed and expired nights. Refresh to check the current status.</p>
       {listError && <p role="alert" className="mt-4 text-sm text-destructive">{listError}</p>}{blocked && saved && <Button variant="outline" onClick={refresh} className="mt-3">Reload business</Button>}
-      {!nights ? <p role="status" className="mt-5 text-sm text-ink-muted">{listError ? "Posted nights unavailable." : "Loading posted nights…"}</p> : !postedNights?.length ? <p className="mt-5 text-sm text-ink-muted">No posted club nights from the last refresh.</p> : <ul className="mt-4 divide-y divide-border-soft">{postedNights.map(night => <li key={night.id} className="py-4"><p className="flex items-center gap-2 text-sm font-bold"><CalendarDays aria-hidden="true" className="size-4 shrink-0 text-green" />{schedule(night)}</p><p className="mt-2 whitespace-pre-line text-sm text-ink-muted [overflow-wrap:anywhere]">{night.giveback}</p><p className="mt-2 inline-flex items-center gap-1 text-xs text-green-dark"><Clock3 aria-hidden="true" className="size-3.5" />{night.status === "claimed" ? "Claimed" : night.status === "expired" ? "Expired" : "Open"} at last refresh · UC Riverside time</p></li>)}</ul>}
+      {!nights ? <p role="status" className="mt-5 text-sm text-ink-muted">{listError ? "Posted nights unavailable." : "Loading posted nights…"}</p> : !postedNights?.length ? <p className="mt-5 text-sm text-ink-muted">No posted club nights from the last refresh.</p> : <ClubNightResults nights={postedNights} schedule={schedule} busy={cancelling} onCancel={setCancelTarget} />}
     </section>
+    <dialog ref={cancelDialog} aria-labelledby="cancel-night-heading" onCancel={event => { if (cancelling) event.preventDefault(); }} onClose={() => { if (!cancelling) setCancelTarget(null); }}
+      className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-card border border-border bg-surface-dashboard p-6 shadow-card backdrop:bg-ink/40">
+      {cancelTarget && <>
+        <h2 id="cancel-night-heading" className="text-2xl">Cancel this club night?</h2>
+        <p className="mt-3 font-bold">{schedule(cancelTarget)}</p>
+        <p className="mt-3 text-sm leading-relaxed text-ink-muted">Students will no longer see it. A night a club has already claimed can&apos;t be cancelled.</p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Button variant="outline" disabled={cancelling} onClick={() => setCancelTarget(null)} className="rounded-button">Keep night</Button>
+          <Button variant="destructive" disabled={cancelling} onClick={() => { void cancelNight(); }} className="rounded-button">{cancelling ? "Cancelling…" : "Cancel night"}</Button>
+        </div>
+      </>}
+    </dialog>
   </>;
 }
