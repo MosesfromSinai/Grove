@@ -12,6 +12,8 @@ import { overviewPeriod } from "./overview-period";
 import { validateCreateClubNight } from "./club-night-input";
 import type {
   AddStaffResult,
+  CancelClubNightInput,
+  CancelClubNightResult,
   BusinessPublic,
   UpdateTruckLocationInput,
   UpdateTruckLocationResult,
@@ -387,6 +389,20 @@ export async function createClubNight(input: CreateClubNightInput): Promise<Crea
   if (result.error?.code === "42501") return { ok: false, error: "NOT_OWNER" };
   const row = one(result);
   return { ok: true, club_night: toOpenClubNight(row) };
+}
+
+// Cancels an open club night. RLS (club_nights_delete_members) only matches unclaimed nights,
+// so a claimed night, its link-only deal and its visits can never be removed from here.
+export async function cancelClubNight(input: CancelClubNightInput): Promise<CancelClubNightResult> {
+  const role = await membership(input.business_id);
+  if (role === "NOT_SIGNED_IN") return { ok: false, error: role };
+  if (!role) return { ok: false, error: "NOT_OWNER" };
+  const deleted = list(await db().from("club_nights").delete()
+    .eq("id", input.club_night_id).eq("business_id", input.business_id).is("claimed_club_name", null).select("id"));
+  if (deleted.length) return { ok: true, club_night_id: input.club_night_id };
+  const night = check(await db().from("club_nights").select("claimed_club_name")
+    .eq("id", input.club_night_id).eq("business_id", input.business_id).maybeSingle());
+  return { ok: false, error: night?.claimed_club_name ? "ALREADY_CLAIMED" : "CLUB_NIGHT_NOT_FOUND" };
 }
 
 // ---------- Business settings ----------
