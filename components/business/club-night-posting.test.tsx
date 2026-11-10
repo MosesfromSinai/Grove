@@ -52,7 +52,7 @@ test("an uncertain save locks retries until a fresh posted-night read and explic
   expect(container.textContent).toContain("may have been posted"); expect(button("Post open club night").disabled).toBe(true); expect(button("I’ve checked — start a new post").disabled).toBe(true);
   await submit(); expect(api.create).toHaveBeenCalledTimes(1);
   api.read.mockResolvedValueOnce([{ ...night, status: "claimed", claimed_club_name: "Private club", visit_count: 9 }]);
-  await click("Refresh posted nights"); expect(button("I’ve checked — start a new post").disabled).toBe(false); expect(container.textContent).toContain("Claimed at last refresh"); expect(container.textContent).not.toContain("Private club");
+  await click("Refresh posted nights"); expect(button("I’ve checked — start a new post").disabled).toBe(false); expect(container.textContent).toContain("Claimed"); expect(container.textContent).toContain("Private club· 9 verified visits"); // #114 shows club results
   await click("I’ve checked — start a new post"); expect(container.querySelector<HTMLInputElement>('#night-giveback')!.value).toBe(""); expect(button("Post open club night").disabled).toBe(false);
 });
 

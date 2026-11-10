@@ -42,6 +42,7 @@ function Posting({ businessId, businessName }: { businessId: string; businessNam
   const [focusRequest, setFocusRequest] = useState(0);
   const [cancelTarget, setCancelTarget] = useState<ClubNight | null>(null);
   const [cancelling, setCancelling] = useState(false);
+  const [cancelNotice, setCancelNotice] = useState("");
   const cancelDialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     if (cancelTarget && !cancelDialog.current?.open) cancelDialog.current?.showModal();
@@ -110,16 +111,16 @@ function Posting({ businessId, businessName }: { businessId: string; businessNam
 
   async function cancelNight() {
     if (!cancelTarget || cancelling) return;
-    setCancelling(true); setListError("");
+    setCancelling(true); setCancelNotice("");
     try {
       const result = await cancelClubNight({ business_id: businessId, club_night_id: cancelTarget.id });
       if (!life.current.active) return;
       if (result.ok) setNights(current => current?.filter(night => night.id !== result.club_night_id) ?? null);
-      else if (result.error === "ALREADY_CLAIMED") { setListError("A club claimed this night before it was cancelled, so it stays on."); void loadNights(); }
-      else if (result.error === "CLUB_NIGHT_NOT_FOUND") { setListError("This night was already removed."); void loadNights(); }
+      else if (result.error === "ALREADY_CLAIMED") { setCancelNotice("A club claimed this night before it was cancelled, so it stays on."); void loadNights(); }
+      else if (result.error === "CLUB_NIGHT_NOT_FOUND") { setCancelNotice("This night was already removed."); void loadNights(); }
       else { setBlocked(true); setListError("Your business access has changed. Reload the business to continue."); }
     } catch {
-      if (life.current.active) setListError("We could not confirm the cancellation. Refresh posted nights to check.");
+      if (life.current.active) setCancelNotice("We could not confirm the cancellation. Refresh posted nights to check.");
     } finally {
       if (life.current.active) { setCancelling(false); setCancelTarget(null); }
     }
@@ -153,7 +154,8 @@ function Posting({ businessId, businessName }: { businessId: string; businessNam
     <section aria-labelledby="open-nights-heading" className="mt-6 rounded-card border border-border bg-surface-dashboard p-5 shadow-card sm:p-7">
       <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="open-nights-heading" className="text-2xl">Posted nights</h2><Button variant="outline" disabled={listBusy || saving} onClick={() => { void loadNights(uncertain); }}><RefreshCw aria-hidden="true" className="size-4" />{listBusy ? "Refreshing…" : "Refresh posted nights"}</Button></div>
       <p className="mt-3 text-xs text-ink-fine">Most recent 20 nights from the last refresh, including claimed and expired nights. Refresh to check the current status.</p>
-      {listError && <p role="alert" className="mt-4 text-sm text-destructive">{listError}</p>}{blocked && saved && <Button variant="outline" onClick={refresh} className="mt-3">Reload business</Button>}
+      {listError && <p role="alert" className="mt-4 text-sm text-destructive">{listError}</p>}
+      {cancelNotice && <p role="alert" className="mt-4 text-sm text-destructive">{cancelNotice}</p>}{blocked && saved && <Button variant="outline" onClick={refresh} className="mt-3">Reload business</Button>}
       {!nights ? <p role="status" className="mt-5 text-sm text-ink-muted">{listError ? "Posted nights unavailable." : "Loading posted nights…"}</p> : !postedNights?.length ? <p className="mt-5 text-sm text-ink-muted">No posted club nights from the last refresh.</p> : <ClubNightResults nights={postedNights} schedule={schedule} busy={cancelling} onCancel={setCancelTarget} />}
     </section>
     <dialog ref={cancelDialog} aria-labelledby="cancel-night-heading" onCancel={event => { if (cancelling) event.preventDefault(); }} onClose={() => { if (!cancelling) setCancelTarget(null); }}
