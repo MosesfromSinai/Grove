@@ -22,6 +22,8 @@ import type {
   BusinessLocationOption,
   SaveBusinessInput,
   SaveBusinessResult,
+  CancelClubNightInput,
+  CancelClubNightResult,
   ClaimClubNightResult,
   ClubNight,
   CreateDealInput,
@@ -524,6 +526,16 @@ export async function createClubNight(input: CreateClubNightInput): Promise<Crea
     ends_at: campusDateTimeToISO(`${value.night_date}T${value.end_time}`)! };
   clubNights.unshift(night);
   return delay({ ok: true, club_night: toOpenClubNight(night) });
+}
+
+// Same rule as the RLS delete policy: members cancel only unclaimed nights.
+export async function cancelClubNight(input: CancelClubNightInput): Promise<CancelClubNightResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  const i = clubNights.findIndex((c) => c.id === input.club_night_id && c.business_id === input.business_id);
+  if (i < 0) return delay({ ok: false, error: "CLUB_NIGHT_NOT_FOUND" });
+  if (clubNights[i].claimed_club_name) return delay({ ok: false, error: "ALREADY_CLAIMED" });
+  clubNights.splice(i, 1);
+  return delay({ ok: true, club_night_id: input.club_night_id });
 }
 
 // Same cap as claim_club_night(): 3 claims per student in 7 days.

@@ -82,6 +82,8 @@ Ticked here, not in teammates' files. Staff-scan issues (#39, #40, #60, #61) are
 - [ ] Onboarding routing (#33): done in `app/page.tsx`; owners added by hand (`STATUS.md`)
 - [x] Mapbox token (#84) and canvas check for the map (#85)
 - [x] Security test pass (#41)
+- [x] Stats page (#76), from Adolfo's Week 3
+- [x] Club night results (#114) and cancel an open club night, from Adolfo's Week 3
 - [x] Deal link and QR download (#115), from Adolfo's Week 3
 
 ### Business
