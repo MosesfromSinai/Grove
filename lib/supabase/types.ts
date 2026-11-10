@@ -196,6 +196,10 @@ export type CreateClubNightResult = { ok: true; club_night: OpenClubNight } |
   { ok: false; error: "NOT_SIGNED_IN" | "NOT_OWNER" } |
   { ok: false; error: "INVALID_CLUB_NIGHT"; fields: CreateClubNightErrors };
 
+export type CancelClubNightInput = { business_id: string; club_night_id: string };
+export type CancelClubNightResult = { ok: true; club_night_id: string } |
+  { ok: false; error: "NOT_SIGNED_IN" | "NOT_OWNER" | "ALREADY_CLAIMED" | "CLUB_NIGHT_NOT_FOUND" };
+
 // A business_members row as the owner sees it in settings.
 export type StaffMember = {
   business_id: string;
