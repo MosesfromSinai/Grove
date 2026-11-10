@@ -227,6 +227,8 @@ export async function getBusinessStats(input: { businessId: string; from: string
   };
 }
 
+// Visit counts embed redemptions(id), not redemptions(count): the aggregate embed is refused under
+// redemptions' column grants (student_location is hidden), so it failed for every signed-in owner.
 export async function getMyDeals(input: { businessId: string }): Promise<MyDeal[]> {
   const role = await membership(input.businessId);
   if (role === "NOT_SIGNED_IN") throw new BusinessAccessError(role);
@@ -234,11 +236,11 @@ export async function getMyDeals(input: { businessId: string }): Promise<MyDeal[
   const rows = list(
     await db()
       .from("deals")
-      .select("*, redemptions(count)")
+      .select("*, redemptions(id)")
       .eq("business_id", input.businessId)
       .order("starts_at", { ascending: false }),
   );
-  return rows.map(({ redemptions, ...d }) => ({ ...toDeal(d), redemption_count: redemptions[0]?.count ?? 0 }));
+  return rows.map(({ redemptions, ...d }) => ({ ...toDeal(d), redemption_count: redemptions.length }));
 }
 
 // Exact HEAD counts are independent of PostgREST's row cap. The feed is bounded.
@@ -358,7 +360,7 @@ export async function getClubNights(input: { businessId: string }): Promise<Club
     await db()
       .from("club_nights")
       .select(
-        "id, business_id, night_date, start_time, end_time, giveback, claimed_club_name, claimed_at, deal_id, businesses(name), deals(redemptions(count))",
+        "id, business_id, night_date, start_time, end_time, giveback, claimed_club_name, claimed_at, deal_id, businesses(name), deals(redemptions(id))",
       )
       .eq("business_id", input.businessId)
       .order("night_date", { ascending: false })
@@ -370,7 +372,7 @@ export async function getClubNights(input: { businessId: string }): Promise<Club
     claimed_club_name: c.claimed_club_name,
     claimed_at: c.claimed_at,
     deal_id: c.deal_id,
-    visit_count: c.deals?.redemptions[0]?.count ?? 0,
+    visit_count: c.deals?.redemptions.length ?? 0,
   }));
 }
 
@@ -530,7 +532,7 @@ export async function createDeal(input: CreateDealInput): Promise<CreateDealResu
 }
 
 async function businessDeal(input: DealMutationInput) {
-  return check(await db().from("deals").select("*, redemptions(count)")
+  return check(await db().from("deals").select("*, redemptions(id)")
     .eq("id", input.deal_id).eq("business_id", input.business_id).maybeSingle());
 }
 
@@ -545,11 +547,11 @@ export async function endDeal(input: DealMutationInput): Promise<EndDealResult> 
   const at = now.toISOString();
   const result = await db().from("deals").update({ ends_at: at })
     .eq("id", input.deal_id).eq("business_id", input.business_id).lt("starts_at", at)
-    .or(`ends_at.is.null,ends_at.gt.${at}`).select("*, redemptions(count)").maybeSingle();
+    .or(`ends_at.is.null,ends_at.gt.${at}`).select("*, redemptions(id)").maybeSingle();
   if (result.error?.code === "42501") return { ok: false, error: "NOT_OWNER" };
   if (result.error?.code === "23514" || (!result.error && !result.data)) return { ok: false, error: "DEAL_NOT_LIVE" };
   const row = one(result);
-  return { ok: true, deal: { ...toDeal(row), redemption_count: row.redemptions[0]?.count ?? 0 } };
+  return { ok: true, deal: { ...toDeal(row), redemption_count: row.redemptions.length } };
 }
 
 export async function cancelDeal(input: DealMutationInput): Promise<CancelDealResult> {
@@ -562,7 +564,7 @@ export async function cancelDeal(input: DealMutationInput): Promise<CancelDealRe
   // A repeating deal that has started is turned off with End now, even between
   // daily windows. Restrict deletion to future starts, also in the DELETE filter.
   if (Date.parse(deal.starts_at) <= now.getTime() || dealStatus(toDeal(deal), now) !== "scheduled") return { ok: false, error: "DEAL_NOT_SCHEDULED" };
-  if ((deal.redemptions[0]?.count ?? 0) > 0) return { ok: false, error: "DEAL_HAS_REDEMPTIONS" };
+  if (deal.redemptions.length > 0) return { ok: false, error: "DEAL_HAS_REDEMPTIONS" };
   const nights = list(await db().from("club_nights").select("id").eq("deal_id", input.deal_id).limit(1));
   if (nights.length) return { ok: false, error: "DEAL_IN_USE" };
   const result = await db().from("deals").delete().eq("id", input.deal_id).eq("business_id", input.business_id)
@@ -572,7 +574,7 @@ export async function cancelDeal(input: DealMutationInput): Promise<CancelDealRe
     // The FK prevents a visit or club-night reference racing the DELETE from
     // erasing history. Re-read only safe counts to explain the refusal.
     const current = await businessDeal(input);
-    return { ok: false, error: (current?.redemptions[0]?.count ?? 0) > 0 ? "DEAL_HAS_REDEMPTIONS" : "DEAL_IN_USE" };
+    return { ok: false, error: (current?.redemptions.length ?? 0) > 0 ? "DEAL_HAS_REDEMPTIONS" : "DEAL_IN_USE" };
   }
   const deleted = check(result);
   return deleted ? { ok: true, deal_id: deleted.id } : { ok: false, error: "DEAL_NOT_SCHEDULED" };
