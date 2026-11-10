@@ -1,5 +1,6 @@
 // Runs every query against the local database and seed: `npm run test:db` (needs `supabase start`).
-// Skipped in `npm test` and CI. Uses the local service role, so it checks shapes, not RLS.
+// Skipped in `npm test` and CI. Most checks use service role; management reads
+// use a signed-in local member. This suite is not the complete RLS acceptance pass.
 
 import { execSync } from "node:child_process";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
@@ -46,6 +47,26 @@ describe.skipIf(!process.env.SUPABASE_DB_TESTS)("queries on the local seed", () 
     await service.auth.admin.deleteUser(studentId);
   });
 
+  async function asMember(businessId: string, check: () => Promise<void>) {
+    const email = `business-query-${crypto.randomUUID()}@example.invalid`;
+    const password = crypto.randomUUID();
+    const created = await service.auth.admin.createUser({ email, password, email_confirm: true });
+    expect(created.error).toBeNull();
+    const id = created.data.user!.id;
+    const member = createClient<Database>(local.API_URL, local.ANON_KEY, { auth: { persistSession: false } });
+    try {
+      const linked = await service.from("business_members").insert({ business_id: businessId, user_id: id, email, role: "staff" });
+      expect(linked.error).toBeNull();
+      const signedIn = await member.auth.signInWithPassword({ email, password });
+      expect(signedIn.error).toBeNull(); setClient(member); await check();
+    } finally {
+      setClient(service); await member.auth.signOut();
+      await service.from("business_members").delete().eq("user_id", id);
+      await service.from("profiles").delete().eq("id", id);
+      await service.auth.admin.deleteUser(id);
+    }
+  }
+
   test("getDeal returns the deal, its business, and HH:MM windows", async () => {
     const deal = await getDeal({ id: BOWL });
     expect(deal).toMatchObject({ title: "$3 off any bowl", daily_start: "14:00", daily_end: "17:00", redeemed_today: false });
@@ -60,9 +81,13 @@ describe.skipIf(!process.env.SUPABASE_DB_TESTS)("queries on the local seed", () 
   });
 
   test("getMyDeals returns every deal newest first with counts", async () => {
-    const deals = await getMyDeals({ businessId: OPT });
-    expect(deals).toHaveLength(6);
-    expect(deals.find((d) => d.id === BURRITO)?.redemption_count).toBe(1);
+    // Management reads now require a real signed-in member, even when the
+    // other shape checks use service role. These credentials are local-only.
+    await asMember(OPT, async () => {
+      const deals = await getMyDeals({ businessId: OPT });
+      expect(deals).toHaveLength(6);
+      expect(deals.find((d) => d.id === BURRITO)?.redemption_count).toBe(1);
+    });
   });
 
   test("getBusinessStats counts the test visit", async () => {
@@ -72,7 +97,9 @@ describe.skipIf(!process.env.SUPABASE_DB_TESTS)("queries on the local seed", () 
 
   test("club nights: one open night at Pepper Tree Pizza Co.", async () => {
     expect(await getOpenClubNights()).toMatchObject([{ business_name: "Pepper Tree Pizza Co.", start_time: "18:00", end_time: "21:00" }]);
-    expect(await getClubNights({ businessId: PEPPER })).toMatchObject([{ status: "open", visit_count: 0 }]);
+    await asMember(PEPPER, async () => {
+      expect(await getClubNights({ businessId: PEPPER })).toMatchObject([{ status: "open", visit_count: 0 }]);
+    });
   });
 
   test("getStaff shows the owner, active staff, and invited staff", async () => {

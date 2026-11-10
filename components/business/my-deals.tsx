@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Plus, Tags } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { cancelDeal, endDeal, getMyDeals } from "@/lib/supabase/business";
+import { cancelDeal, endDeal, getMyDeals, isMockData } from "@/lib/supabase";
+import { BusinessAccessError } from "@/lib/supabase/business-errors";
 import { CAMPUS_TZ } from "@/lib/supabase/deal-status";
 import type { DealMutationError, DealStatus, MyDeal } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,7 @@ const tabs = [{ status: "live", label: "Active" }, { status: "scheduled", label:
 const dateTime = new Intl.DateTimeFormat("en-US", { timeZone: CAMPUS_TZ, year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 const failureMessages: Record<DealMutationError, string> = {
   NOT_OWNER: "You do not have permission to manage deals for this business.",
+  NOT_SIGNED_IN: "Sign in again before managing deals.",
   DEAL_NOT_FOUND: "This deal is no longer available. The list has been refreshed.",
   DEAL_NOT_LIVE: "This deal can no longer be ended now. Check its updated status.",
   DEAL_NOT_SCHEDULED: "Only scheduled deals can be canceled. Check its updated status.",
@@ -48,8 +50,11 @@ export function MyDeals() {
       try {
         const rows = await getMyDeals({ businessId: currentBusinessId });
         if (active && request === generation.current) { setDeals(rows); setCheckedAt(Date.now()); setLoadError(""); }
-      } catch {
-        if (active && request === generation.current) setLoadError("We could not load your deals. Please try again.");
+      } catch (error) {
+        if (active && request === generation.current) {
+          if (error instanceof BusinessAccessError) setDeals(null);
+          setLoadError(error instanceof BusinessAccessError ? "Sign in with a current business membership to see your deals." : "We could not load your deals. Please try again.");
+        }
       }
     }
     function refreshVisible() { if (document.visibilityState === "visible") void load(); }
@@ -123,7 +128,7 @@ export function MyDeals() {
   return (
     <>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-ink-muted">UC Riverside time · Sample deals reset on full page reload.</p>
+        <p className="text-sm text-ink-muted">UC Riverside time{isMockData ? " · Sample deals reset on full page reload." : " · Your business's saved deals."}</p>
         <Link href="/dashboard/deals/new" className={buttonVariants({ className: "rounded-button" })}><Plus aria-hidden="true" className="size-4" />Post a deal</Link>
       </div>
 

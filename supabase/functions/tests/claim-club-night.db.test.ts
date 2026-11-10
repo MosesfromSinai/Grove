@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { campusClock } from "../../../lib/supabase/deal-status";
-import { claimClubNight, getClubNights, getDeal, setClient } from "../../../lib/supabase/queries";
+import { claimClubNight, getDeal, setClient } from "../../../lib/supabase/queries";
 import { admin, anon, removeUser, testUser } from "./helpers";
 
 const PEPPER = "b0000000-0000-4000-8000-000000000004";
@@ -50,7 +50,8 @@ describe.skipIf(!process.env.SUPABASE_DB_TESTS)("claim-club-night, served locall
 
     setClient(admin() as unknown as Client);
     expect(await getDeal({ id: claim.deal_id })).toMatchObject({ title: "Chess Club night", visibility: "link_only", discount_type: null });
-    expect((await getClubNights({ businessId: PEPPER })).find((n) => n.id === NIGHT)?.status).toBe("claimed");
+    const { data: night } = await admin().from("club_nights").select("claimed_club_name").eq("id", NIGHT).single();
+    expect(night?.claimed_club_name).toBe("Chess Club"); // getClubNights is members-only now, so read it directly
 
     setClient(film.client as unknown as Client);
     expect(await claimClubNight({ club_night_id: NIGHT, club_name: "Film Club" })).toEqual({ ok: false, error: "ALREADY_CLAIMED" });

@@ -1,6 +1,7 @@
 import { CAMPUS_TZ, campusClock } from "./deal-status";
 import type { CreateDealErrors, CreateDealInput } from "./types";
-import { validMockImage } from "./image-input";
+import { validImage } from "./image-input";
+import { BUSINESS_DAYS } from "./business-input";
 
 export { MAX_IMAGE_BYTES as MAX_DEAL_PHOTO_BYTES, IMAGE_TYPES as DEAL_PHOTO_TYPES } from "./image-input";
 
@@ -63,14 +64,30 @@ export function validateCreateDealInput(input: CreateDealInput, now = Date.now()
 
   const start = isoTimestamp(input.starts_at);
   const end = isoTimestamp(input.ends_at);
+  const days = input.active_days ?? null;
+  const dailyStart = input.daily_start ?? null;
+  const dailyEnd = input.daily_end ?? null;
+  const repeating = days !== null;
+  const time = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+  if (repeating && (!Array.isArray(days) || days.length === 0 || new Set(days).size !== days.length ||
+    days.some(day => !BUSINESS_DAYS.some(item => item.key === day)))) fields.active_days = "Choose at least one valid repeat day, without duplicates.";
+  if (repeating) {
+    if (typeof dailyStart !== "string" || !time.test(dailyStart)) fields.daily_start = "Choose a valid daily start time.";
+    if (typeof dailyEnd !== "string" || !time.test(dailyEnd)) fields.daily_end = "Choose a valid daily end time.";
+    else if (typeof dailyStart === "string" && time.test(dailyStart) && dailyEnd <= dailyStart) fields.daily_end = "Daily end must be after daily start on the same day.";
+  } else if (dailyStart !== null || dailyEnd !== null) fields.active_days = "Choose repeat days for a daily time window.";
+  const visibility = input.visibility ?? "public";
+  if (visibility !== "public" && visibility !== "link_only") fields.visibility = "Choose public or link-only visibility.";
   if (!Number.isFinite(start)) fields.starts_at = "Choose a valid start date and time.";
-  if (!Number.isFinite(end)) fields.ends_at = "Choose a valid end date and time.";
+  if (input.ends_at === null) {
+    if (!repeating) fields.ends_at = "A one-time deal needs an end date and time.";
+  } else if (!Number.isFinite(end)) fields.ends_at = "Choose a valid end date and time.";
   else if (Number.isFinite(start) && end <= start) fields.ends_at = "End time must be after start time.";
   else if (end <= now) fields.ends_at = "End time must be in the future.";
   if (typeof input.students_only !== "boolean") fields.students_only = "Choose whether this deal is for UCR students only.";
 
   const photo = input.photo_url;
-  if (!validMockImage(photo)) {
+  if (!validImage(photo)) {
     fields.photo_url = "Choose a JPG, PNG, or WebP photo up to 5 MB.";
   }
 
@@ -80,7 +97,9 @@ export function validateCreateDealInput(input: CreateDealInput, now = Date.now()
     value: {
       business_id: input.business_id, title, description,
       discount_type: input.discount_type, discount_value: input.discount_value,
-      starts_at: new Date(start).toISOString(), ends_at: new Date(end).toISOString(),
+      starts_at: new Date(start).toISOString(), ends_at: input.ends_at === null ? null : new Date(end).toISOString(),
+      active_days: repeating ? BUSINESS_DAYS.filter(day => days.includes(day.key)).map(day => day.key) : null,
+      daily_start: dailyStart, daily_end: dailyEnd, visibility,
       students_only: input.students_only, photo_url: photo,
     },
   };

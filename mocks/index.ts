@@ -5,11 +5,18 @@
 import { campusClock, dealStatus, liveUntil, openNow } from "../lib/supabase/deal-status";
 import { validateCreateDealInput } from "../lib/supabase/deal-input";
 import { copyHours, validateBusinessInput } from "../lib/supabase/business-input";
+import { BusinessAccessError } from "../lib/supabase/business-errors";
+import { overviewPeriod } from "../lib/supabase/overview-period";
+import { validateCreateClubNight } from "../lib/supabase/club-night-input";
+import { campusDateTimeToISO } from "../lib/supabase/deal-input";
 import type {
   AddStaffResult,
   BusinessPublic,
   BusinessStats,
+  BusinessOverview,
+  RedemptionConnection,
   BusinessProfile,
+  BusinessSticker,
   UpdateTruckLocationInput,
   UpdateTruckLocationResult,
   BusinessLocationOption,
@@ -33,6 +40,10 @@ import type {
   RedeemResult,
   Redemption,
   SetPinResult,
+  SetRedemptionModeInput,
+  SetRedemptionModeResult,
+  CreateClubNightInput,
+  CreateClubNightResult,
   StaffMember,
   StaffRedeemResult,
 } from "../lib/supabase/types";
@@ -123,7 +134,7 @@ function toRedemption(r: MockRedemption): Redemption {
   const d = deals.find((x) => x.id === r.deal_id);
   return {
     ...r,
-    redeemed_on: localDate(r.redeemed_at),
+    redeemed_on: campusClock(new Date(r.redeemed_at)).date,
     deal_title: d?.title ?? "",
     business_name: businessById(r.business_id).name,
   };
@@ -277,14 +288,30 @@ export async function getMyDeals(input: { businessId: string }): Promise<MyDeal[
   return delay(mine);
 }
 
+export async function getBusinessOverview(input: { businessId: string }): Promise<BusinessOverview> {
+  if (input.businessId !== mockOwner.business_id) throw new BusinessAccessError("NOT_MEMBER");
+  const period = overviewPeriod(new Date());
+  const visits = redemptions.filter(r => r.business_id === input.businessId && Date.parse(r.redeemed_at) <= Date.parse(period.asOf))
+    .sort((a, b) => b.redeemed_at.localeCompare(a.redeemed_at) || b.id.localeCompare(a.id));
+  return delay({ today: visits.filter(r => Date.parse(r.redeemed_at) >= Date.parse(period.todayFrom)).length,
+    week: visits.filter(r => Date.parse(r.redeemed_at) >= Date.parse(period.weekFrom)).length,
+    recentVisits: visits.slice(0, 8).map(toRedemption), as_of: period.asOf });
+}
+
 // ---------- Business writes ----------
 
 function toBusinessProfile(business: MockBusiness): BusinessProfile {
-  return { business: { ...toBusinessPublic(business), hours: copyHours(business.hours) }, pin_ready: initializedPins.has(business.id) };
+  return { business: { ...toBusinessPublic(business), hours: copyHours(business.hours) }, membership_role: "owner", pin_ready: initializedPins.has(business.id) };
 }
 
-export async function getMyBusiness(): Promise<BusinessProfile> {
+export async function getMyBusiness(): Promise<BusinessProfile | null> {
   return delay(toBusinessProfile(businessById(mockOwner.business_id)));
+}
+
+export async function getBusinessSticker(input: { businessId: string }): Promise<BusinessSticker | null> {
+  if (input.businessId !== mockOwner.business_id) throw new BusinessAccessError("NOT_MEMBER");
+  const business = businessById(input.businessId);
+  return delay(business.qr_slug ? { business_id: business.id, business_name: business.name, qr_slug: business.qr_slug } : null);
 }
 
 export async function updateTruckLocation(input: UpdateTruckLocationInput): Promise<UpdateTruckLocationResult> {
@@ -326,10 +353,10 @@ export async function createDeal(input: CreateDealInput): Promise<CreateDealResu
   const deal: MockDeal = {
     ...result.value,
     id: crypto.randomUUID(),
-    active_days: null,
-    daily_start: null,
-    daily_end: null,
-    visibility: "public",
+    active_days: result.value.active_days ?? null,
+    daily_start: result.value.daily_start ?? null,
+    daily_end: result.value.daily_end ?? null,
+    visibility: result.value.visibility ?? "public",
     created_at: new Date().toISOString(),
   };
   deals.push(deal);
@@ -356,7 +383,7 @@ export async function cancelDeal(input: DealMutationInput): Promise<CancelDealRe
   const index = deals.findIndex(d => d.id === input.deal_id && d.business_id === input.business_id);
   if (index < 0) return delay({ ok: false, error: "DEAL_NOT_FOUND" });
   const deal = deals[index];
-  if (dealStatus(deal) !== "scheduled") return delay({ ok: false, error: "DEAL_NOT_SCHEDULED" });
+  if (dealStatus(deal) !== "scheduled" || Date.parse(deal.starts_at) <= Date.now()) return delay({ ok: false, error: "DEAL_NOT_SCHEDULED" });
   if (toMyDeal(deal).redemption_count > 0 || redemptions.some(r => r.deal_id === deal.id)) {
     return delay({ ok: false, error: "DEAL_HAS_REDEMPTIONS" });
   }
@@ -430,9 +457,11 @@ export async function notifyDeal(input: { deal_id: string }): Promise<NotifyDeal
 export function subscribeToRedemptions(
   input: { businessId: string },
   onRedemption: (r: Redemption) => void,
+  onConnection?: (state: RedemptionConnection) => void,
 ): () => void {
   const listener = { businessId: input.businessId, onRedemption };
   listeners.add(listener);
+  onConnection?.("live");
   return () => {
     listeners.delete(listener);
   };
@@ -478,10 +507,23 @@ export async function getOpenClubNights(): Promise<OpenClubNight[]> {
 
 // A business's club nights with verified visits, newest first.
 export async function getClubNights(input: { businessId: string }): Promise<ClubNight[]> {
+  if (input.businessId !== mockOwner.business_id) throw new BusinessAccessError("NOT_MEMBER");
   const mine = clubNights
     .filter((c) => c.business_id === input.businessId)
     .sort((a, b) => b.starts_at.localeCompare(a.starts_at));
   return delay(mine.map(toClubNight));
+}
+
+export async function createClubNight(input: CreateClubNightInput): Promise<CreateClubNightResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  const validated = validateCreateClubNight(input);
+  if (!validated.ok) return delay({ ok: false, error: "INVALID_CLUB_NIGHT", fields: validated.fields });
+  const value = validated.value;
+  const night: MockClubNight = { ...value, id: `cn-${crypto.randomUUID()}`, claimed_club_name: null, claimed_by: null,
+    claimed_at: null, deal_id: null, starts_at: campusDateTimeToISO(`${value.night_date}T${value.start_time}`)!,
+    ends_at: campusDateTimeToISO(`${value.night_date}T${value.end_time}`)! };
+  clubNights.unshift(night);
+  return delay({ ok: true, club_night: toOpenClubNight(night) });
 }
 
 // Same cap as claim_club_night(): 3 claims per student in 7 days.
@@ -524,7 +566,15 @@ function toStaffMember(m: (typeof businessMembers)[number]): StaffMember {
   return { ...m, status: m.user_id ? "active" : "invited" };
 }
 
-// Sets a new random 4-digit PIN and returns it once. The real function stores only the hash.
+// Mode changes preserve the existing PIN and permanent sticker link.
+export async function setRedemptionMode(input: SetRedemptionModeInput): Promise<SetRedemptionModeResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  if (input.redemption_mode !== "sticker" && input.redemption_mode !== "staff_scan") return delay({ ok: false, error: "INVALID_MODE" });
+  businessById(input.business_id).redemption_mode = input.redemption_mode;
+  return delay({ ok: true, redemption_mode: input.redemption_mode });
+}
+
+// The PIN is returned only by this explicit reset; mode changes never touch it.
 export async function setPin(input: { business_id: string }): Promise<SetPinResult> {
   if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
   const pin = String(Math.floor(Math.random() * 10_000)).padStart(4, "0");

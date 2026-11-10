@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { beforeEach, test, vi } from "vitest";
+import { afterEach, beforeEach, test, vi } from "vitest";
 import { campusClock, openNow } from "../lib/supabase/deal-status";
 import { validateCreateDealInput, campusDateTimeToISO, campusDateTimeInput } from "../lib/supabase/deal-input";
 import { validateBusinessInput } from "../lib/supabase/business-input";
@@ -16,6 +16,34 @@ beforeEach(async () => {
 });
 
 const now = Date.now();
+afterEach(() => vi.useRealTimers());
+
+test("posting a mock club night makes an unclaimed night visible without creating a deal or resetting a PIN", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-11-06T20:00:00Z"));
+  const api = await import("../mocks/index"); const beforeDeals = fixtures.deals.length;
+  const business = fixtures.businesses.find(b => b.id === "biz-opt"); const beforePin = business.staff_pin;
+  const result = await api.createClubNight({ business_id: "biz-opt", night_date: "2026-11-07", start_time: "18:00", end_time: "21:00", giveback: "  $1 per student back to your club  " });
+  assert.equal(result.ok, true); assert.equal(result.club_night.giveback, "$1 per student back to your club");
+  assert.ok((await api.getOpenClubNights()).some(n => n.id === result.club_night.id));
+  const listed = (await api.getClubNights({ businessId: "biz-opt" })).find(n => n.id === result.club_night.id);
+  assert.equal(listed.status, "open"); assert.equal(listed.claimed_club_name, null); assert.equal(listed.deal_id, null); assert.equal(listed.visit_count, 0);
+  assert.equal(fixtures.deals.length, beforeDeals); assert.equal(business.staff_pin === beforePin, true);
+  assert.deepEqual(await api.createClubNight({ business_id: "foreign", night_date: "2026-11-07", start_time: "18:00", end_time: "21:00", giveback: "Offer" }), { ok: false, error: "NOT_OWNER" });
+  await assert.rejects(api.getClubNights({ businessId: "foreign" }), { code: "NOT_MEMBER" });
+});
+
+test("mock redemption mode changes preserve the PIN and permanent sticker link", async () => {
+  const api = await import("../mocks/index");
+  const business = fixtures.businesses.find(b => b.id === "biz-opt");
+  const beforePin = business.staff_pin; const beforeSlug = business.qr_slug;
+  for (const redemption_mode of ["staff_scan", "sticker"]) {
+    assert.deepEqual(await api.setRedemptionMode({ business_id: business.id, redemption_mode }), { ok: true, redemption_mode });
+    assert.equal((await getMyBusiness()).business.redemption_mode, redemption_mode);
+    assert.equal(business.staff_pin === beforePin, true); assert.equal(business.qr_slug, beforeSlug);
+  }
+  assert.deepEqual(await api.setRedemptionMode({ business_id: "biz-owl", redemption_mode: "staff_scan" }), { ok: false, error: "NOT_OWNER" });
+  assert.deepEqual(await api.setRedemptionMode({ business_id: business.id, redemption_mode: "invalid" }), { ok: false, error: "INVALID_MODE" });
+});
 const input = (overrides = {}) => ({
   business_id: "biz-opt", title: "  $2 off any burrito  ", description: "  Any burrito on the menu.  ",
   discount_type: "amount_off", discount_value: 2, photo_url: null,
@@ -83,7 +111,7 @@ test("scheduled posts preserve photos and eligibility but cannot inject generate
   assert.equal(result.ok, true);
   assert.notEqual(result.deal.id, "injected");
   assert.equal(result.deal.status, "scheduled");
-  assert.equal(result.deal.visibility, "public");
+  assert.equal(result.deal.visibility, "link_only");
   assert.equal(result.deal.redemption_count, 0);
   assert.equal(result.deal.photo_url, photo_url);
   assert.equal(result.deal.students_only, false);
@@ -220,6 +248,48 @@ const businessInput = (overrides = {}) => ({
   logo_url: null, is_truck: false, ...overrides,
 });
 
+test("repeat validation rejects partial, duplicate, overnight, and invalid visibility inputs", () => {
+  const repeat = { active_days: ["mon", "wed"], daily_start: "14:00", daily_end: "17:00", ends_at: null };
+  for (const [overrides, field] of [
+    [{ active_days: [] }, "active_days"], [{ active_days: ["mon", "mon"] }, "active_days"],
+    [{ active_days: ["holiday"] }, "active_days"], [{ daily_start: null }, "daily_start"],
+    [{ daily_start: "24:00" }, "daily_start"], [{ daily_end: "13:00" }, "daily_end"],
+    [{ daily_end: "14:00" }, "daily_end"], [{ daily_end: "" }, "daily_end"],
+    [{ visibility: "private" }, "visibility"],
+  ]) {
+    const result = validateCreateDealInput(input({ ...repeat, ...overrides }), now);
+    assert.equal(result.ok, false);
+    assert.ok(result.fields[field]);
+  }
+  assert.equal(validateCreateDealInput(input({ ends_at: null }), now).ok, false);
+  assert.equal(validateCreateDealInput(input({ daily_start: "14:00" }), now).ok, false);
+  const normalized = validateCreateDealInput(input({ ...repeat, active_days: ["wed", "mon"] }), now);
+  assert.equal(normalized.ok, true);
+  assert.deepEqual(normalized.value.active_days, ["mon", "wed"]);
+  assert.equal(normalized.value.visibility, "public");
+});
+
+test("a saved repeating link-only deal opens by id and stays out of public discovery", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-11-09T23:00:00Z")); // Monday 3 PM at UCR after DST.
+  const result = await createDeal(input({ starts_at: "2026-11-09T22:00:00Z", ends_at: null,
+    active_days: ["wed", "mon"], daily_start: "14:00", daily_end: "17:00", visibility: "link_only" }));
+  assert.equal(result.ok, true);
+  const detail = await getDeal({ id: result.deal.id });
+  assert.equal(detail.status, "live");
+  assert.deepEqual(detail.active_days, ["mon", "wed"]);
+  assert.equal(detail.ends_at, null);
+  const feed = await getDealsNearby({ lat: 33.9762, lng: -117.3254, radiusM: 3000, hasDeals: true });
+  assert.ok(!feed.some(row => row.deal_id === detail.id));
+  const api = await import("../mocks/index");
+  const sticker = await api.getBusinessBySlug({ slug: fixtures.businesses.find(b => b.id === "biz-opt").qr_slug });
+  assert.ok(!sticker.liveDeals.some(row => row.id === detail.id));
+  vi.setSystemTime(new Date("2026-11-10T02:00:00Z")); // Monday 6 PM, outside its window.
+  assert.equal((await getDeal({ id: detail.id })).status, "scheduled");
+  assert.equal((await cancelDeal({ business_id: "biz-opt", deal_id: detail.id })).error, "DEAL_NOT_SCHEDULED");
+  assert.equal((await endDeal({ business_id: "biz-opt", deal_id: detail.id })).ok, true);
+});
+
 test("business profile reads exclude private fields and return detached hours", async () => {
   const profile = await getMyBusiness();
   assert.equal(profile.pin_ready, false);
@@ -227,6 +297,14 @@ test("business profile reads exclude private fields and return detached hours", 
   const original = profile.business.hours.mon[0][0];
   profile.business.hours.mon[0][0] = "00:00";
   assert.equal((await getMyBusiness()).business.hours.mon[0][0], original);
+});
+
+test("mock sticker reads use the same permanent slug as the business landing query", async () => {
+  const api = await import("../lib/supabase/index");
+  const sticker = await api.getBusinessSticker({ businessId: "biz-opt" });
+  assert.equal(sticker.qr_slug, fixtures.businesses.find(b => b.id === "biz-opt").qr_slug);
+  assert.equal((await api.getBusinessBySlug({ slug: sticker.qr_slug })).business.id, sticker.business_id);
+  await assert.rejects(api.getBusinessSticker({ businessId: "biz-saf" }), error => error.code === "NOT_MEMBER");
 });
 
 test("business validation rejects invalid coordinates, hours, logos, and eligibility", () => {
