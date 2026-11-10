@@ -79,3 +79,10 @@ test("a network failure keeps the form and says so", async () => {
   expect(text()).toContain("Couldn't claim this night");
   expect(container.querySelector("form")).not.toBeNull();
 });
+
+test("RATE_LIMITED explains the weekly claim cap", async () => {
+  mock.claim.mockResolvedValue({ ok: false, error: "RATE_LIMITED" });
+  await openAndClaim("ACM");
+  expect(text()).toContain("You've claimed 3 club nights this week.");
+  expect(container.querySelector("form")).not.toBeNull();
+});

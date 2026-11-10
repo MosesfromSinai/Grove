@@ -42,6 +42,11 @@ describe.skipIf(!process.env.SUPABASE_DB_TESTS)("redeem, served locally", () => 
     expect(await redeem({ ...input, lat: 33.9737, lng: -117.3281 })).toEqual({ ok: false, error: "TOO_FAR" });
   });
 
+  test("an impossible location is INVALID_LOCATION, not a server error", async () => {
+    setClient(student.client as unknown as Client);
+    expect(await redeem({ ...input, lat: 95, lng: -117.3254 })).toEqual({ ok: false, error: "INVALID_LOCATION" });
+  });
+
   test("at the counter it redeems once, then ALREADY_REDEEMED_TODAY", async () => {
     setClient(student.client as unknown as Client);
     const first = await redeem(input);

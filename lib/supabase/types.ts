@@ -46,7 +46,12 @@ export type BusinessPublic = {
   redemption_mode: RedemptionMode;
 };
 
-export type BusinessProfile = { business: BusinessPublic; pin_ready: boolean };
+export type BusinessProfile = { business: BusinessPublic; membership_role: MemberRole; pin_ready: boolean | null };
+// Business-facing sticker read; qr_slug stays out of BusinessPublic.
+export type BusinessSticker = { business_id: string; business_name: string; qr_slug: string };
+export type SetRedemptionModeInput = { business_id: string; redemption_mode: RedemptionMode };
+export type SetRedemptionModeResult = { ok: true; redemption_mode: RedemptionMode } |
+  { ok: false; error: "NOT_SIGNED_IN" | "NOT_OWNER" | "INVALID_MODE" | "STAFF_SCAN_UNAVAILABLE" };
 export type UpdateTruckLocationInput = { business_id: string; lat: number; lng: number };
 export type UpdateTruckLocationResult =
   | { ok: true; location: UpdateTruckLocationInput }
@@ -58,7 +63,7 @@ export type SaveBusinessInput = Pick<BusinessPublic,
 export type BusinessInputErrors = Partial<Record<keyof SaveBusinessInput, string>>;
 export type SaveBusinessResult =
   | { ok: true; profile: BusinessProfile }
-  | { ok: false; error: "NOT_OWNER" }
+  | { ok: false; error: "NOT_OWNER" | "NOT_SIGNED_IN" | "IMAGE_STORAGE_UNAVAILABLE" }
   | { ok: false; error: "INVALID_BUSINESS"; fields: BusinessInputErrors };
 
 export type DealDetail = Deal & {
@@ -70,11 +75,15 @@ export type MyDeal = Deal & {
   redemption_count: number;
 };
 
-// Sprint 1 posting supports a single public time window. Repeat days come later.
+// Omitted repeat fields default to null; omitted visibility defaults to public.
 export type CreateDealInput = Pick<Deal,
   "business_id" | "title" | "description" | "photo_url" | "starts_at" | "students_only"
 > & {
-  ends_at: string;
+  ends_at: string | null;
+  active_days?: Weekday[] | null;
+  daily_start?: string | null;
+  daily_end?: string | null;
+  visibility?: DealVisibility;
   discount_type: DiscountType;
   discount_value: number | null;
 };
@@ -82,12 +91,13 @@ export type CreateDealInput = Pick<Deal,
 export type CreateDealErrors = Partial<Record<keyof CreateDealInput, string>>;
 export type CreateDealResult =
   | { ok: true; deal: MyDeal }
-  | { ok: false; error: "NOT_OWNER" }
+  | { ok: false; error: "NOT_OWNER" | "NOT_SIGNED_IN" | "IMAGE_STORAGE_UNAVAILABLE" }
   | { ok: false; error: "INVALID_DEAL"; fields: CreateDealErrors };
 
 export type DealMutationInput = { business_id: string; deal_id: string };
 export type DealMutationError =
   | "NOT_OWNER"
+  | "NOT_SIGNED_IN"
   | "DEAL_NOT_FOUND"
   | "DEAL_NOT_LIVE"
   | "DEAL_NOT_SCHEDULED"
@@ -150,6 +160,8 @@ export type BusinessStats = {
   total: number;
 };
 
+export type BusinessOverview = { today: number; week: number; recentVisits: Redemption[]; as_of: string };
+export type RedemptionConnection = "connecting" | "live" | "reconnecting";
 // The signed-in student's own profile, for the Profile screen.
 export type MyProfile = {
   full_name: string | null;
@@ -178,6 +190,16 @@ export type ClubNight = OpenClubNight & {
   visit_count: number; // verified redemptions of deal_id
 };
 
+export type CreateClubNightInput = Pick<OpenClubNight, "business_id" | "night_date" | "start_time" | "end_time" | "giveback">;
+export type CreateClubNightErrors = Partial<Record<keyof CreateClubNightInput, string>>;
+export type CreateClubNightResult = { ok: true; club_night: OpenClubNight } |
+  { ok: false; error: "NOT_SIGNED_IN" | "NOT_OWNER" } |
+  { ok: false; error: "INVALID_CLUB_NIGHT"; fields: CreateClubNightErrors };
+
+export type CancelClubNightInput = { business_id: string; club_night_id: string };
+export type CancelClubNightResult = { ok: true; club_night_id: string } |
+  { ok: false; error: "NOT_SIGNED_IN" | "NOT_OWNER" | "ALREADY_CLAIMED" | "CLUB_NIGHT_NOT_FOUND" };
+
 // A business_members row as the owner sees it in settings.
 export type StaffMember = {
   business_id: string;
@@ -194,6 +216,7 @@ export type ErrorCode =
   | "WRONG_BUSINESS"
   | "TOO_FAR"
   | "LOCATION_REQUIRED"
+  | "INVALID_LOCATION"
   | "ALREADY_REDEEMED_TODAY"
   | "BAD_PIN"
   | "CODE_EXPIRED"

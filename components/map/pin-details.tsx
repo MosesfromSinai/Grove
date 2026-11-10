@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { DealCard } from "@/components/student/deal-card";
 import { formatDistance, type MapBusiness } from "@/lib/geo/nearby";
+import { StatusPill } from "./status-pill";
 
 export function PinDetails({
   business,
@@ -23,17 +24,18 @@ export function PinDetails({
       ref={dialog}
       onClose={onClose}
       aria-labelledby="pin-details-title"
-      className="fixed inset-x-0 bottom-0 top-auto mx-auto mb-0 max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-t-card border bg-bg-student p-5 shadow-card backdrop:bg-ink/40"
+      className="fixed inset-x-0 bottom-0 top-auto mx-auto mb-0 max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-t-card border bg-surface p-5 pt-3 shadow-card backdrop:bg-ink/40"
     >
       {business && (
         <>
+          <div className="mx-auto mb-3 h-1 w-10 rounded-pill bg-border-strong" aria-hidden="true" />
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 id="pin-details-title" className="text-2xl">
                 {business.name}
               </h2>
-              <p className="mt-1 text-sm text-ink-muted">
-                {business.openNow ? "Open now" : "Closed"} ·{" "}
+              <p className="mt-1 flex items-center gap-2 text-sm text-ink-muted">
+                <StatusPill open={business.openNow} />
                 {formatDistance(business.distanceM)} away
               </p>
             </div>

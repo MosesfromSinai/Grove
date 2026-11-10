@@ -48,16 +48,16 @@ Everyone, for the repo on day 1, `mocks/` and the API contract by day 3, and rea
 - [x] `redeem-pin` Edge Function (hashed PIN check, with Celso) (#15)
 - [x] Typed queries in `lib/supabase/` for every function in the contract (#16)
 - [x] Enable Realtime on `redemptions` for dashboards (#17)
-- [ ] Run the week-2 gate test: one printed sticker, two phones (#18)
+- [x] Run the week-2 gate test: one printed sticker, two phones (#18)
 - [x] Migration: `active_days`, `daily_start`, `daily_end`, `visibility` on `deals`; `timezone` on `campuses`; `club_nights` table (#101)
-- [ ] Live-now check with repeat days: one `deal_status()` SQL function used by `redeem`, `redeem-pin`, `issue-code`, `staff-redeem`, `deals_nearby`, and RLS (#102)
+- [x] Live-now check with repeat days: one `deal_status()` SQL function used by `redeem`, `redeem-pin`, `issue-code`, `staff-redeem`, `deals_nearby`, and RLS (#102)
 - [x] `claim-club-night` Edge Function: one claim per night (conditional update), creates the link-only deal, returns `ALREADY_CLAIMED` / `CLUB_NIGHT_EXPIRED` / `NOT_SIGNED_IN` (#103)
 - [x] `set-pin` Edge Function (owner only; random 4-digit PIN returned once, stored hashed with Celso's helper) and the database default for `qr_slug` on new businesses (#120)
 - [ ] Agree staff-scan token design with Celso by Nov 1; log it as a **Decision** in `LOG.md` (#19)
 
 ### Week 3 — Staff mode and stats (Nov 2–8)
 - [ ] `issue-code` (token refreshes ~every 30 s) and `staff-redeem` (staff of that business only) (#20)
-- [ ] `getBusinessStats` SQL (per deal, per hour) (#21)
+- [x] `getBusinessStats` SQL (per deal, per hour) (#21)
 - [ ] Sentry for app and functions (#22)
 - [ ] `add-staff` Edge Function and `getStaff` query (owner adds staff by Google email; an invited email becomes active on its first sign-in) (#121)
 - [ ] Production Supabase project; migrate; real campus data only; ready before the Week 4 pilot (#23)
@@ -72,16 +72,19 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 ### Taken over (2026-11-09; see `LOG.md` → Team)
 Ticked here, not in teammates' files. Staff-scan issues (#39, #40, #60, #61) are stretch.
 - [x] `deals_nearby` PostGIS function (#88), map on real data (#89), pin bottom sheet (#90), link-only hidden from the map (#117), PWA manifest and icons (#119), from Hikaru's #138
-- [ ] Food-truck location update (#94): component and RPC merged; Adolfo places it on the dashboard
+- [x] Food-truck location update (#94): component and RPC merged; placed on the dashboard overview for truck owners
 - [x] Location before scan with PIN link (#54), sticker page (#57), PIN screen (#58), from Edward's #139
 - [x] Keep the deal link through sign-in (#109)
 - [ ] Verify link-only hidden from feed (#108) and no mock imports (#59) on real data
 - [x] Claim club night screen (#110)
 - [x] Profile page (#62)
-- [ ] Rate-limit club night claims (#106) and reject out-of-range coordinates (#38)
+- [x] Rate-limit club night claims (#106) and reject out-of-range coordinates (#38)
 - [ ] Onboarding routing (#33): done in `app/page.tsx`; owners added by hand (`STATUS.md`)
-- [ ] Mapbox token (#84) and canvas check for the map (#85)
-- [ ] Security test pass (#41)
+- [x] Mapbox token (#84) and canvas check for the map (#85)
+- [x] Security test pass (#41)
+- [x] Stats page (#76), from Adolfo's Week 3
+- [x] Club night results (#114) and cancel an open club night, from Adolfo's Week 3
+- [x] Deal link and QR download (#115), from Adolfo's Week 3
 
 ### Business
 - [ ] 1–2 restaurant interviews (hypotheses 1–4, see `CLAUDE.md` → Business); notes in the shared Drive folder (#27)

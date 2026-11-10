@@ -128,6 +128,7 @@ test("selecting a Mapbox marker retains keyboard focus and its DOM node", async 
   expect(container.querySelector(".grove-map-canvas button")).toBe(button);
   expect(document.activeElement).toBe(button);
   expect(button.getAttribute("aria-pressed")).toBe("true");
+  expect(button.className).toContain("grove-map-regular");
 });
 
 test("unmount removes the map and all marker elements", async () => {
@@ -148,6 +149,8 @@ test("map errors leave an accessible pin preview", async () => {
   const button = container.querySelector<HTMLButtonElement>(
     ".grove-map-preview button",
   )!;
+  expect(button.querySelector(".grove-map-pinCircle svg")).not.toBeNull();
+  expect(button.querySelector(".grove-map-pinName")!.textContent).toBe("Test kitchen");
   button.click();
   expect(onSelect).toHaveBeenCalledWith("test-business");
 });

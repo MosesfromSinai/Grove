@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
-select plan(10);
+select plan(13);
 
 -- A test student and a deal that's live now at Orange Peel Tacos (33.9762, -117.3254).
 insert into auth.users (id, email) values ('5e000000-0000-4000-8000-000000000001', 'redeem-test@student.example');
@@ -20,6 +20,11 @@ select is(redeem_sticker('5e000000-0000-4000-8000-000000000001', '00000000-0000-
   'DEAL_NOT_LIVE', 'an unknown deal is DEAL_NOT_LIVE');
 select is(redeem_sticker('5e000000-0000-4000-8000-000000000001', 'de000000-0000-4000-8000-000000000001', 'orange-peel-tacos', null, null)->>'error',
   'LOCATION_REQUIRED', 'no location is LOCATION_REQUIRED');
+select is(redeem_sticker('5e000000-0000-4000-8000-000000000001', 'de000000-0000-4000-8000-000000000001', 'orange-peel-tacos', 91, -117.3254)->>'error',
+  'INVALID_LOCATION', 'a latitude past 90 is INVALID_LOCATION, not an error');
+select is(redeem_sticker('5e000000-0000-4000-8000-000000000001', 'de000000-0000-4000-8000-000000000001', 'orange-peel-tacos', 33.9762, 181)->>'error',
+  'INVALID_LOCATION', 'a longitude past 180 is INVALID_LOCATION');
+select is((select count(*) from redemptions where student_id = '5e000000-0000-4000-8000-000000000001')::int, 0, 'an invalid location inserts nothing');
 select is(redeem_sticker('5e000000-0000-4000-8000-000000000001', 'de000000-0000-4000-8000-000000000001', 'orange-peel-tacos', 33.9737, -117.3281)->>'error',
   'TOO_FAR', 'campus center (about 370 m away) is TOO_FAR');
 select is(redeem_sticker('5e000000-0000-4000-8000-000000000001', 'de000000-0000-4000-8000-000000000001', 'orange-peel-tacos', 33.9770, -117.3254)->>'ok',
