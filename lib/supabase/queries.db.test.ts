@@ -8,6 +8,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { Database } from "./database.types";
 import type { Redemption } from "./types";
 import {
+  cancelClubNight,
   getBusinessBySlug,
   getBusinessStats,
   getClubNights,
@@ -100,6 +101,34 @@ describe.skipIf(!process.env.SUPABASE_DB_TESTS)("queries on the local seed", () 
     await asMember(PEPPER, async () => {
       expect(await getClubNights({ businessId: PEPPER })).toMatchObject([{ status: "open", visit_count: 0 }]);
     });
+  });
+
+  test("cancelClubNight removes an open night but never a claimed one", async () => {
+    const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+    const { data: deal } = await service.from("deals").insert({ business_id: PEPPER, title: "Kept night", starts_at: new Date().toISOString(),
+      ends_at: new Date(Date.now() + 3_600_000).toISOString(), visibility: "link_only" }).select("id").single();
+    const { data: rows } = await service.from("club_nights").insert([
+      { business_id: PEPPER, night_date: tomorrow, start_time: "18:00", end_time: "21:00", giveback: "cancel me" },
+      { business_id: PEPPER, night_date: tomorrow, start_time: "18:00", end_time: "21:00", giveback: "claimed", claimed_club_name: "ACM",
+        claimed_by: studentId, claimed_at: new Date().toISOString(), deal_id: deal!.id },
+    ]).select("id, giveback");
+    const open = rows!.find((r) => r.giveback === "cancel me")!.id;
+    const claimed = rows!.find((r) => r.giveback === "claimed")!.id;
+    try {
+      await asMember(PEPPER, async () => {
+        expect(await cancelClubNight({ business_id: PEPPER, club_night_id: open })).toEqual({ ok: true, club_night_id: open });
+        expect(await cancelClubNight({ business_id: PEPPER, club_night_id: claimed })).toEqual({ ok: false, error: "ALREADY_CLAIMED" });
+        expect(await cancelClubNight({ business_id: PEPPER, club_night_id: open })).toEqual({ ok: false, error: "CLUB_NIGHT_NOT_FOUND" });
+      });
+      await asMember(OPT, async () => {
+        expect(await cancelClubNight({ business_id: PEPPER, club_night_id: claimed })).toEqual({ ok: false, error: "NOT_OWNER" });
+      });
+      const { count } = await service.from("club_nights").select("id", { count: "exact", head: true }).eq("id", claimed);
+      expect(count).toBe(1);
+    } finally {
+      await service.from("club_nights").delete().in("id", [open, claimed]);
+      await service.from("deals").delete().eq("id", deal!.id);
+    }
   });
 
   test("getStaff shows the owner, active staff, and invited staff", async () => {
