@@ -17,6 +17,8 @@ import type {
   RedemptionConnection,
   BusinessProfile,
   BusinessSticker,
+  UpdateTruckLocationInput,
+  UpdateTruckLocationResult,
   BusinessLocationOption,
   SaveBusinessInput,
   SaveBusinessResult,
@@ -33,6 +35,7 @@ import type {
   DealDetail,
   IssueCodeResult,
   MyDeal,
+  MyProfile,
   NotifyDealResult,
   RedeemResult,
   Redemption,
@@ -47,6 +50,7 @@ import type {
 import {
   businessMembers,
   businesses,
+  campuses,
   clubNights,
   deals,
   mockOwner,
@@ -248,6 +252,17 @@ export async function getMyRedemptions(): Promise<Redemption[]> {
   return delay(mine.map(toRedemption));
 }
 
+export async function getMyProfile(): Promise<MyProfile | null> {
+  const { full_name, email, verified_student, campus_id } = mockStudent;
+  const campus_name = campuses.find((c) => c.id === campus_id)?.name ?? null;
+  return delay({ full_name, email, campus_name, verified_student });
+}
+
+// Mocks have no session to end.
+export async function signOut(): Promise<void> {
+  return delay(undefined);
+}
+
 export async function getBusinessStats(input: {
   businessId: string;
   from: string;
@@ -297,6 +312,18 @@ export async function getBusinessSticker(input: { businessId: string }): Promise
   if (input.businessId !== mockOwner.business_id) throw new BusinessAccessError("NOT_MEMBER");
   const business = businessById(input.businessId);
   return delay(business.qr_slug ? { business_id: business.id, business_name: business.name, qr_slug: business.qr_slug } : null);
+}
+
+export async function updateTruckLocation(input: UpdateTruckLocationInput): Promise<UpdateTruckLocationResult> {
+  if (input.business_id !== mockOwner.business_id) return delay({ ok: false, error: "NOT_OWNER" });
+  if (!Number.isFinite(input.lat) || Math.abs(input.lat) > 90 || !Number.isFinite(input.lng) || Math.abs(input.lng) > 180) {
+    return delay({ ok: false, error: "INVALID_LOCATION" });
+  }
+  const business = businessById(input.business_id);
+  if (!business.is_truck) return delay({ ok: false, error: "NOT_A_TRUCK" });
+  business.lat = input.lat;
+  business.lng = input.lng;
+  return delay({ ok: true, location: { ...input } });
 }
 
 // Mock-only address lookup. Arbitrary addresses require explicit coordinates;
@@ -380,6 +407,7 @@ export async function redeem(input: {
   if (b.qr_slug !== input.qr_slug) return delay({ ok: false, error: "WRONG_BUSINESS" });
   if (dealStatus(d) !== "live") return delay({ ok: false, error: "DEAL_NOT_LIVE" });
   if (input.lat === null || input.lng === null) return delay({ ok: false, error: "LOCATION_REQUIRED" });
+  if (Math.abs(input.lat) > 90 || Math.abs(input.lng) > 180) return delay({ ok: false, error: "INVALID_LOCATION" });
   if (distanceM(input.lat, input.lng, b.lat, b.lng) > REDEEM_RADIUS_M) return delay({ ok: false, error: "TOO_FAR" });
   if (redeemedToday(d.id)) return delay({ ok: false, error: "ALREADY_REDEEMED_TODAY" });
   return delay({ ok: true, redemption: record(d, "sticker") });
@@ -498,7 +526,14 @@ export async function createClubNight(input: CreateClubNightInput): Promise<Crea
   return delay({ ok: true, club_night: toOpenClubNight(night) });
 }
 
+// Same cap as claim_club_night(): 3 claims per student in 7 days.
+const CLAIM_CAP = 3;
+const CLAIM_WINDOW_MS = 7 * 86_400_000;
+
 export async function claimClubNight(input: { club_night_id: string; club_name: string }): Promise<ClaimClubNightResult> {
+  const since = Date.now() - CLAIM_WINDOW_MS;
+  const recent = clubNights.filter((x) => x.claimed_by === mockStudent.id && x.claimed_at && Date.parse(x.claimed_at) > since);
+  if (recent.length >= CLAIM_CAP) return delay({ ok: false, error: "RATE_LIMITED" });
   const c = clubNights.find((x) => x.id === input.club_night_id);
   if (!c || clubNightStatus(c) === "expired") return delay({ ok: false, error: "CLUB_NIGHT_EXPIRED" });
   if (c.claimed_club_name) return delay({ ok: false, error: "ALREADY_CLAIMED" });

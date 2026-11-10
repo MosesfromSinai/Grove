@@ -143,7 +143,7 @@ Stretch goal (possible future implementation); not built for the MVP.
 
 Moses owns `lib/supabase/` and writes the wrappers; the owner listed writes the SQL behind it.
 
-`getDealsNearby` calls `deals_nearby(lat float8, lng float8, radius_m int, open_now boolean default false, has_deals boolean default false)`, which returns `DealCard` rows (columns named exactly as the type, `live_until` from the current window). Hikaru writes it (#88).
+`getDealsNearby` calls `deals_nearby(lat float8, lng float8, radius_m int, open_now boolean default false, has_deals boolean default false)`, which returns `DealCard` rows through the `nearby_deal_card` composite type (`live_until` is the exact current window end, in campus time). Migration `20261102000000_nearby_and_truck_location.sql` implements it (#88). Inputs require finite coordinates and a radius of 1–50,000 metres. It is security-invoker, uses PostGIS geography distance, and excludes link-only deals explicitly even for owners and past redeemers. `business_is_open(hours, timezone, at_time)` handles split hours and overnight periods; malformed periods fail closed.
 
 | Function | Input | Returns | Used by |
 |---|---|---|---|
@@ -151,6 +151,8 @@ Moses owns `lib/supabase/` and writes the wrappers; the owner listed writes the 
 | `getDeal` | `{ id }` | `DealDetail \| null`, public or link-only, via `deal_by_id()` (this is how a deal link opens) | Edward |
 | `getBusinessBySlug` | `{ slug }` | `{ business: BusinessPublic, liveDeals: Deal[] } \| null`, live public deals only | Edward (sticker landing) |
 | `getMyRedemptions` | none | `Redemption[]`, newest first | Edward |
+| `getMyProfile` | none | `MyProfile \| null`: the signed-in user's own name, email, campus name and verified flag (RLS: own row only); null when signed out | Edward (profile) |
+| `signOut` | none | `void`. Ends the browser session; the screen then reloads to `/sign-in`. Throws on failure | Edward (profile) |
 | `getBusinessStats` | `{ businessId, from, to }` | `BusinessStats` | Adolfo |
 | `getBusinessOverview` | `{ businessId }` | `BusinessOverview`: today's/week's exact counts and latest 8 visits; member-only | Adolfo (#75 proposal for Moses review) |
 | `getMyDeals` | `{ businessId }` | `MyDeal[]`, newest start first, both visibilities | Adolfo |
@@ -251,6 +253,13 @@ type Redemption = {
   business_name: string;
 };
 
+type MyProfile = {
+  full_name: string | null;
+  email: string;
+  campus_name: string | null;  // from campuses.name
+  verified_student: boolean;
+};
+
 type BusinessStats = {
   perDeal: { deal_id: string; title: string; count: number }[];
   perHour: { hour: number; count: number }[];  // hour 0–23, local time
@@ -301,6 +310,7 @@ All adapters now follow the shared mock/real switch. The real path uses the sign
 | `endDeal` | `{ business_id, deal_id }` | `{ ok: true, deal: MyDeal }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_LIVE` |
 | `cancelDeal` | `{ business_id, deal_id }` | `{ ok: true, deal_id: string }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `DEAL_NOT_FOUND`, `DEAL_NOT_SCHEDULED`, `DEAL_HAS_REDEMPTIONS`, `DEAL_IN_USE` |
 | `getMyBusiness` | none | `BusinessProfile \| null` (no membership) | throws `BusinessAccessError` (`NOT_SIGNED_IN`, `MULTIPLE_BUSINESSES`) or a transport/query error |
+| `updateTruckLocation` | `{ business_id, lat, lng }` | `{ ok: true, location: { business_id, lat, lng } }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `NOT_A_TRUCK`, `INVALID_LOCATION` |
 | `getBusinessSticker` | `{ businessId }` | `BusinessSticker \| null` (missing business/slug) | throws `BusinessAccessError` (`NOT_SIGNED_IN`, `NOT_MEMBER`) or a transport/query error |
 | `getBusinessLocationOptions` | none | `Pick<BusinessPublic, "address" \| "lat" \| "lng">[]`; sample coordinates on mocks, `[]` on real data (no geocoder) | throws on transport failure |
 | `saveBusiness` | `SaveBusinessInput` | `{ ok: true, profile: BusinessProfile }` | `NOT_SIGNED_IN`, `NOT_OWNER`, `IMAGE_STORAGE_UNAVAILABLE`, `INVALID_BUSINESS` (`fields: BusinessInputErrors`) |
@@ -338,6 +348,10 @@ type SaveBusinessInput = Pick<BusinessPublic,
 type BusinessInputErrors = Partial<Record<keyof SaveBusinessInput, string>>;
 ```
 
+`updateTruckLocation` uses the shared mock/real switch. It calls owner-only `update_truck_location(business_id uuid, lat float8, lng float8)`, which locks the business row and updates its PostGIS location; generated `lat`/`lng` follow automatically. Staff and other owners cannot move the pin. The dashboard renders `<TruckLocation businessId={…} />` (from `components/map/`) only for food trucks.
+
+`getMyBusiness` and the other business writes stay mock-backed until Adolfo's #73.
+
 Writes return `Promise` results; errors are `{ ok: false, error, fields? }`. Read helpers return `Promise` values. `setPin` retains its Edge Function signature below.
 
 - Omitted repeat fields become null; omitted visibility becomes `public`. Chosen weekdays are unique, valid, and normalized Monday–Sunday. Repeats require both `HH:MM` daily times with end later than start (no overnight windows). Only repeats can omit an end instant. Starts/end instants and daily windows use campus time in the UI; instants are saved as UTC.
@@ -370,13 +384,13 @@ All return either `{ ok: true, ... }` or `{ ok: false, error: ErrorCode }`. `lib
 | `add-staff` — `addStaff()` | `{ business_id, email }` (owner only) | `{ member: StaffMember }`; status `invited` until that email signs in | Moses |
 | `notify-deal` — `notifyDeal()` | `{ deal_id }`, called when a deal goes live. **Stretch goal** | `{ sent: number }` | Hikaru |
 
-`redeem` checks in this order: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT` (every redemption needs a verified student; `students_only` is display-only), `RATE_LIMITED` (more than 10 `redeem` or `redeem-pin` attempts by the student in a minute), then `WRONG_BUSINESS`, `DEAL_NOT_LIVE` (also for an unknown deal), `LOCATION_REQUIRED`, `TOO_FAR` (over 150 m), `ALREADY_REDEEMED_TODAY`. Functions always answer HTTP 200 with `{ ok, ... }`; anything else means a server error, and the wrapper throws.
+`redeem` checks in this order: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT` (every redemption needs a verified student; `students_only` is display-only), `RATE_LIMITED` (more than 10 `redeem` or `redeem-pin` attempts by the student in a minute), then `WRONG_BUSINESS`, `DEAL_NOT_LIVE` (also for an unknown deal), `LOCATION_REQUIRED`, `INVALID_LOCATION` (latitude outside −90…90 or longitude outside −180…180), `TOO_FAR` (over 150 m), `ALREADY_REDEEMED_TODAY`. Functions always answer HTTP 200 with `{ ok, ... }`; anything else means a server error, and the wrapper throws.
 
 `redeem-pin` checks in this order: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT`, `RATE_LIMITED` (the same 10-a-minute limit), `DEAL_NOT_LIVE` (unknown deal, another business's deal, or not live now), `RATE_LIMITED` (PIN lockout: 5 bad PINs by that student at that business in 15 minutes; other students aren't affected), `BAD_PIN` (anything but the right 4 digits), `ALREADY_REDEEMED_TODAY`.
 
 `set-pin` and `add-staff` errors: `NOT_SIGNED_IN`, `NOT_OWNER` (only the business's owner; staff get `NOT_OWNER`). A new business's `qr_slug` comes from its name (accents removed, lowercase, dashes), plus a short suffix if taken.
 
-`claim-club-night` errors: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT`, `CLUB_NIGHT_EXPIRED`, `ALREADY_CLAIMED` (one claim per club night; the claim is a single conditional update, so two claims at once can't both win), `RATE_LIMITED` (Celso). An unknown night is `CLUB_NIGHT_EXPIRED`. The club name is trimmed and cut to 60 characters; a blank name is a bad request (HTTP 400, the wrapper throws), so the claim screen requires one.
+`claim-club-night` errors: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT`, `CLUB_NIGHT_EXPIRED`, `ALREADY_CLAIMED` (one claim per club night; the claim is a single conditional update, so two claims at once can't both win), `RATE_LIMITED` (checked first: the student already claimed 3 club nights in the last 7 days; only successful claims count). An unknown night is `CLUB_NIGHT_EXPIRED`. The club name is trimmed and cut to 60 characters; a blank name is a bad request (HTTP 400, the wrapper throws), so the claim screen requires one.
 
 ### Redeem with repeat days and link-only deals
 The two-QR rule and the redemption checks are in `CLAUDE.md` → Redemption rules. What that means for the functions:
@@ -393,6 +407,7 @@ type ErrorCode =
   | "WRONG_BUSINESS"
   | "TOO_FAR"
   | "LOCATION_REQUIRED"
+  | "INVALID_LOCATION"
   | "ALREADY_REDEEMED_TODAY"
   | "BAD_PIN"
   | "CODE_EXPIRED"

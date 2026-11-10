@@ -52,6 +52,10 @@ export type BusinessSticker = { business_id: string; business_name: string; qr_s
 export type SetRedemptionModeInput = { business_id: string; redemption_mode: RedemptionMode };
 export type SetRedemptionModeResult = { ok: true; redemption_mode: RedemptionMode } |
   { ok: false; error: "NOT_SIGNED_IN" | "NOT_OWNER" | "INVALID_MODE" | "STAFF_SCAN_UNAVAILABLE" };
+export type UpdateTruckLocationInput = { business_id: string; lat: number; lng: number };
+export type UpdateTruckLocationResult =
+  | { ok: true; location: UpdateTruckLocationInput }
+  | { ok: false; error: "NOT_SIGNED_IN" | "NOT_OWNER" | "NOT_A_TRUCK" | "INVALID_LOCATION" };
 export type BusinessLocationOption = Pick<BusinessPublic, "address" | "lat" | "lng">;
 export type SaveBusinessInput = Pick<BusinessPublic,
   "name" | "address" | "lat" | "lng" | "hours" | "logo_url" | "is_truck"
@@ -158,6 +162,13 @@ export type BusinessStats = {
 
 export type BusinessOverview = { today: number; week: number; recentVisits: Redemption[]; as_of: string };
 export type RedemptionConnection = "connecting" | "live" | "reconnecting";
+// The signed-in student's own profile, for the Profile screen.
+export type MyProfile = {
+  full_name: string | null;
+  email: string;
+  campus_name: string | null;
+  verified_student: boolean;
+};
 
 // What a student sees when choosing a club night to claim.
 export type OpenClubNight = {
@@ -201,6 +212,7 @@ export type ErrorCode =
   | "WRONG_BUSINESS"
   | "TOO_FAR"
   | "LOCATION_REQUIRED"
+  | "INVALID_LOCATION"
   | "ALREADY_REDEEMED_TODAY"
   | "BAD_PIN"
   | "CODE_EXPIRED"

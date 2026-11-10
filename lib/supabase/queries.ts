@@ -13,6 +13,8 @@ import { validateCreateClubNight } from "./club-night-input";
 import type {
   AddStaffResult,
   BusinessPublic,
+  UpdateTruckLocationInput,
+  UpdateTruckLocationResult,
   BusinessStats,
   BusinessOverview,
   RedemptionConnection,
@@ -24,6 +26,7 @@ import type {
   Hours,
   IssueCodeResult,
   MyDeal,
+  MyProfile,
   NotifyDealResult,
   OpenClubNight,
   RedeemResult,
@@ -179,6 +182,23 @@ export async function getMyRedemptions(): Promise<Redemption[]> {
     deal_title: deals?.title ?? "",
     business_name: businesses?.name ?? "",
   }));
+}
+
+export async function getMyProfile(): Promise<MyProfile | null> {
+  const id = await userId();
+  if (!id) return null;
+  const row = check(
+    await db().from("profiles").select("full_name, email, verified_student, campuses(name)").eq("id", id).maybeSingle(),
+  );
+  if (!row) return null;
+  const { campuses, ...profile } = row;
+  return { ...profile, campus_name: campuses?.name ?? null };
+}
+
+// Ends the browser session (clears the auth cookies). The caller then reloads to /sign-in.
+export async function signOut(): Promise<void> {
+  const { error } = await db().auth.signOut();
+  if (error) throw new Error(error.message);
 }
 
 // Counts verified visits in [from, to), per deal and per campus hour. #21 may move this into SQL.
@@ -368,6 +388,14 @@ export async function createClubNight(input: CreateClubNightInput): Promise<Crea
 }
 
 // ---------- Business settings ----------
+
+export async function updateTruckLocation(input: UpdateTruckLocationInput): Promise<UpdateTruckLocationResult> {
+  if (!Number.isFinite(input.lat) || Math.abs(input.lat) > 90 || !Number.isFinite(input.lng) || Math.abs(input.lng) > 180) {
+    return { ok: false, error: "INVALID_LOCATION" };
+  }
+  const result = await (db() as unknown as SupabaseClient).rpc("update_truck_location", input);
+  return one(result) as UpdateTruckLocationResult;
+}
 
 export async function getStaff(input: { businessId: string }): Promise<StaffMember[]> {
   const rows = list(await db().from("business_members").select("*").eq("business_id", input.businessId));

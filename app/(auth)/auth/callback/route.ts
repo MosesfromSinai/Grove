@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse, type NextRequest } from "next/server";
+import { NEXT_COOKIE, safeNextPath } from "@/lib/auth/next-path";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -41,9 +42,11 @@ export async function GET(request: NextRequest) {
     .eq("id", user.id)
     .maybeSingle();
 
-  if (profile?.role === "business") {
-    return NextResponse.redirect(new URL("/dashboard", siteUrl));
-  }
-
-  return NextResponse.redirect(new URL("/feed", siteUrl));
+  // Students return to the page they asked for before sign-in (a shared deal link, #109);
+  // business users always land on the dashboard. The cookie is single use.
+  const next = safeNextPath(request.cookies.get(NEXT_COOKIE)?.value);
+  const destination = profile?.role === "business" ? "/dashboard" : (next ?? "/feed");
+  const response = NextResponse.redirect(new URL(destination, siteUrl));
+  response.cookies.delete(NEXT_COOKIE);
+  return response;
 }
