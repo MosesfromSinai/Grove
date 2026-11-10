@@ -7,6 +7,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { getBusinessOverview, getMyDeals, isMockData, subscribeToRedemptions, type BusinessOverview, type MyDeal, type RedemptionConnection } from "@/lib/supabase";
 import { BusinessAccessError } from "@/lib/supabase/business-errors";
 import { CAMPUS_TZ, dealStatus, liveUntil } from "@/lib/supabase/deal-status";
+import { TruckLocation } from "@/components/map/truck-location";
 import { BusinessLoading, BusinessName, useBusiness } from "./business-context";
 
 const time = new Intl.DateTimeFormat("en-US", { timeZone: CAMPUS_TZ, hour: "numeric", minute: "2-digit" });
@@ -15,13 +16,17 @@ const methods = { sticker: "Counter sticker", pin: "Backup PIN", staff_scan: "St
 type Snapshot = { overview: BusinessOverview; deals: MyDeal[] };
 
 export function BusinessOverviewPage() {
-  const { profile } = useBusiness();
+  const { profile, updateProfile } = useBusiness();
+  // #94: food-truck owners move their pin from here; update_truck_location is owner-only.
+  const truckOwner = profile?.business.is_truck && profile.membership_role === "owner";
   return <>
     <header className="mb-7 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
       <div className="min-w-0"><p className="mb-1 text-sm font-bold text-green-dark [overflow-wrap:anywhere]"><BusinessName /></p>
         <h1 className="text-3xl sm:text-4xl">Overview</h1><p className="mt-2 text-ink-muted">A little local love. More students through your door.</p></div>
       <Link href="/dashboard/deals/new" className={buttonVariants({ size: "lg", className: "rounded-button" })}><Plus aria-hidden="true" className="size-5" />Post a deal</Link>
     </header>
+    {profile && truckOwner && <div className="mb-6"><TruckLocation businessId={profile.business.id}
+      onMoved={({ lat, lng }) => updateProfile({ ...profile, business: { ...profile.business, lat, lng } })} /></div>}
     {profile ? <Overview key={profile.business.id} businessId={profile.business.id} /> : <BusinessLoading />}
   </>;
 }
