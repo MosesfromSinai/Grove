@@ -66,7 +66,7 @@ export function PinForm() {
     );
   }
 
-  if (deal === undefined) return <p className="pt-10 text-center text-ink-muted">Loading…</p>;
+  if (deal === undefined) return <p role="status" className="pt-10 text-center text-ink-muted">Loading…</p>;
 
   return (
     <div>
@@ -92,8 +92,8 @@ export function PinForm() {
           onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
           className="mt-1 block min-h-12 w-full rounded-button border border-border-strong bg-surface px-4 text-center text-2xl tracking-[0.5em]"
         />
-        {error && <p className="mt-3 text-sm font-semibold text-brown">{errorMessages[error]}</p>}
-        {failed && <p className="mt-3 text-sm font-semibold text-brown">Something went wrong. Try again.</p>}
+        {error && <p role="alert" className="mt-3 text-sm font-semibold text-brown">{errorMessages[error]}</p>}
+        {failed && <p role="alert" className="mt-3 text-sm font-semibold text-brown">Something went wrong. Try again.</p>}
         <button
           type="submit"
           disabled={busy || pin.length !== 4}
