@@ -127,15 +127,22 @@ A restaurant posts an open night; one student claims it for a club by typing the
 - On claim, a deal is created: same business, `starts_at`/`ends_at` = the night's window, `visibility = 'link_only'`, `students_only = true`, no discount, title "<club> night", giveback in the description.
 - **Review discrepancy (#113):** the existing `claim_club_night` SQL checks only whether the night has ended; it does not enforce the same-date claim restriction stated above. Its Edge wrapper adds no date check. Moses must reconcile the intended rule and hosted behavior; this posting change does not modify claim SQL/functions.
 
-### `push_subscriptions`
-Stretch goal (possible future implementation); not built for the MVP.
-| Column | Type | Notes |
+### `push_subscriptions` and `push_deliveries`
+Local push implementation proposed for #91–93; sender and client default disabled. Moses reviews/applies the migration; Celso reviews auth/grants. Full rollout and device checklist: `lib/push/README.md`.
+
+`push_subscriptions`: `id uuid`, `user_id uuid` (profile cascade), `campus_id uuid`, unique `endpoint text`, `keys jsonb` (`p256dh`, `auth`), private rounded `location geography(Point,4326)`, `created_at timestamptz`, `expires_at timestamptz` (seven days). No browser table grants or direct writes; authenticated RPCs below validate a verified student, coordinates, supported HTTPS provider and keys. Five active devices per account; another account cannot take over an endpoint. No background location collection.
+
+`push_deliveries`: `(subscription_id, deal_id, window_start)` primary key, `created_at`, `outcome` (`claimed`, `sent`, `failed`). Service-role only. Claim before sending, one attempt per subscription/deal/live window, at most three per subscription per rolling 24h. Opt-out deletes preferences and their delivery history; re-enabling starts a new setup/allowance. Expired subscriptions and 30-day delivery history are removed during dispatch. Failed/uncertain sends are not retried automatically.
+
+| Shared data function | Input | Result |
 |---|---|---|
-| id | uuid | |
-| user_id | uuid → profiles | |
-| endpoint | text, unique | |
-| keys | jsonb | `p256dh`, `auth` |
-| created_at | timestamptz | |
+| `savePushSubscription` | `{ endpoint, keys: { p256dh, auth }, lat, lng }` | `{ ok: true, expires_at }` or `{ ok: false, error }`: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT`, `INVALID_LOCATION`, `INVALID_SUBSCRIPTION`, `DEVICE_LIMIT`, `SUBSCRIPTION_IN_USE` |
+| `getPushSubscription` | `endpoint: string` | `{ active: boolean, expires_at: string \| null }`; safe owned status only, no keys/location |
+| `removePushSubscription` | `endpoint: string` | `{ ok: true }` (including missing/foreign endpoint; deletes only caller’s row), or `NOT_SIGNED_IN` |
+
+SQL RPC names are `save_push_subscription(p_endpoint,p_keys,p_lat,p_lng)`, `get_push_subscription(p_endpoint)`, `remove_push_subscription(p_endpoint)`. `claim_push_deliveries(p_deal_id default null,p_limit default 50)` and `push_delivery_eligible(p_subscription_id,p_deal_id)` are service-role only. Claiming filters same-campus public live deals within 3 km of a current saved area; repeat windows use campus timezone. The final eligibility RPC rechecks consent, role/verification, radius and public/live status immediately before network sending.
+
+`notify-deal` accepts an authenticated business owner for one owned public live `deal_id`, or a separate server-only dispatch secret for scheduled batches. `{ ok: true, sent, failed }` counts provider results; `PUSH_DISABLED` is returned before claiming when the sender is not configured/enabled. Other existing auth/owner/live errors remain. Mocks never imply real delivery and return `PUSH_DISABLED` for this operation. `signOut()` blocks new enables through revocation and auth sign-out, preventing a late save from enabling the old account.
 
 ---
 
@@ -385,7 +392,7 @@ All return either `{ ok: true, ... }` or `{ ok: false, error: ErrorCode }`. `lib
 | `claim-club-night` — `claimClubNight()` | `{ club_night_id, club_name }` | `{ club_night: ClubNight, deal_id }` (share `/deals/<deal_id>` with members) | Moses |
 | `set-pin` — `setPin()` | `{ business_id }` (owner only) | `{ pin }`: a new random 4-digit PIN, returned this once and stored hashed. Used at onboarding and for "Reset PIN" | Moses |
 | `add-staff` — `addStaff()` | `{ business_id, email }` (owner only) | `{ member: StaffMember }`; status `invited` until that email signs in | Moses |
-| `notify-deal` — `notifyDeal()` | `{ deal_id }`, called when a deal goes live. **Stretch goal** | `{ sent: number }` | Hikaru |
+| `notify-deal` — `notifyDeal()` | Owner JWT + `{ deal_id }`; private scheduled caller may use `{}`. **Local implementation; rollout disabled** | `{ ok: true, sent, failed }`, existing failures or `PUSH_DISABLED` | Hikaru |
 
 `redeem` checks in this order: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT` (every redemption needs a verified student; `students_only` is display-only), `RATE_LIMITED` (more than 10 `redeem` or `redeem-pin` attempts by the student in a minute), then `WRONG_BUSINESS`, `DEAL_NOT_LIVE` (also for an unknown deal), `LOCATION_REQUIRED`, `INVALID_LOCATION` (latitude outside −90…90 or longitude outside −180…180), `TOO_FAR` (over 150 m), `ALREADY_REDEEMED_TODAY`. Functions always answer HTTP 200 with `{ ok, ... }`; anything else means a server error, and the wrapper throws.
 

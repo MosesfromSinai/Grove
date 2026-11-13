@@ -1,3 +1,4 @@
+import { signOutWithPush } from "../lib/push/browser";
 // Mock versions of every lib/supabase function in docs/API_CONTRACT.md.
 // Same names, inputs, and return types, so swapping to the real ones is an import change.
 // State lives in memory and resets on page reload.
@@ -262,7 +263,7 @@ export async function getMyProfile(): Promise<MyProfile | null> {
 
 // Mocks have no session to end.
 export async function signOut(): Promise<void> {
-  return delay(undefined);
+  return signOutWithPush(removePushSubscription, () => delay(undefined));
 }
 
 export async function getBusinessStats(input: {
@@ -450,7 +451,7 @@ export async function staffRedeem(input: { token: string }): Promise<StaffRedeem
 export async function notifyDeal(input: { deal_id: string }): Promise<NotifyDealResult> {
   const d = deals.find((x) => x.id === input.deal_id);
   if (!d || dealStatus(d) !== "live") return delay({ ok: false, error: "DEAL_NOT_LIVE" });
-  return delay({ ok: true, sent: 12 });
+  return delay({ ok: false, error: "PUSH_DISABLED" });
 }
 
 // ---------- Live updates ----------
@@ -613,3 +614,22 @@ export async function getStaff(input: { businessId: string }): Promise<StaffMemb
 
 // Campus date and time right now, handy for showing "today" on club night screens.
 export const campusNow = () => campusClock(new Date());
+
+
+// Mocks never imply that a real notification was delivered.
+const mockPush = new Map<string,string>();
+export async function savePushSubscription(input: import("../lib/supabase/types").PushInput): Promise<import("../lib/supabase/types").PushSaveResult> {
+  const {validPushEndpoint,validPushKeys}=await import("../lib/push/validation");
+  if(!validPushEndpoint(input.endpoint)||!validPushKeys(input.keys)) return {ok:false,error:"INVALID_SUBSCRIPTION"};
+  if(!Number.isFinite(input.lat)||!Number.isFinite(input.lng)||Math.abs(input.lat)>90||Math.abs(input.lng)>180) return {ok:false,error:"INVALID_LOCATION"};
+  if(!mockPush.has(input.endpoint)&&mockPush.size>=5) return {ok:false,error:"DEVICE_LIMIT"};
+  const expires_at=new Date(Date.now()+7*86400000).toISOString();mockPush.set(input.endpoint,expires_at);
+  return {ok:true,expires_at};
+}
+export async function getPushSubscription(endpoint: string): Promise<import("../lib/supabase/types").PushState> {
+  const expires_at=mockPush.get(endpoint)??null;
+  return {active:!!expires_at&&Date.parse(expires_at)>Date.now(),expires_at};
+}
+export async function removePushSubscription(endpoint: string): Promise<import("../lib/supabase/types").PushRemoveResult> {
+  mockPush.delete(endpoint);return {ok:true};
+}
