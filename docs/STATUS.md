@@ -23,7 +23,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 | Celso | Business: competitor analysis (#45), interviews (#46, #107), attendance cell (#47). Security test pass (#41) once the screens are merged |
 | Edward | Business: student survey (#67), interviews (#68, #111) |
 | Adolfo | Dashboard work from #140 (and #141, which it contains) merged by Moses on `moses/dashboard`: overview, post-deal with repeat days and visibility, sticker, redemption settings, club night posting; truck pin placed (#94). Next: club night results (#114), deal link and QR (#115), stats (#76), pilot outreach |
-| Hikaru | Week 4 #96 map performance/polish and reassigned #63 install guide implemented on `hikaru/week4-map-polish`; 210 unit and 4 browser checks pass. Physical iPhone/Android installation (#159) and business tasks (#97–99, #118) remain. #84/#85 are closed on GitHub |
+| Hikaru | Week 4 #96 map performance/polish and reassigned #63 install guide implemented on `hikaru/week4-map-polish`; 210 unit and 4 browser checks pass. Physical iPhone check is a user-reported pass (Nov 12); Android installation (#159) and business tasks (#97–99, #118) remain. #84/#85 are closed on GitHub |
 
 ## Open PRs (merge in this order)
 
@@ -32,7 +32,7 @@ One `moses/` branch at a time; each merges when CI passes.
 ## Blockers
 
 - **Real data:** Moses recorded passing local SQL tests, but the last hosted-migration note still says `20261102000000_nearby_and_truck_location.sql` is not applied to grove-dev. This conflicts with the already-live real-data switch above; Moses should confirm the hosted migration state. No hosted database check was performed in Hikaru’s Nov 12 session.
-- **Phone installation (#159):** #84/#85 and manifest/icons #119 are closed. The new install guide and 100-pin renderer have desktop browser checks, but physical iPhone Safari/Android Chrome installation and phone performance remain unverified. The renderer benchmark uses local blank tiles without a provider token.
+- **Phone installation (#159):** #84/#85 and manifest/icons #119 are closed. Hikaru reported that PR #162’s preview works on their physical iPhone (Nov 12). Model/iOS version and per-step results were not supplied. Android installation remains pending; #159 stays open. Phone performance has no measured device results. The renderer benchmark uses local blank tiles without a provider token.
 - **Test data:** delete Grove Test Kitchen (ids starting `7e57`) from grove-dev before the switch; it would show as a pin near campus.
 - **Settings (done):** Vercel Authentication is off for previews. `NEXT_PUBLIC_SITE_URL` is set for Production only, so previews sign in on their own domain. Supabase Auth on grove-dev is Google-only; its Redirect URLs are `https://grove-jade.vercel.app/**`, `http://localhost:3000/**`, and `https://grove-*-mosesfromsinais-projects.vercel.app/**`.
 - **Everyone:** CI ("Lint, typecheck, build") runs `npm test` too. Run `npm run lint && npm run typecheck && npm test && npm run build` (Node 22) before pushing. SQL tests: `npx supabase@2.122.0 db reset && npx supabase@2.122.0 test db` with Docker running.

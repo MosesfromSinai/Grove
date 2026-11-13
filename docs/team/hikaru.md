@@ -52,7 +52,9 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 ### Week 4 — Polish, no new features (Nov 9–15)
 - [x] Map stays smooth with 100 test pins; polish (#96). Desktop Chrome/WebGL with local blank style: p95 frame interval 16.8 ms, maximum 16.8 ms over 20 refreshes; zero recreated pins. Reproduce with `npm run test:map-browser`.
 - [x] Add to Home Screen guide (#63, reassigned to Hikaru): Safari instructions, browser-provided install action, cancellation/failure fallback, hidden when installed.
-- [ ] Install from the HTTPS preview on a physical iPhone and Android; reopen, verify icon/name, sign-in, navigation and location (#159). Browser emulation does not finish this task.
+- [ ] Complete physical phone installation checks (#159).
+  - [x] iPhone: Hikaru reported the PR #162 preview works on their physical iPhone (Nov 12); overall user confirmation, model/iOS and per-step details unspecified.
+  - [ ] Android: not tested; still required to finish #159.
 
 ### Business
 - [ ] Fill the blank Lean Canvas boxes: Key Metrics, Unfair Advantage, Channels, Cost Structure, Revenue Streams, Project Name (#97)
@@ -77,6 +79,11 @@ _Record things only you need to remember. Decisions that affect others go in `do
 ---
 
 ## Session log
+
+### 2026-11-12 — iPhone follow-up
+- **Did:** Recorded Hikaru’s physical-iPhone confirmation in #159 and the sprint docs, on PR #162’s preview. No defect reported; no additional device details or individual checklist results supplied.
+- **Next:** Android installation check; #159 stays open until both platforms are covered. Other business and hosted-data follow-ups remain unchanged.
+
 
 ### 2026-11-12
 - **Did:** Pulled current main as `hika583`; finished #96 marker reconciliation and accessible marker roles, and #63’s install guide in the shared student shell. Added a separate Vite/Playwright browser fixture, never a production route or auth bypass. Synced stale task ticks to the current GitHub issue states.

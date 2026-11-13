@@ -45,9 +45,11 @@ Latest local desktop Chrome run at 390×844: 100 pins, 20 location/center refres
 
 The install guide lives in the student layout after page content. It is collapsed, supports Safari/iPad instructions and a one-shot browser-provided install action, retains manual steps after cancel/failure, and hides in standalone mode. Four browser tests cover renderer behavior, narrow-view instructions, install events, cancellation, failure and installed hiding. Instructions follow [Apple’s iPhone guide](https://support.apple.com/guide/iphone/iph42ab2f3a7/ios) and [Chrome’s Android guide](https://support.google.com/chrome/answer/9658361?co=GENIE.Platform%3DAndroid&hl=en).
 
-### Physical installation (#159, still required)
+### Physical installation (#159, Android pending)
 
-On the HTTPS PR preview, using a real iPhone Safari and Android Chrome:
+On Nov 12, Hikaru reported that the [PR #162 preview](https://grove-git-hikaru-week4-map-polish-mosesfromsinais-projects.vercel.app/profile) works on their physical iPhone after receiving this checklist. This is an overall user-reported pass; model/iOS version and per-step details were not supplied. Android remains untested, so #159 stays open.
+
+For the remaining Android check (and any iPhone retest), use the HTTPS PR preview:
 
 1. Sign in with a permitted account; expand **Add Grove to your home screen** below the student page.
 2. Follow the device instructions; check Grove’s name and sprout icon in the OS install confirmation and home screen.
