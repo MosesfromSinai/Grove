@@ -48,7 +48,9 @@ export function MapExplorer() {
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      setResult({ businesses: [], loading: true, error: false });
+      // Keep the current pins while the next query is in flight. Clearing them
+      // here would defeat keyed reconciliation and drop keyboard focus.
+      setResult((previous) => ({ ...previous, loading: true, error: false }));
       try {
         const rows = await getDealsNearby({
           lat,

@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-11-02_
+_Last updated: 2026-11-12_
 
 ---
 
@@ -15,10 +15,9 @@ _Last updated: 2026-11-02_
 `app/(student)/map/`, `components/map/`, `lib/geo/`, `public/manifest.json`, `public/icons/`, the `deals_nearby` SQL function (Moses reviews the migration). Stretch goal: `lib/push/`, `public/sw.js`, `supabase/functions/notify-deal`.
 
 ## Depends on
-- **Moses:** tables, `visibility`, `deal_status()`, and typed queries are on main. Reviews/applies the new discovery and truck-location migration to grove-dev and refreshes generated DB types.
-- **Celso:** RLS is on main; owner-only location RPC is ready for security review.
-- **Edward:** shared deal card is on main and used in the pin bottom sheet. (The theme is done; the install prompt only matters for push, now a stretch goal.)
-- **Adolfo:** dashboard integration of the truck button is included in this change; real onboarding/settings/posting still await #73.
+- **Moses:** merged the discovery/truck migration and recorded passing local SQL checks on Nov 9. Hosted migration state still needs confirmation; STATUS has conflicting deployment notes.
+- **Edward:** shared student shell/card are on main. #63 is now assigned to Hikaru; the install guide is placed in the student shell in this PR.
+- **Adolfo:** dashboard data adapters and truck-button placement are on main.
 
 ## Others depend on you
 - **Edward:** `getDealsNearby` for the feed (distance and open-now come from your query).
@@ -29,29 +28,31 @@ _Last updated: 2026-11-02_
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [ ] Mapbox token, restricted to our domains; send it to Moses by one-time link (onetimesecret.com) so he adds it to Vercel (#84)
-- [ ] Map page with mock pins: orange for deals, green for the rest (#85)
+- [x] Mapbox token, restricted to our domains; send it to Moses by one-time link (onetimesecret.com) so he adds it to Vercel (#84)
+- [x] Map page with mock pins: orange for deals, green for the rest (#85)
 - [x] Filter chips: Open now, Has deals, Walking distance (#86)
 - [x] Location permission flow; fall back to campus center if denied (#87)
 
-Map code for #85 is implemented on `hikaru/map-foundation` at `/map`, including Mapbox GL JS and a labeled pin preview when tiles are unavailable. Keep #85 open until #84 supplies a restricted token and the actual Mapbox map is checked against canvas screen 3. Local browser checks cover the preview, filters, and synthetic location responses; HTTPS phone testing remains pending.
+#84 and #85 are closed on GitHub. Moses recorded the canvas-aligned pins on Nov 9. No Mapbox token is stored in this checkout; this session's 100-pin renderer check uses a local blank style, not hosted tiles.
 
 ### Week 2 — Real data and link-only deals (Oct 26–Nov 1)
-- [ ] `deals_nearby` PostGIS function (radius, open now from `hours`, has deals; live now via `deal_status()`, so repeating deals show only in their window) (#88)
-- [x] Wire map and filters through the shared mock/real boundary (#89; real database validation awaits the new migration)
+- [x] `deals_nearby` PostGIS function (radius, open now from `hours`, has deals; live now via `deal_status()`, so repeating deals show only in their window) (#88)
+- [x] Wire map and filters through the shared mock/real boundary (#89)
 - [x] Pin tap opens a bottom sheet: name, open/closed, distance, today's deal using Edward's shared card (#90)
-- [ ] Hide link-only deals from `deals_nearby` and the map (`visibility = 'public'` only) (#117)
+- [x] Hide link-only deals from `deals_nearby` and the map (`visibility = 'public'` only) (#117)
 
 ### Week 3 — Food trucks and PWA install (Nov 2–8)
 
-Both implementations are on `hikaru/food-trucks-and-pwa`: the dashboard truck button supports the mock/real data switch, and manifest/icons/Apple metadata are in place. Keep #94 and #119 open until the server migration and physical phone install checks below are verified.
-- [ ] Food-truck "I'm here now": a button component in `components/map/` that updates the business's `location`; Adolfo places it on the dashboard (#94)
-- [ ] PWA `manifest.json` and app icons so Grove is installable without push (name, colors from the theme, icons in `public/`) (#119)
+Merged by Moses in #138 and integrated into the dashboard; #94/#119 are closed. Physical installation is tracked separately in #159.
+- [x] Food-truck "I'm here now": a button component in `components/map/` that updates the business's `location`; Adolfo places it on the dashboard (#94)
+- [x] PWA `manifest.json` and app icons so Grove is installable without push (name, colors from the theme, icons in `public/`) (#119)
 
 _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 
 ### Week 4 — Polish, no new features (Nov 9–15)
-- [ ] Map stays smooth with 100 test pins; polish (#96)
+- [x] Map stays smooth with 100 test pins; polish (#96). Desktop Chrome/WebGL with local blank style: p95 frame interval 16.8 ms, maximum 16.8 ms over 20 refreshes; zero recreated pins. Reproduce with `npm run test:map-browser`.
+- [x] Add to Home Screen guide (#63, reassigned to Hikaru): Safari instructions, browser-provided install action, cancellation/failure fallback, hidden when installed.
+- [ ] Install from the HTTPS preview on a physical iPhone and Android; reopen, verify icon/name, sign-in, navigation and location (#159). Browser emulation does not finish this task.
 
 ### Business
 - [ ] Fill the blank Lean Canvas boxes: Key Metrics, Unfair Advantage, Channels, Cost Structure, Revenue Streams, Project Name (#97)
@@ -70,12 +71,18 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 ## Notes and decisions
 _Record things only you need to remember. Decisions that affect others go in `docs/LOG.md` as **Decision** lines._
 
-- `/map` uses `@/lib/supabase` and groups rows by `business_id`. The default stays mocks; `NEXT_PUBLIC_DATA_SOURCE=supabase` uses the real RPCs after the new migration is applied. Setup, test scope, and remaining checks: `components/map/README.md`.
-- Mapbox token creation and transfer (#84) remain manual: create a domain-restricted token in the Mapbox account, keep it in `.env.local`, and send it to Moses through the agreed one-time link for Vercel. No token is included in this change.
+- `/map` uses `@/lib/supabase` and groups rows by `business_id`. Local default is mocks; Vercel uses `NEXT_PUBLIC_DATA_SOURCE=supabase` per Moses’s Nov 9 log. Setup, test scope, and remaining checks: `components/map/README.md`.
+- #84 is closed; preserve the team’s secret-handling rules. No token is included in this change.
 
 ---
 
 ## Session log
+
+### 2026-11-12
+- **Did:** Pulled current main as `hika583`; finished #96 marker reconciliation and accessible marker roles, and #63’s install guide in the shared student shell. Added a separate Vite/Playwright browser fixture, never a production route or auth bypass. Synced stale task ticks to the current GitHub issue states.
+- **Verified:** 210 unit tests, 4 browser tests, lint, typecheck and production build pass. Actual Mapbox GL/WebGL renders 100 pins on a locally supplied blank style; 20 center/location refreshes preserve all pin nodes, keyboard focus and current selection callbacks. Desktop p95 frame interval 16.8 ms, max 16.8 ms, max refresh 34 ms. Browser checks cover Safari instructions, install cancellation/rejection, one-shot prompt and installed-mode hiding. The original main renderer failed the keyboard-focus regression in this fixture.
+- **Next:** Teammate review/merge; physical iPhone/Android install check #159. Finish business tasks using the shared Drive documents and real interview participants.
+- **Blockers:** Physical phone testing is unavailable in this session; no local provider/auth credentials; no Grove/Lean Canvas results in accessible Drive searches. No phone install, hosted database, interviews or hosted tiles verification is claimed. Existing hosted-data notes conflict; Moses should confirm the migration state. Push remains stretch scope. No Codex credits consumed.
 
 ### 2026-11-02
 - **Did:** Recovered the surviving clean checkout and pulled current main as `hika583`. Built #94’s owner truck-location action plus real owner-profile read, #119’s manifest/PNG/maskable/Apple icons and root metadata, #88’s PostGIS discovery with campus hours and repeat windows, #89’s data-switch wiring, #90’s shared-card bottom sheet, and #117’s explicit public-only join. Added RPC, component, manifest, and pgTAP tests.
