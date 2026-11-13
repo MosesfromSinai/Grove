@@ -57,8 +57,8 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
   - [ ] Android: not tested; still required to finish #159.
 
 ### Business
-- [ ] Fill the blank Lean Canvas boxes: Key Metrics, Unfair Advantage, Channels, Cost Structure, Revenue Streams, Project Name (#97)
-- [ ] Pricing questions for interviews (per verified visit, ~$0.50–1 with a monthly cap, vs. a flat fee for club nights; first deal free for pilots); summarize answers (#98)
+- [x] Lean Canvas content (#97): all requested sections already present in the supplied Team-01-Grove export, Activity 2 section 4; project name is Grove. Closed after reviewing that evidence on Nov 12; no live Drive edit claimed.
+- [ ] Pricing questions and findings in shared Drive (#98): a four-page Word guide is prepared locally, with pricing questions, earlier team findings, H1–H5 prompts and a blank notes form. Shared-folder upload still needs the folder/guide URL. No new interview answers were created.
 - [ ] 1–2 restaurant interviews (hypotheses 1–4, see `CLAUDE.md` → Business); notes in the shared Drive folder (#99)
 - [ ] At least one student interview (hypothesis 5, see `CLAUDE.md` → Business); notes in the shared Drive folder (#118)
 
@@ -79,6 +79,13 @@ _Record things only you need to remember. Decisions that affect others go in `do
 ---
 
 ## Session log
+
+### 2026-11-12 — assigned issue audit
+- **Did:** Reviewed all 11 open assigned Grove issues as `hika583`. Closed #97 because the supplied team export already contains the completed canvas. Updated #63/#96 as implemented in PR #162, awaiting teammate review/merge; #159 retains the user-reported iPhone pass and pending Android check. Added concrete prerequisites to stretch issues #91–93/#95.
+- **Prepared:** A four-page local pricing and interview guide for #98/#99/#118, based on the supplied Activity 2 and the current repo scope. It includes an earlier-results summary, pricing/cap/club-night questions, H1–H5 interviews and a blank notes form. All four rendered pages were inspected. Research files remain outside this public repository.
+- **Evidence:** The supplied Activity 2 has earlier group business findings and a completed canvas. Meeting minutes mention an older food-truck conversation by Hikaru, but do not cover all H1–H4. Activity 2 explicitly says students were not interviewed in that round. These records do not finish the current individual interview tasks.
+- **Remaining:** #98 needs the shared-folder/guide URL for upload; #99 needs 1–2 qualifying restaurant interviews and #118 at least one student interview, with notes in shared Drive. #159 needs physical Android installation. #91–93/#95 remain stretch under the feature freeze, pending a team scope decision, backend schema/RLS, secure deployment and device delivery checks. PR #162 has passing checks but requires a teammate review; no review was requested by messaging teammates.
+
 
 ### 2026-11-12 — iPhone follow-up
 - **Did:** Recorded Hikaru’s physical-iPhone confirmation in #159 and the sprint docs, on PR #162’s preview. No defect reported; no additional device details or individual checklist results supplied.

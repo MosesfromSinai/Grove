@@ -23,7 +23,7 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 | Celso | Business: competitor analysis (#45), interviews (#46, #107), attendance cell (#47). Security test pass (#41) once the screens are merged |
 | Edward | Business: student survey (#67), interviews (#68, #111) |
 | Adolfo | Dashboard work from #140 (and #141, which it contains) merged by Moses on `moses/dashboard`: overview, post-deal with repeat days and visibility, sticker, redemption settings, club night posting; truck pin placed (#94). Next: club night results (#114), deal link and QR (#115), stats (#76), pilot outreach |
-| Hikaru | Week 4 #96 map performance/polish and reassigned #63 install guide implemented on `hikaru/week4-map-polish`; 210 unit and 4 browser checks pass. Physical iPhone check is a user-reported pass (Nov 12); Android installation (#159) and business tasks (#97–99, #118) remain. #84/#85 are closed on GitHub |
+| Hikaru | Week 4 #96 map performance/polish and reassigned #63 install guide implemented on `hikaru/week4-map-polish`; 210 unit and 4 browser checks pass. Physical iPhone check is a user-reported pass (Nov 12); Android installation (#159), shared-Drive publication of the prepared pricing/interview guide (#98), and real interview notes (#99/#118) remain. #97 is closed after reviewing the completed canvas in the supplied export. #84/#85 are closed on GitHub |
 
 ## Open PRs (merge in this order)
 
@@ -117,7 +117,8 @@ Redeeming by sticker needs you within 150 m of the business (seed coordinates ar
 
 ## Business status
 
-- Interviews (five hypotheses, see `CLAUDE.md` → Business): **0 done so far.**
-- Lean Canvas: Problem, Solution, UVP, Customer Segments filled. Key Metrics, Unfair Advantage, Channels, Cost Structure, Revenue Streams, and Project Name still blank.
+- Interviews: the supplied Activity 2 contains earlier group business discovery, so the old “0 done” note was stale. Current individual H1–H4/H5 interview completion is not established by those aggregate results. Hikaru’s #99/#118 remain open; a guide and blank notes form are prepared outside the public repo.
+- Lean Canvas (#97): completed content is present in the supplied Team-01-Grove export, Activity 2 section 4, including the previously listed blank sections; the project is Grove. Closed after that review on Nov 12. No live shared document was edited in this audit.
+- Pricing/interview guide (#98): completed as a local Word document using the earlier team findings; shared-Drive publication awaits the folder/guide URL. Research documents and private team records are not committed here.
 - Pilot businesses signed: **0.** Offer: first deal free. Target: at least one signed by Nov 6 for the Week 4 pilot.
 - Effort table: Celso's attendance cell is blank.
