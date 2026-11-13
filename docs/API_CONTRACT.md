@@ -138,7 +138,7 @@ Local push implementation proposed for #91–93; sender and client default disab
 |---|---|---|
 | `savePushSubscription` | `{ endpoint, keys: { p256dh, auth }, lat, lng }` | `{ ok: true, expires_at }` or `{ ok: false, error }`: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT`, `INVALID_LOCATION`, `INVALID_SUBSCRIPTION`, `DEVICE_LIMIT`, `SUBSCRIPTION_IN_USE` |
 | `getPushSubscription` | `endpoint: string` | `{ active: boolean, expires_at: string \| null }`; safe owned status only, no keys/location |
-| `removePushSubscription` | `endpoint: string` | `{ ok: true }` (including missing/foreign endpoint; deletes only caller’s row), or `NOT_SIGNED_IN` |
+| `removePushSubscription` | `endpoint: string` | `{ ok: true, removed: boolean }` (false for missing/foreign endpoint; deletes only caller’s row), or `NOT_SIGNED_IN` |
 
 SQL RPC names are `save_push_subscription(p_endpoint,p_keys,p_lat,p_lng)`, `get_push_subscription(p_endpoint)`, `remove_push_subscription(p_endpoint)`. `claim_push_deliveries(p_deal_id default null,p_limit default 50)` and `push_delivery_eligible(p_subscription_id,p_deal_id)` are service-role only. Claiming filters same-campus public live deals within 3 km of a current saved area; repeat windows use campus timezone. The final eligibility RPC rechecks consent, role/verification, radius and public/live status immediately before network sending.
 

@@ -28,6 +28,8 @@ select is(public.save_push_subscription('https://fcm.googleapis.com/test#bad',js
 select is(public.save_push_subscription('https://fcm.googleapis.com/test','{}',0,0)->>'error','INVALID_SUBSCRIPTION','missing keys rejected');
 select is(public.save_push_subscription('https://fcm.googleapis.com/offline-one',jsonb_build_object('p256dh','B'||repeat('a',86),'auth',repeat('a',22)),33.973732,-117.328174)->>'ok','true','verified student can register');
 select is(public.get_push_subscription('https://fcm.googleapis.com/offline-one')->>'active','true','owner sees safe active state');
+select is(public.remove_push_subscription('https://fcm.googleapis.com/offline-one')->>'removed','true','owner receives confirmed deletion');
+select save_push_subscription('https://fcm.googleapis.com/offline-one',jsonb_build_object('p256dh','B'||repeat('a',86),'auth',repeat('a',22)),33.974,-117.328);
 select ok(not(public.get_push_subscription('https://fcm.googleapis.com/offline-one')?'keys'),'state does not expose keys');
 reset role;
 select is((select round(st_y(location::geometry)::numeric,3) from push_subscriptions where endpoint='https://fcm.googleapis.com/offline-one'),33.974::numeric,'saved latitude rounded');
@@ -37,6 +39,7 @@ set local request.jwt.claims='{"sub":"56000000-0000-4000-8000-000000000002","rol
 select is(public.get_push_subscription('https://fcm.googleapis.com/offline-one')->>'active','false','another account cannot read preference');
 select is(public.save_push_subscription('https://fcm.googleapis.com/offline-one',jsonb_build_object('p256dh','B'||repeat('a',86),'auth',repeat('a',22)),33.974,-117.328)->>'error','SUBSCRIPTION_IN_USE','another account cannot take over endpoint');
 select is(public.remove_push_subscription('https://fcm.googleapis.com/offline-one')->>'ok','true','remove is idempotent without ownership disclosure');
+select is(public.remove_push_subscription('https://fcm.googleapis.com/offline-one')->>'removed','false','foreign removal does not claim a confirmed deletion');
 select is(public.save_push_subscription('https://web.push.apple.com/offline-far',jsonb_build_object('p256dh','B'||repeat('a',86),'auth',repeat('a',22)),34.5,-117.3)->>'ok','true','far location accepted but not eligible for near deals');
 reset role;
 select is((select count(*) from push_subscriptions where endpoint='https://fcm.googleapis.com/offline-one'),1::bigint,'foreign remove preserved real owner');

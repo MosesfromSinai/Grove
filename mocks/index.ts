@@ -631,5 +631,5 @@ export async function getPushSubscription(endpoint: string): Promise<import("../
   return {active:!!expires_at&&Date.parse(expires_at)>Date.now(),expires_at};
 }
 export async function removePushSubscription(endpoint: string): Promise<import("../lib/supabase/types").PushRemoveResult> {
-  mockPush.delete(endpoint);return {ok:true};
+  return {ok:true,removed:mockPush.delete(endpoint)};
 }

@@ -78,7 +78,7 @@ async function clearPush(remove: (endpoint: string) => Promise<PushRemoveResult>
   if (!subscription) return;
   // Either path stops delivery. A network failure need not trap someone at sign-out.
   const [server, browser] = await Promise.allSettled([remove(subscription.endpoint), subscription.unsubscribe()]);
-  const removed = server.status === "fulfilled" && server.value.ok;
+  const removed = server.status === "fulfilled" && server.value.ok && server.value.removed;
   const unsubscribed = browser.status === "fulfilled" && browser.value;
   if (!removed && !unsubscribed) throw new Error("UNSUBSCRIBE_FAILED");
 }

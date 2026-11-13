@@ -41,7 +41,7 @@ test("sign-out waits for in-flight saves, then revokes and unsubscribes",async()
  let finish!:(result:{ok:true;expires_at:string})=>void;
  save.mockReturnValue(new Promise(resolve=>{finish=resolve}));
  const enabling=enablePush(reg,key,{lat:0,lng:0},save);await vi.waitFor(()=>expect(save).toHaveBeenCalled());
- getSubscription.mockResolvedValue(sub);const remove=vi.fn().mockResolvedValue({ok:true});const stopping=disablePush(remove);
+ getSubscription.mockResolvedValue(sub);const remove=vi.fn().mockResolvedValue({ok:true,removed:true});const stopping=disablePush(remove);
  expect(remove).not.toHaveBeenCalled();finish({ok:true,expires_at:"later"});await enabling;await stopping;
  expect(remove).toHaveBeenCalledWith(endpoint);expect(unsubscribe).toHaveBeenCalled();
 });
@@ -68,13 +68,13 @@ test("insecure and non-installed iPhone modes never report support",()=>{
 test("starting disable first blocks a late enable while registration lookup is pending",async()=>{
  let finish!:(value:ServiceWorkerRegistration)=>void;
  vi.mocked(navigator.serviceWorker.getRegistration).mockReturnValueOnce(new Promise(resolve=>{finish=resolve}));
- const stopping=disablePush(vi.fn().mockResolvedValue({ok:true}));
+ const stopping=disablePush(vi.fn().mockResolvedValue({ok:true,removed:true}));
  await expect(enablePush(reg,key,{lat:0,lng:0},save)).rejects.toThrow("PUSH_BUSY");
  expect(requestPermission).not.toHaveBeenCalled();finish(reg);await stopping;
 });
 test("sign-out holds the enable lock until auth has finished",async()=>{
  let finish!:()=>void;const logout=vi.fn(()=>new Promise<void>(resolve=>{finish=resolve}));
- const leaving=signOutWithPush(vi.fn().mockResolvedValue({ok:true}),logout);
+ const leaving=signOutWithPush(vi.fn().mockResolvedValue({ok:true,removed:true}),logout);
  await vi.waitFor(()=>expect(logout).toHaveBeenCalled());
  await expect(enablePush(reg,key,{lat:0,lng:0},save)).rejects.toThrow("PUSH_BUSY");
  finish();await leaving;expect(requestPermission).not.toHaveBeenCalled();
@@ -84,4 +84,10 @@ test("sign-out holds the enable lock until auth has finished",async()=>{
 test("an uncertain save and failed browser rollback is still exposed to the caller for recovery",async()=>{
  save.mockRejectedValue(Error("offline"));unsubscribe.mockResolvedValue(false);
  await expect(enablePush(reg,key,{lat:0,lng:0},save)).rejects.toThrow("offline");expect(unsubscribe).toHaveBeenCalled();
+});
+
+
+test("idempotent missing or foreign removal is not proof of revocation when unsubscribe fails",async()=>{
+ getSubscription.mockResolvedValue(sub);unsubscribe.mockResolvedValue(false);
+ await expect(disablePush(vi.fn().mockResolvedValue({ok:true,removed:false}))).rejects.toThrow("UNSUBSCRIBE_FAILED");
 });

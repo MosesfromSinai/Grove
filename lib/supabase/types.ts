@@ -240,4 +240,4 @@ export type PushInput = { endpoint: string; keys: { p256dh: string; auth: string
 export type PushState = { active: boolean; expires_at: string | null };
 export type PushError = "NOT_SIGNED_IN" | "NOT_VERIFIED_STUDENT" | "INVALID_LOCATION" | "INVALID_SUBSCRIPTION" | "DEVICE_LIMIT" | "SUBSCRIPTION_IN_USE";
 export type PushSaveResult = { ok: true; expires_at: string } | { ok: false; error: PushError };
-export type PushRemoveResult = { ok: true } | { ok: false; error: "NOT_SIGNED_IN" };
+export type PushRemoveResult = { ok: true; removed: boolean } | { ok: false; error: "NOT_SIGNED_IN" };

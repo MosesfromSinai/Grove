@@ -66,10 +66,12 @@ returns jsonb language sql stable security definer set search_path = '' as $$
 $$;
 create function public.remove_push_subscription(p_endpoint text)
 returns jsonb language plpgsql security definer set search_path = '' as $$
+declare affected integer;
 begin
  if auth.uid() is null then return jsonb_build_object('ok',false,'error','NOT_SIGNED_IN'); end if;
  delete from public.push_subscriptions where endpoint=p_endpoint and user_id=auth.uid();
- return jsonb_build_object('ok',true);
+ get diagnostics affected = row_count;
+ return jsonb_build_object('ok',true,'removed',affected>0);
 end; $$;
 revoke all on function public.save_push_subscription(text,jsonb,float8,float8), public.get_push_subscription(text),public.remove_push_subscription(text) from public,anon;
 grant execute on function public.save_push_subscription(text,jsonb,float8,float8), public.get_push_subscription(text),public.remove_push_subscription(text) to authenticated;

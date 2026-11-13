@@ -8,7 +8,7 @@ test("subscription wrappers use the shared RPC boundary and preserve server erro
  rpc.mockResolvedValue({data:{ok:true,expires_at:"later"},error:null});await savePushSubscription(input);
  expect(rpc).toHaveBeenCalledWith("save_push_subscription",{p_endpoint:input.endpoint,p_keys:input.keys,p_lat:input.lat,p_lng:input.lng});
  rpc.mockResolvedValue({data:{active:true,expires_at:"later"},error:null});expect((await getPushSubscription(input.endpoint)).active).toBe(true);
- rpc.mockResolvedValue({data:{ok:true},error:null});await removePushSubscription(input.endpoint);expect(rpc).toHaveBeenLastCalledWith("remove_push_subscription",{p_endpoint:input.endpoint});
+ rpc.mockResolvedValue({data:{ok:true,removed:true},error:null});await removePushSubscription(input.endpoint);expect(rpc).toHaveBeenLastCalledWith("remove_push_subscription",{p_endpoint:input.endpoint});
  rpc.mockResolvedValue({data:null,error:{message:"offline"}});await expect(getPushSubscription(input.endpoint)).rejects.toThrow("offline");
 });
 test("mocks save/read/remove and never claim real delivery",async()=>{
