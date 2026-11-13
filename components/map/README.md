@@ -16,7 +16,7 @@ Review/apply `supabase/migrations/20261102000000_nearby_and_truck_location.sql` 
 - `deals_nearby(lat, lng, radius_m, open_now, has_deals)`: PostGIS geography radius/distance, campus-local split/overnight hours, live public deals via `deal_status()`, and exact repeating-window end timestamps. Radius must be 1–50,000 m. A `nearby_deal_card` composite return type preserves the existing RPC argument and row names. Invoker security respects column grants/RLS, and the explicit public-only join also hides link-only deals from their owners and past redeemers.
 - `update_truck_location(business_id, lat, lng)`: authenticated owner-only, validated coordinates, locked business row, truck-only update, safe coordinate response. Generated lat/lng follow PostGIS location automatically.
 
-Truck updates use the data switch; `getMyBusiness` and other dashboard writes stay mocks until Adolfo’s #73. `TruckLocation` takes `businessId` (and an optional `onMoved`) as props; the dashboard renders it only for food trucks.
+Truck updates and dashboard adapters now use the shared data switch after #73. `TruckLocation` takes `businessId` (and an optional `onMoved`) as props; the dashboard renders it only for food trucks.
 
 ## Checks and evidence
 
@@ -31,6 +31,30 @@ npm run test:db
 
 The new pgTAP file covers RLS-safe discovery, multiple deals, empty businesses, radius/filters, open hours, repeat windows, hidden deals as anon/owner/past redeemer, owner vs staff/other-owner truck updates, invalid coordinates, and discovery after a move. It runs in a transaction and rolls back. The old DB-wrapper test expecting a missing RPC now expects real rows.
 
-Local Chrome checks on 2026-11-02 used the actual components on a temporary fixture under `/theme` with placeholder local auth configuration; the original theme route was restored and no auth bypass was committed. The fixture confirmed the bottom sheet and shared card, a synthetic truck location moving the mock pin from 373 m to 35 m after query refresh, denial leaving the pin unchanged, and a narrow viewport without horizontal overflow. Chrome parsed the manifest with zero manifest errors and reported zero installability errors; Apple title/icon links were present. Synthetic browser overrides were removed afterward.
+### Week 4 renderer and install checks (2026-11-12)
 
-Still pending: isolated PostGIS/pgTAP execution (Docker handoff requested), applying the migration to grove-dev, authenticated hosted truck testing, actual Mapbox rendering with #84’s restricted token, design-canvas comparison, and physical iPhone Safari/Android Chrome installation checks. Local browser/manifest checks do not establish those outcomes. #84–85, #88/#117 server validation, #94, and #119 remain open until their corresponding checks pass.
+```sh
+npm ci
+# Uses installed Google Chrome. If absent, install it locally first.
+npm run test:map-browser
+```
+
+The separate Vite test server runs only on `127.0.0.1:3186`, serves the actual map/install components, and is shut down by Playwright. It never edits a Next.js route or bypasses app authentication. Mapbox requests are intercepted and fulfilled with a local blank style; the test token is an inert placeholder. No provider tile requests are sent. This fixture measures DOM marker updates and actual Mapbox GL/WebGL camera movement, not network tile performance.
+
+Latest local desktop Chrome run at 390×844: 100 pins, 20 location/center refreshes, zero pin additions/removals, p95 frame interval 16.8 ms, maximum 16.8 ms, maximum refresh 34 ms. The automated smoke threshold is p95 below 50 ms; results vary with hardware/load and are not a phone FPS guarantee. The original main renderer failed this fixture’s keyboard-focus check when callbacks/center objects refreshed. Regression tests also cover pin cleanup, data refresh and latest callback selection. Metrics and screenshots go under ignored `test-results/map-browser/`.
+
+The install guide lives in the student layout after page content. It is collapsed, supports Safari/iPad instructions and a one-shot browser-provided install action, retains manual steps after cancel/failure, and hides in standalone mode. Four browser tests cover renderer behavior, narrow-view instructions, install events, cancellation, failure and installed hiding. Instructions follow [Apple’s iPhone guide](https://support.apple.com/guide/iphone/iph42ab2f3a7/ios) and [Chrome’s Android guide](https://support.google.com/chrome/answer/9658361?co=GENIE.Platform%3DAndroid&hl=en).
+
+### Physical installation (#159, Android pending)
+
+On Nov 12, Hikaru reported that the [PR #162 preview](https://grove-git-hikaru-week4-map-polish-mosesfromsinais-projects.vercel.app/profile) works on their physical iPhone after receiving this checklist. This is an overall user-reported pass; model/iOS version and per-step details were not supplied. Android remains untested, so #159 stays open.
+
+For the remaining Android check (and any iPhone retest), use the HTTPS PR preview:
+
+1. Sign in with a permitted account; expand **Add Grove to your home screen** below the student page.
+2. Follow the device instructions; check Grove’s name and sprout icon in the OS install confirmation and home screen.
+3. Launch from that icon; confirm standalone navigation, correct icon/name, sign-in/session behavior and that the guide is hidden.
+4. Open the map; check navigation and location allow/deny behavior. Record device, OS/browser version, preview URL, result and any defect in #159.
+5. Remove only the test installation afterward if it is no longer wanted.
+
+This session passed 210 unit tests, 4 browser checks, lint, typecheck and build. SQL tests were not rerun; Moses’s Nov 9 log records the local SQL pass. #84–85, #88–90, #94, #117 and #119 are closed on GitHub. Hosted migration notes remain inconsistent, so confirm that state with Moses. Physical phone install/relaunch, phone performance, authenticated hosted truck movement and current provider tiles are not established by the local fixture. No research results are invented.

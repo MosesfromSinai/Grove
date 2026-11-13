@@ -22,6 +22,11 @@ export function NearbyMap({ center, businesses, selectedId, onSelect }: Props) {
   const map = useRef<MapboxMap | null>(null);
   const markerButtons = useRef(new Map<string, HTMLButtonElement>());
   const selected = useRef(selectedId);
+  const select = useRef(onSelect);
+  const markers = useRef(new Map<string, { marker: Marker; business: MapBusiness }>());
+  const originMarker = useRef<Marker | null>(null);
+
+  useEffect(() => { select.current = onSelect; }, [onSelect]);
   const initialCenter = useRef(center);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -37,6 +42,8 @@ export function NearbyMap({ center, businesses, selectedId, onSelect }: Props) {
     if (!token || !container.current) return;
     let cancelled = false;
     let instance: MapboxMap | null = null;
+    const ownedMarkers = markers.current;
+    const ownedButtons = markerButtons.current;
     const timeout = window.setTimeout(() => {
       if (!cancelled) setFailed(true);
     }, 15_000);
@@ -71,6 +78,11 @@ export function NearbyMap({ center, businesses, selectedId, onSelect }: Props) {
     return () => {
       cancelled = true;
       window.clearTimeout(timeout);
+      for (const { marker } of ownedMarkers.values()) marker.remove();
+      ownedMarkers.clear();
+      ownedButtons.clear();
+      originMarker.current?.remove();
+      originMarker.current = null;
       instance?.remove();
       map.current = null;
     };
@@ -90,36 +102,57 @@ export function NearbyMap({ center, businesses, selectedId, onSelect }: Props) {
   useEffect(() => {
     if (!ready || !map.current || failed) return;
     let cancelled = false;
-    const markers: Marker[] = [];
-    const buttons = markerButtons.current;
     void import("mapbox-gl").then(({ default: mapboxgl }) => {
       if (cancelled || !map.current) return;
-      const origin = document.createElement("span");
-      origin.className = "grove-map-origin";
-      origin.setAttribute("aria-label", "Distance origin");
-      markers.push(
-        new mapboxgl.Marker({ element: origin })
-          .setLngLat([center.lng, center.lat])
-          .addTo(map.current),
-      );
+      if (!originMarker.current) {
+        const origin = document.createElement("span");
+        origin.className = "grove-map-origin";
+        origin.setAttribute("aria-label", "Distance origin");
+        originMarker.current = new mapboxgl.Marker({ element: origin })
+          .setLngLat([center.lng, center.lat]).addTo(map.current);
+      }
+      originMarker.current.setLngLat([center.lng, center.lat]);
+
+      // Reconcile by business id: location/filter refreshes keep surviving buttons,
+      // focus and Mapbox listeners instead of rebuilding every marker.
+      const ids = new Set(businesses.map((business) => business.id));
+      for (const [id, { marker }] of markers.current) {
+        if (!ids.has(id)) {
+          marker.remove();
+          markers.current.delete(id);
+          markerButtons.current.delete(id);
+        }
+      }
       for (const business of businesses) {
+        const existing = markers.current.get(business.id);
+        if (existing) {
+          const button = markerButtons.current.get(business.id)!;
+          const previous = existing.business;
+          if (previous.name !== business.name || !!previous.deals.length !== !!business.deals.length) {
+            button.classList.toggle("grove-map-deal", business.deals.length > 0);
+            button.classList.toggle("grove-map-regular", business.deals.length === 0);
+            button.setAttribute("aria-label", pinLabel(business));
+            button.querySelector(".grove-map-pinName")!.textContent = business.name;
+            button.querySelector(".grove-map-pinCircle")!.innerHTML = business.deals.length ? DEAL_ICON : NO_DEAL_ICON;
+          }
+          if (previous.lng !== business.lng || previous.lat !== business.lat) {
+            existing.marker.setLngLat([business.lng, business.lat]);
+          }
+          existing.business = business;
+          continue;
+        }
         const button = pinElement(business);
         button.setAttribute("aria-pressed", String(business.id === selected.current));
-        buttons.set(business.id, button);
-        button.addEventListener("click", () => onSelect(business.id));
-        markers.push(
-          new mapboxgl.Marker({ element: button, anchor: "bottom" })
-            .setLngLat([business.lng, business.lat])
-            .addTo(map.current),
-        );
+        markerButtons.current.set(business.id, button);
+        button.addEventListener("click", () => select.current(business.id));
+        const marker = new mapboxgl.Marker({ element: button, anchor: "bottom" })
+          .setLngLat([business.lng, business.lat])
+          .addTo(map.current);
+        markers.current.set(business.id, { marker, business });
       }
     });
-    return () => {
-      cancelled = true;
-      markers.forEach((marker) => marker.remove());
-      buttons.clear();
-    };
-  }, [businesses, center, onSelect, ready, failed]);
+    return () => { cancelled = true; };
+  }, [businesses, center, ready, failed]);
 
   const preview = !token || failed;
   return (

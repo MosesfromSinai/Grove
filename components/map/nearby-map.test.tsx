@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import type { MapBusiness } from "@/lib/geo/nearby";
+import { MapExplorer } from "./map-explorer";
 import { NearbyMap } from "./nearby-map";
 
 const mock = vi.hoisted(() => {
@@ -14,8 +15,11 @@ const mock = vi.hoisted(() => {
       remove: ReturnType<typeof vi.fn>;
     }[],
     failConstructor: false,
+    nearby: vi.fn(),
   };
 });
+
+vi.mock("@/lib/supabase", () => ({ getDealsNearby: mock.nearby }));
 
 vi.mock("mapbox-gl", () => ({
   default: {
@@ -92,14 +96,14 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 
-async function render(selectedId: string | null = null) {
+async function render(selectedId: string | null = null, rows = businesses, at = center, select = onSelect) {
   await act(async () => {
     root.render(
       <NearbyMap
-        center={center}
-        businesses={businesses}
+        center={at}
+        businesses={rows}
         selectedId={selectedId}
-        onSelect={onSelect}
+        onSelect={select}
       />,
     );
   });
@@ -169,4 +173,61 @@ test("a map that never loads falls back after 15 seconds", async () => {
     vi.advanceTimersByTime(15_000);
   });
   expect(container.textContent).toContain("Map tiles unavailable");
+});
+
+
+test("100 pins retain their nodes and focus through refreshed rows, center and callbacks", async () => {
+  await loadMap();
+  const rows = Array.from({ length: 100 }, (_, i) => ({ ...businesses[0], id: `spot-${i}`, name: `Spot ${i}`, lng: center.lng + i / 10000 }));
+  await render(null, rows);
+  const buttons = [...container.querySelectorAll<HTMLButtonElement>(".grove-map-canvas button")];
+  expect(buttons).toHaveLength(100);
+  buttons[49].focus();
+  const callback = vi.fn();
+  await render("spot-49", rows.map(row => ({ ...row })), { ...center, lat: center.lat + 0.001 }, callback);
+  expect([...container.querySelectorAll(".grove-map-canvas button")]).toEqual(buttons);
+  expect(document.activeElement).toBe(buttons[49]);
+  buttons[49].click();
+  expect(callback).toHaveBeenCalledWith("spot-49");
+  await render(null, rows.slice(0, 50));
+  expect(container.querySelectorAll(".grove-map-canvas button")).toHaveLength(50);
+  expect(buttons[99].isConnected).toBe(false);
+  expect(container.querySelector(".grove-map-canvas button")).toBe(buttons[0]);
+});
+
+test("refresh updates a surviving pin's name without replacing it", async () => {
+  await loadMap();
+  const button = container.querySelector<HTMLButtonElement>(".grove-map-canvas button")!;
+  await render(null, [{ ...businesses[0], name: "Renamed truck", lat: center.lat + 0.001 }]);
+  expect(container.querySelector(".grove-map-canvas button")).toBe(button);
+  expect(button.getAttribute("aria-label")).toBe("Renamed truck, no live deal");
+  expect(button.querySelector(".grove-map-pinName")?.textContent).toBe("Renamed truck");
+});
+
+
+test("MapExplorer retains real marker nodes while a filter request is pending", async () => {
+  const rows = Array.from({ length: 100 }, (_, i) => ({
+    business_id: `business-${i}`, business_name: `Business ${i}`, logo_url: null,
+    is_truck: false, ...center, distance_m: i, open_now: true,
+    has_deal: false as const, deal_id: null, title: null, discount_type: null,
+    discount_value: null, ends_at: null, live_until: null, students_only: null, photo_url: null,
+  }));
+  mock.nearby.mockResolvedValueOnce(rows);
+  await act(async () => { root.render(<MapExplorer />); await vi.dynamicImportSettled(); });
+  await act(async () => { mock.maps[0].handlers.load(); await vi.dynamicImportSettled(); });
+  const buttons = [...container.querySelectorAll<HTMLButtonElement>(".grove-map-canvas button")];
+  expect(buttons).toHaveLength(100);
+  let resolve!: (value: typeof rows) => void;
+  mock.nearby.mockReturnValueOnce(new Promise<typeof rows>((done) => { resolve = done; }));
+  const filter = [...container.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "Open now")!;
+  buttons[49].focus();
+  await act(async () => filter.click());
+  expect(mock.nearby).toHaveBeenLastCalledWith(expect.objectContaining({ openNow: true }));
+  expect(container.querySelector('[aria-label="Nearby places"]')?.getAttribute("aria-busy")).toBe("true");
+  expect([...container.querySelectorAll(".grove-map-canvas button")]).toEqual(buttons);
+  expect(document.activeElement).toBe(buttons[49]);
+  await act(async () => { resolve(rows.map(row => ({ ...row }))); await vi.dynamicImportSettled(); });
+  expect([...container.querySelectorAll(".grove-map-canvas button")]).toEqual(buttons);
+  expect(document.activeElement).toBe(buttons[49]);
+  expect(container.querySelector('[aria-label="Nearby places"]')?.getAttribute("aria-busy")).toBe("false");
 });
