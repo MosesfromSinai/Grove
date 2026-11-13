@@ -1,3 +1,4 @@
+import { signOutWithPush } from "../push/browser";
 // Real versions of every lib/supabase function in docs/API_CONTRACT.md, on Supabase.
 // Same names, inputs, and return types as mocks/; lib/supabase/index.ts picks one.
 
@@ -199,8 +200,10 @@ export async function getMyProfile(): Promise<MyProfile | null> {
 
 // Ends the browser session (clears the auth cookies). The caller then reloads to /sign-in.
 export async function signOut(): Promise<void> {
-  const { error } = await db().auth.signOut();
-  if (error) throw new Error(error.message);
+  await signOutWithPush(removePushSubscription, async () => {
+    const { error } = await db().auth.signOut();
+    if (error) throw new Error(error.message);
+  });
 }
 
 // Counts verified visits in [from, to), per deal and per campus hour. #21 may move this into SQL.
@@ -594,4 +597,18 @@ export async function cancelDeal(input: DealMutationInput): Promise<CancelDealRe
   }
   const deleted = check(result);
   return deleted ? { ok: true, deal_id: deleted.id } : { ok: false, error: "DEAL_NOT_SCHEDULED" };
+}
+
+
+// Cast until Moses regenerates the database types after applying the migration.
+export async function savePushSubscription(input: import("./types").PushInput): Promise<import("./types").PushSaveResult> {
+  return check(await (db() as SupabaseClient).rpc("save_push_subscription", {
+    p_endpoint:input.endpoint,p_keys:input.keys,p_lat:input.lat,p_lng:input.lng,
+  }));
+}
+export async function getPushSubscription(endpoint: string): Promise<import("./types").PushState> {
+  return check(await (db() as SupabaseClient).rpc("get_push_subscription",{p_endpoint:endpoint}));
+}
+export async function removePushSubscription(endpoint: string): Promise<import("./types").PushRemoveResult> {
+  return check(await (db() as SupabaseClient).rpc("remove_push_subscription",{p_endpoint:endpoint}));
 }

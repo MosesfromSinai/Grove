@@ -42,3 +42,7 @@ AGENTS.md
 # supabase cli local state
 supabase/.temp/
 supabase/.branches/
+
+# Local verification artifacts and Deno npm cache
+/test-results/
+**/node_modules/

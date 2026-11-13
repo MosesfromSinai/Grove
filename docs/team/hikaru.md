@@ -59,10 +59,10 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 - [ ] 1–2 restaurant interviews (hypotheses 1–4, see `CLAUDE.md` → Business); notes in the shared Drive folder (#99)
 - [ ] At least one student interview (hypothesis 5, see `CLAUDE.md` → Business); notes in the shared Drive folder (#118)
 
-### Stretch goal (possible future implementation)
-- [ ] VAPID keys; `sw.js` service worker for push (#91)
-- [ ] Subscription flow saving to `push_subscriptions` (#92)
-- [ ] `notify-deal`: when a deal goes live, push to subscribed students near the business (decide the radius, log it as a **Decision** in `LOG.md`) (#93)
+### Push stretch implementation for review
+- [ ] #91 rollout: local key-generation script and push-only `sw.js` implemented on `hikaru/push-notifications`; Moses must configure matching VAPID keys, review and deploy. Sending/client flags default off.
+- [ ] #92 rollout: explicit profile opt-in, saved-area expiry, subscription RPCs/private migration, unsubscribe and sign-out cleanup implemented/tested locally; migration and authenticated hosted verification remain.
+- [ ] #93 rollout: dispatcher, service-only eligibility/claims and separate minute-schedule SQL implemented locally. Proposed radius 3 km; seven-day area; three attempts per saved setup/24h, reset on re-enable. Moses reviews the policy, deploys the function and installs Vault/cron configuration.
 - [ ] Test push on iPhone (installed to home screen, iOS 16.4+) and Android (#95)
 
 ---
@@ -76,6 +76,13 @@ _Record things only you need to remember. Decisions that affect others go in `do
 ---
 
 ## Session log
+
+### 2026-11-12 — push notifications
+- **Did:** Implemented #91–93 locally for review at Hikaru’s explicit request, independently of #162. Includes push-only service worker, secure opt-in and saved area, private subscription RPCs/migration, shared mocks/data wrappers, profile controls, centralized sign-out cleanup, pinned Web Push dispatcher, offline signing/encryption check, one-time key script and separate schedule SQL. Flags default disabled; no production credentials or hosted Supabase changes.
+- **Verified:** 243 unit tests pass (23 full-service DB tests skipped), plus lint/typecheck/build, Deno typecheck and offline real-library signing/encryption. Isolated PostgreSQL 17/PostGIS/pgTAP tests pass all 182 checks across eight suites (45 push checks) with minimal Supabase-compatible auth/grants; no full hosted/Edge gateway claim. Review fixed sign-out ordering and uncertain-save recovery. Browser fixture checks are documented in `lib/push/README.md`.
+- **Next:** Moses/Celso review the schema/grants, policy and sender; apply migration/regenerate types, configure keys/secrets and preview flags, deploy function and Vault/cron schedule, then physical iPhone/Android #95 tests. Exact handoff: `lib/push/README.md`.
+- **Blockers:** Real Supabase auth/service and phone delivery verification need Moses’s configuration and agreed test devices. #91–93 remain open for their hosted acceptance checks; #95 remains open. Local SQL used only the expressly authorized Grove container; Nanka was untouched.
+
 
 ### 2026-11-02
 - **Did:** Recovered the surviving clean checkout and pulled current main as `hika583`. Built #94’s owner truck-location action plus real owner-profile read, #119’s manifest/PNG/maskable/Apple icons and root metadata, #88’s PostGIS discovery with campus hours and repeat windows, #89’s data-switch wiring, #90’s shared-card bottom sheet, and #117’s explicit public-only join. Added RPC, component, manifest, and pgTAP tests.

@@ -2,7 +2,7 @@
 
 The project's live memory. Read this first every session. Overwrite it (don't append) whenever the current state changes, so it always describes **now**. History goes in `LOG.md`, not here.
 
-_Last updated: 2026-11-09 by Moses_
+_Last updated: 2026-11-12 by Hikaru_
 
 ---
 
@@ -23,13 +23,15 @@ Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove 
 | Celso | Business: competitor analysis (#45), interviews (#46, #107), attendance cell (#47). Security test pass (#41) once the screens are merged |
 | Edward | Business: student survey (#67), interviews (#68, #111) |
 | Adolfo | Dashboard work from #140 (and #141, which it contains) merged by Moses on `moses/dashboard`: overview, post-deal with repeat days and visibility, sticker, redemption settings, club night posting; truck pin placed (#94). Next: club night results (#114), deal link and QR (#115), stats (#76), pilot outreach |
-| Hikaru | Business: Lean Canvas (#97), pricing (#98), interviews (#99, #118). Mapbox token (#84) to Moses by one-time link |
+| Hikaru | Local push implementation #91–93 on `hikaru/push-notifications` for review, explicitly requested Nov 12; disabled pending Moses/Celso review and configuration. Physical delivery #95 remains. Week 4 polish/installation and business audit remain in separate PR #162 |
 
 ## Open PRs (merge in this order)
 
 One `moses/` branch at a time; each merges when CI passes.
 
 ## Blockers
+
+- **Push rollout (#91–93/#95):** locally implemented with flags off. Moses needs migration/RLS review, normal local Supabase integration checks, hosted migration/types, matching VAPID and dispatcher secrets, Edge deployment, Vercel public flags/key, Vault/cron and physical test devices. See `lib/push/README.md` for exact order, proposed privacy/rate policy, test evidence and rollback. No real push was sent locally.
 
 - **Real data:** `20261102000000_nearby_and_truck_location.sql` passes all SQL tests locally but isn't applied to grove-dev yet (Moses). The feed and map stay empty on real data until it is. Then set `NEXT_PUBLIC_DATA_SOURCE=supabase` in Vercel.
 - **Mapbox (#84):** the restricted token still needs to reach Moses for Vercel; without it the map shows the labeled pin preview, no tiles.
