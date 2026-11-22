@@ -97,6 +97,7 @@ Redeeming by sticker needs you within 150 m of the business (seed coordinates ar
 | Out-of-range location is `INVALID_LOCATION` | `redeem.test.sql`, `redeem.db.test.ts` | Pass |
 | `grove_next` can't open-redirect | `lib/auth/next-path.test.ts` (`//`, `/\`, schemes, control characters, `/auth/*` rejected); callback redirects only to a same-site path | Pass |
 | One business can't read or change another's deals, redemptions, club nights or pin | New `cross_business.test.sql` (12 checks, Orange Peel's owner against Pepper Tree) | Pass |
+| No keys in the repo or its git history (#43, Celso, 2026-11-22) | gitleaks on all 336 commits (every branch, merge diffs included); working-tree hits are only git-ignored local files | Pass |
 | Signed-out visitors read only public data (#156, Celso, 2026-11-22) | `anon_browse.test.sql` (22 checks): no redemptions, profiles, members, club nights or attempts; no link-only deals in discovery; no writes; no redeem or claim functions | Pass |
 
 **Phone checks on production (manual):**

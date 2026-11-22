@@ -51,7 +51,7 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 
 ### Week 4 — Review, no new features (Nov 9–15)
 - [x] Fix every failed test from #41, or record it as an accepted risk in the threat model (#42)
-- [ ] Check no secrets are in the repo or its git history, e.g. with gitleaks (browser bundle already clean, Moses #41) (#43)
+- [x] Check no secrets are in the repo or its git history, e.g. with gitleaks (browser bundle already clean, Moses #41) (#43)
 - [x] Browse without signing in, auth side: feed, map and deal pages open to signed-out visitors; anon reads only public data (`celso/public-browse`) (#156)
 - [ ] Run the 6 security phone checks in `docs/STATUS.md` → Security test results on production, plus: a signed-out visitor can't redeem or see student data; send results to Moses (#158)
 - [ ] Competitor slide for the pitch (#44)
@@ -79,7 +79,7 @@ Update the Status column as defenses are built.
 | Reading another business's data | RLS on every table; `is_business_member` helper prevents cross-business reads | Built |
 | `staff_pin` exposed via API | Column-level REVOKE on `businesses` for anon/authenticated; bcrypt if leaked | Built |
 | `club_nights.claimed_by` exposed via API | Column-level REVOKE on `club_nights` for anon/authenticated | Built |
-| Leaked service-role or VAPID key | Server-only env vars, never committed; rotate if leaked | Planned |
+| Leaked service-role or VAPID key | Server-only env vars, never committed; rotate if leaked | Built: gitleaks finds nothing in any commit (#43, 2026-11-22) |
 | Link-only deal shared off campus | Link only shows the deal; redeeming still needs a verified student, the counter sticker, ~150 m, a live window, and the daily limit | Built (#41 tests) |
 | Fake or duplicate club night claims | One claim per club night (conditional update), signed-in verified student, 3 claims per 7 days | Built (#106) |
 | Claiming a club night for a club you're not in | Not checked: no club accounts in the MVP. **Accepted risk**; the restaurant sees the club name and visits | Accepted |
@@ -96,6 +96,7 @@ Add a row for every test you run.
 | Date | Test | Result | Fix |
 |---|---|---|---|
 | 2026-10-26 | `supabase/tests/rls_security.test.sql` (45 checks) on a local database: logged-out PIN guessing, making yourself verified or a business, seeing claimed club nights, reading `owner_id`/`staff_pin`/`claimed_by`/`student_location`, editing `qr_slug`, staff editing the business, browser inserting redemptions, attempt-based redeem limit | All pass; reopening the holes makes 7 checks fail | #128 |
+| 2026-11-22 | gitleaks 8.30.1: `gitleaks git --log-opts=--all` (every branch, 336 commits) plus every patch including merge diffs through `gitleaks stdin`; `gitleaks dir` on the working tree | History: no leaks. Working tree: 27 hits, all in git-ignored files never committed (`.env.local`, `.next/`, `supabase/.temp/`); the only JWTs in `.next/static` are the anon key, and `supabase/.temp` holds the local CLI's demo keys | None needed (#43) |
 | 2026-11-22 | `supabase/tests/anon_browse.test.sql` (22 checks) on a fresh local database: signed-out role reads public deals and businesses, opens a link-only deal only by id, can't see link-only deals in the table or `deals_nearby`, can't read redemptions, profiles, members, club nights or attempts, can't write deals, club nights or businesses, can't run redeem, claim or truck functions | All pass with no grant changes; full suite 159 checks pass | #156 |
 | 2026-11-09 | Moses's #41 pass (automated checks and bundle scan) | All pass | See `docs/STATUS.md` → Security test results |
 | 2026-10-26 | Old `protect_profile_columns` trigger, as a signed-in user | **Failed**: user set `verified_student = true`, `role = business` | Replaced with a column grant (#128) |
@@ -112,7 +113,8 @@ _Newest at the top. One entry per session._
 
 ### 2026-11-22 (#156 browse without signing in)
 - **Did:** Caught up on Nov 9–15 (Moses finished my open Week 2–3 code, closing #33, #35–#38, #41, #42, #105, #106; staff scan moved to stretch, so #39 and #40 too). On `celso/public-browse`: `/feed`, `/map` and `/deals/<id>` open to signed-out visitors (`lib/auth/public-paths.ts`, used by `proxy.ts`, with tests); redeeming, PIN, claiming and Profile still redirect to sign-in and come back through `grove_next`. New `supabase/tests/anon_browse.test.sql` (22 checks) confirms the anon role reads only public data; no migration or grant change needed. Lint, typecheck, 229 unit tests, build and 159 SQL checks pass; local signed-out routes checked with curl. Ticked closed issues and updated the threat model.
-- **Next:** PR for #156 (Moses reviews), then Edward's #157 can start. #43 gitleaks scan of the repo and history. #158 phone checks on production (ask Moses for a test deal). Business: #44–#47, #107.
+- **Also:** #43 gitleaks scan: no secrets in any commit on any branch; working-tree hits are only git-ignored local files (see Security test log). PR #164 opened for #156.
+- **Next:** Moses reviews #164, then Edward's #157 can start. #158 phone checks on production (ask Moses for a test deal). Business: #44–#47, #107.
 - **Blockers:** none. `/` still sends signed-out visitors to `/sign-in` (team call, see STATUS).
 
 ### 2026-10-26 (#128 review fixes)
