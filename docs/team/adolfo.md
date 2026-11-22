@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-11-06_
+_Last updated: 2026-11-22_
 
 ---
 
@@ -15,11 +15,11 @@ _Last updated: 2026-11-06_
 `app/(business)/`, `components/business/`.
 
 ## Depends on
-- **Moses:** #126/#127/#128/#131/#135/#137 are merged; RLS, `set-pin`, and Realtime are live. Local #73 adapters now follow the shared switch, with contract/type changes proposed for review. Business provisioning and Storage remain unsupported; PIN readiness is unknown on real data and onboarding preserves existing PINs. Authorized Grove Test Kitchen membership/current test data and a real-database pass are pending; Moses is unavailable, so local work proceeds independently.
+- **Moses:** #151–#154 merged the dashboard, stats, results and sharing; Nov 9 LOG accepts the dashboard contract proposals. The final plan reports production/preview real-data checks, applied migrations and Mapbox setup. Owner provisioning is manual; Storage remains unsupported and PIN readiness remains unknown on real data. Adolfo's own hosted/counter acceptance is pending, not implied by those merges.
 - **Celso:** auth routing is merged and the sign-in gate passed. Business updates are owner-only; members can manage deals. Browser profile edits may change only `full_name`, never role or verification. Use provisioned membership; do not self-assign roles.
 - **Edward:** the deal page at `/deals/<id>`, which your deal link and QR open. (The theme is done; see `/theme`.)
-- **Hikaru:** draft #138 contains the truck-location component and `deals_nearby`; neither is on main yet. Coordinate the dashboard placement after merge.
-- **Sticker (#74):** SQL already permits reading `qr_slug`; the local `getBusinessSticker` helper checks membership and returns it separately from `BusinessPublic`. Moses's helper/contract review, authorized grove-dev verification, configured deployment origin, and Edward's `/b/[slug]` page (#139) remain acceptance needs.
+- **Hikaru:** #142 merged discovery/truck/PWA work and #151 placed the truck-owner action. #162 map/install polish and #163 push stretch remain separate open PRs as of Nov 19. Coordinate any location mutation on a shared truck.
+- **Sticker (#74):** helper and `/b/[slug]` route are merged. Local PNG decoding is verified; Adolfo's production membership/origin/download and actual-size print/phone scan remain #80 checks. Advertising `/deals/<id>` QR codes only open deals.
 
 ## Others depend on you
 - **Everyone:** real businesses for the week-4 pilot.
@@ -29,25 +29,25 @@ _Last updated: 2026-11-06_
 ## Tasks
 
 ### Week 1 — Foundation (Oct 19–25)
-- [x] Dashboard layout (desktop sidebar, phone and tablet friendly) (#69) — canvas compared and responsive/keyboard checks passed; pushed on `adolfo/dashboard-review`, PR/merge pending
+- [x] Dashboard layout (desktop sidebar, phone and tablet friendly) (#69) — merged in #151; physical acceptance remains #80
 - [x] Business onboarding: name, address (sets `location`), hours, logo upload, food-truck toggle; first PIN via `setPin()` (#70) — reviewed and tested on mocks
-- [x] Post-deal form: title, description, discount, start/end, photo, "UCR students only" (#71) — canvas compared; mock posting and responsive/keyboard checks passed; pushed on `adolfo/dashboard-review`, PR/merge pending
+- [x] Post-deal form: title, description, discount, start/end, photo, "UCR students only" (#71) — merged in #151; real image uploads remain unsupported
 - [x] My deals list: active, scheduled, expired, with redemption counts; End now and Cancel (mocks) (#72) — implemented on mocks
 
 ### Week 2 — Live data, stickers, repeat days (Oct 26–Nov 1)
-- [ ] Wire onboarding, posting, and My deals to real tables (#73) — supported adapters implemented/tested locally; authorized real-database verification, provisioning/Storage, and review remain pending
-- [ ] Repeat days and visibility on the post-deal form: day checkboxes, daily start/end time, public or link-only (while wiring it to real tables) (#112) — controls, normalized mocks/real payloads, and local behavior verified; contract review and hosted acceptance pending
-- [ ] Printable sticker: configured origin + `/b/<qr_slug>`, Grove branding, "Scan in the Grove app to redeem," downloadable PNG (#74) — local 3/4/6-inch export/decoding verified; shared review, hosted read, and physical print/phone acceptance pending
-- [ ] Overview page: today's and this week's redemptions, active deals, live visit feed via Realtime (#75) — implemented/tested locally; review and authorized hosted RLS/Realtime acceptance pending
+- [x] Wire onboarding, posting, and My deals to real tables (#73) — merged in #151; personal hosted verification continues under #80
+- [x] Repeat days and visibility (#112) — merged in #151; physical/hosted acceptance remains #80
+- [x] Printable counter sticker (#74) — merged in #151; production download/print/phone acceptance remains #80
+- [x] Overview totals, live deals and Realtime visits (#75) — merged in #151; personal hosted acceptance remains #80
 
 ### Week 3 — Stats, settings, staff scanner, club nights (Nov 2–8)
-- [ ] Stats: redemptions per deal and busiest hours (Recharts) (#76)
-- [ ] Redemption settings: Sticker vs. Staff scan selector; Reset PIN calls `set-pin` and shows the new PIN once (#77) — implemented/tested locally; live Staff scan activation gated on #20, shared review and authorized hosted checks pending
-- [ ] Staff scanner: camera via `html5-qrcode`, calls `staff-redeem`, green "Verified" or red "Not valid" with reason, "Scan next" (#78)
-- [ ] Post an open club night: date, time window, giveback text (e.g. "15% back to your club") (#113) — implemented/tested locally; shared review, authorized hosted RLS/persistence and downstream claim checks pending
-- [ ] Club night results on the dashboard: claimed club name and verified visits per night (#114)
-- [ ] Deal link and QR download for flyers and group chats (`/deals/<id>`; it opens the deal only, never redeems) (#115)
-- [ ] Staff list in settings: add staff by Google email (`add-staff`), see invited vs. active (`getStaff`), remove staff (#122)
+- [x] Stats: redemptions per deal and busiest hours (#76) — #152 uses CSS bars; no Recharts rebuild needed
+- [x] Redemption settings and one-time Reset PIN (#77) — merged in #151; Staff scan hidden/gated as stretch; coordinate hosted resets
+- [ ] Staff scanner (#78) — stretch, outside this pass; preserved old branch is not merged into main
+- [x] Post an open club night (#113) — merged in #151
+- [x] Club-night results, claimed club/visits and cancellation of open nights (#114) — merged in #153
+- [x] Deal link and advertising QR download (#115) — merged in #154; local QR failure/stale-asset fix pending review
+- [ ] Staff list in settings (#122) — stretch, outside this pass; preserved `adolfo/staff-management` remains untouched
 
 _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 
@@ -64,6 +64,35 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 ---
 
 ## Notes and session log
+
+### 2026-11-22
+- **Commit approval:** After guided mock review, Adolfo explicitly authorized saving, staging and committing the five reviewed files locally. Source/tests match the checked versions. Push, issue/PR changes and hosted work remain unauthorized/pending; keep tools and reports outside the commit. Supabase invitation/setup and physical acceptance remain pending.
+- **Manual download follow-up:** The isolated browser stored Adolfo's download under an extensionless temporary ID. Both downloaded files are valid 8,007-byte, 480×480 PNGs decoding to `http://127.0.0.1:3001/deals/deal-opt-burrito`. Saved a correctly named copy at `C:/Users/adolf/Downloads/Grove-QR-review-20261122/2-off-any-burrito-qr.png`; Adolfo confirmed it opens and supplied a screenshot. No Grove defect established from the harness filename behavior. QR source unchanged; hosted/physical acceptance still pending.
+- **Recovery/review:** Recovered the five unstaged checkpoint files on `adolfo/deal-share-recovery` at `40d1bcf`; no staged/untracked files or interrupted merge/rebase. Backed up full files and patches in `%TEMP%/grove-recovery-20261122`. No Grove build/test/preview processes survived. Fetch confirms main and origin/main still equal HEAD, so no integration was needed; all old branches remain intact. Reviewed the QR fix without changing its source or three regressions.
+- **Fresh checks:** Node 22.23.4 lint, typecheck, `npm test` (210 passed, 23 DB-dependent skipped), and build passed. Vitest required an unsandboxed rerun after a startup file-permission error. Build used loopback/mocks configuration; Next.js 16.4.2 first stopped for a security-upgrade warning, then the unchanged retry passed with the warning still present. Dependency review belongs to Moses; no upgrade was performed. November 19 browser/red-green results remain prior evidence, not new hosted or physical results.
+- **Fresh browser:** Edge 157, loopback auth/contract mocks and Tokyo timezone: seven routes at 320/390/768/1440px had no horizontal page overflow. Verified QR failure/retry, copy, Escape/focus restoration, decoded `/deals/<id>` QR, decoded 1200px `/b/<slug>` sticker, invalid-form focus, repeat/link-only mock save, ended history and canceled PIN confirmation; no page errors. Share-dialog accessibility scan was clean. Of 14 page scans, one Settings phone scan flagged download-button contrast; three follow-ups after button readiness/transitions (390/768/390px) had no violations, so no stable defect was established. Inspected error/ready QR and Settings captures. Reports/screenshots are outside Grove in the recovery directory; preview/auth-fixture processes were stopped. These are desktop emulations, not hosted, RLS, physical-print or device passes.
+- **Guided mock review:** Six share regressions passed again on Node 22. Focused Edge checks passed for failure/copy/retry, actual public/link-only PNG downloads (480px, independently decoded to each deal URL), 390/768px dialog widths, Escape/focus restoration and error/ready-dialog accessibility; no page errors. Adolfo confirmed failure/no-download, Copied feedback, retry, opening the PNG, correct Chess Club details/QR after switching, and Escape/Enter closing/reopening the same deal. Guided local review is complete; clipboard contents were not separately checked. Source/tests unchanged; earlier full lint/typecheck/210-test/build checks were not rerun in this follow-up. Isolated mock preview/auth fixture left on ports 3001/54330 for review; closing its browser stops them. Harness/reports stay in `%TEMP%/grove-recovery-20261122`. Local commit is approved; push and hosted/physical acceptance remain pending.
+- **Scope:** Re-read Moses's six-page final plan, ownership rules and contract; #80/#81 are still open and staff scanning/management remain stretch. No newer main LOG entries; PRs #160–#163 remain open. Neither main nor those PRs fixes the separate Stats 40px controls or single-response stats aggregation finding. No Stats, shared adapter, auth, API, database or theme edits.
+- **Access / next:** Adolfo reports his Supabase invitation expired and a replacement was requested. He has run no owner-setup SQL. Reviewed README and scripts 01–04 at `D:/CS175/.tools/grove-owner-setup` (the supplied `D:/CS175.tools/...` path does not exist). Account/business state remains unknown. Resume with grove-dev → SQL Editor after access returns, then guide read-only inspection one step at a time and review sanitized results before any provisioning. All SQL stays manual; hosted and physical #80 testing remain pending. Current local commit is approved; stop before push, issue posting or PR changes for review.
+
+### 2026-11-19
+- **Did:** Started from clean `adolfo/staff-management` at `25b2ef0` (no staged, unstaged or untracked files). Fetched origin, inspected its five unmerged commits and alternate stats/results/sharing implementations, preserved all branches, and fast-forwarded main to `40d1bcf`. Created `adolfo/deal-share-recovery` from current main. No old feature stack was merged. Read the six-page Final Week Plan, current contract, LOG, issues and PRs #151–#154. #79/#80/#81 remain open; #78/#122 are stretch. No owner feedback has been supplied.
+- **Scope/catch-up:** Moses accepted the shared dashboard proposals, corrected owner counts to `redemptions(id)`, added `cancelClubNight` with claimed-night protection, and completed the four merged PRs. Manual owner provisioning and staff-scan stretch replace the old sequence. Edward's Nov 9 log records some phone testing on mocks, with PIN/Redeemed checks incomplete; it does not establish dashboard acceptance. Celso and Hikaru have no newer main LOG entries since the prior Nov 6 session; Hikaru's later open PRs are separate from merged behavior. STATUS's old migration/Mapbox/test-data blockers are superseded by the final plan; stale contract-header wording remains Moses's documentation area.
+- **Fix:** QR generation failures now show an alert and Retry QR while retaining copyable `/deals/<id>` links. Downloads/previews match the current deal and generation attempt; reopening clears old assets and closed requests cannot restore them. Three new regressions failed before the fix and pass afterward. No API, adapter, auth, RLS, migration, function, or theme changes.
+- **Checks:** Node 22.23.4 lint, typecheck, 210 tests and production build passed (23 DB-dependent tests skipped). Initial typecheck found generated dev types for the old branch's absent `/dashboard/scan`; preserved that generated cache outside Grove and regenerated. Restricted build font fetching required a network-enabled rerun; a QR test-mock overload type was corrected before successful typecheck/build. Local tools/reports/screenshots remain outside the repository.
+- **Browser:** Headless Edge 157 with loopback auth and contract mocks, Tokyo device timezone. Seven dashboard routes at 320/390/768/1440px had no horizontal page overflow; 14 page WCAG A/AA scans plus one share-dialog scan had no violations. Independently decoded deal QR to `/deals/<id>` and default 1200px sticker PNG to `/b/<slug>`. Checked sign-out gate, copy, Escape/focus restoration, injected QR export failure/retry, invalid-post summary focus, repeat/link-only save, My deals and End now history, and canceling the Reset PIN confirmation. Inspected phone/tablet screenshots. These are desktop browser emulations, not hosted, physical-device, or database/RLS tests. Existing component tests cover loading/empty/error/permission, settings secrecy and club posting/claim-race results; no new hosted pass is claimed.
+- **Further review:** Stats range controls measure 40px tall against the project's 44px touch target; a separate issue draft is prepared, not posted or changed on this branch. `getBusinessStats` reads one response without pagination; ask Moses to review count completeness for histories over the hosted response cap. No shared adapter edits made. Drafts/evidence are local and await approval before posting.
+- **Owner setup:** Adolfo reports Moses authorized creating a disposable new test business in grove-dev SQL Editor. Gmail sign-in/profile state remains unknown. Prepared read-only inspection, guarded rerunnable creation/invite, verification, and scoped final owner transfer SQL outside Grove; no SQL executed here. New test UUID: `2f41fa4a-6f90-4cac-97f6-fff1301a3377`. If needed, only Adolfo's own verified UCR profile supplies the temporary owner foreign key, with no UCR role/membership/verification change. Keep shared owners/PINs/locations unchanged. User must inspect and review before executing; coordinate data/cleanup with Moses, scoped to this business ID.
+- **Next / blockers:** Stop before commit/push/PR or issue posting. Review QR changes locally, then request publication approval; once authorized, update from main and verify CI plus the exact PR preview before merge, followed by production retest. #80 stays unchecked pending actual owner access, real data, phone/tablet/counter results and sticker scanning near the configured business. #79 and business research remain separate, unverified tasks. No teammate contact occurred.
+
+### #80 production handoff (pending actual results)
+Use `https://grove-jade.vercel.app` throughout. Record device, OS/browser, timestamp, test row IDs, expected/actual result and sanitized screenshot; never record a PIN. Repeat on a real phone and tablet at the counter. Proposed QR changes additionally need a PR preview URL after authorized publication; no preview exists yet.
+
+1. **Entry/access:** `/sign-in` then `/dashboard`; provisioned personal-Gmail owner of the isolated test business, with invite linked and profile `business`. Sign in through Google; expect the intended business, working nav and no other business data. Record the business ID/name and landing URL. Use UCR only in a separate student session.
+2. **Deals:** `/dashboard/deals/new` and `/dashboard/deals`; owner, agreed disposable `[test]` data/window. Post a one-time public deal and a repeat/link-only deal using campus times; inspect Active/Scheduled, save/reload, cancel a future unused deal and End now a started one. Expect preserved ended history, correct repeat windows and visibility. Student discovery at `/feed`, `/map` and `/b/adolfo-dashboard-test-20261119-3377` must omit link-only deals; their `/deals/<actual-id>` link still opens. Record IDs, windows, visibility and results.
+3. **Overview/stats:** `/dashboard` and `/dashboard/stats`; owner and at least one genuine test redemption. Check totals/latest visit after refresh/reconnect and 7/30-day ranges. Expect only verified visits for this business with campus-hour labels. Record expected vs displayed counts and test interval. Zero data is an empty-state test, not proof of counting.
+4. **Club nights:** `/dashboard/club-nights`; owner and an agreed current open night; UCR student claims through `/club-nights`. Expect claimed club and verified visits after refresh, no Cancel on claimed nights, and confirmation before canceling an unused open night. During the live window, open the generated `/deals/<actual-id>` in the student session and redeem using the counter sticker. Record night/deal IDs, claim, visit and any race/error outcome. Giveback is settled outside Grove.
+5. **Settings/sticker:** `/dashboard/settings`; owner with configured business location and print access. Download PNG, print at actual size and inspect `/b/adolfo-dashboard-test-20261119-3377`; scan inside Grove as UCR student within ~150m during the live deal. Expect the real live Redeemed result and once-per-day protection. Advertising QR from My deals opens `/deals/<actual-id>` only, with no redemption. Record pixel/print size, decoded paths and sanitized result. Coordinate any PIN generation/reset or truck-location action separately; do not mutate shared settings during this sequence.
 
 ### 2026-11-06
 - **#113 Commit/publication approval:** Adolfo approved committing #113 and pushing the completed #75/#77/#113 feature branches. Prior verification remains valid; authorized hosted/shared acceptance stays pending. No PR or merge requested; GitHub Actions runs on PR/main, so branch pushes alone do not run CI. Next: #114.
