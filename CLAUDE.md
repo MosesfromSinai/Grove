@@ -2,7 +2,7 @@
 
 This file is the shared memory for every team member's AI sessions. Claude Code reads it automatically from the repo root. In claude.ai, paste or attach it at the start of each session along with the files listed under **Session protocol**. **All shared rules live here and only here.** Team files hold personal tasks, notes, and logs.
 
-_Last updated: 2026-10-26 by Moses_
+_Last updated: 2026-11-22 by Moses_
 
 ---
 
@@ -44,21 +44,36 @@ Doc updates go in the same pull request as the code. **A session isn't finished 
 - Don't change another person's area (see Team) without saying so; suggest coordinating with them.
 - **Never write in someone else's team file.** If work affects them, note it in `docs/STATUS.md` under Blockers or tell them directly.
 - Never invent customer research: no made-up interview answers, quotes, survey numbers, or pilot results. Research lives in the team's shared Google Drive folder, not in this repo.
+- **Temporary override (decided by Moses, 2026-11-22):** for the 2026-11-22 cleanup session only, Moses (default owner and team lead) may edit any teammate's code, push fixes to their branches, resolve conflicts on and merge their PRs once CI passes, and correct tasks or issue numbers in their `docs/team/<name>.md`. Every such change is noted in `docs/STATUS.md`. Force-pushes and history rewrites on shared branches stay forbidden. The rules above apply again after that session.
 
 ---
 
 ## What Grove is
 
-**A marketing company first.** **Paying customers are locally owned restaurants and food trucks near a college campus** (not chains). They pay Grove to bring in students, especially on slow days (Mon–Wed). **Students are users, not payers.** The app runs the deals and proves every visit.
+**Grove is a campus marketing agency for independent (non-chain) restaurants and food trucks near a college campus. It is not an app company.** Restaurants pay Grove to bring students in on their slow days (Mon–Wed). The web app is the tool that delivers the offer to students and proves every visit. **Students are users, not payers.**
 
-- **Problem:** businesses near campuses depend on students, but their deals get buried on platforms students don't check (Instagram, Yelp), and owners can't tell what works.
-- **Solution:** Grove brings students in through campus channels and its app; every visit is proven by an in-store QR scan.
-- **How we reach students:** campus clubs, flyers and tabling, and the Grove app. Clubs and fraternities we know (PAT, ACM, Cyber) and AMA student ambassadors are possible options we could pursue, **not confirmed partners**. Don't describe them as partners anywhere.
-- **"Campaign"** is only the business word for the marketing service we sell. In the app, deals stay deals; there's no campaign system.
-- **Business model (still to be validated in interviews):** pay per verified visit (~$0.50–1, monthly cap) plus a flat fee for bigger events like club nights. First deal free for pilot restaurants.
+**Positioning (use this line everywhere):** "Grove is a campus marketing agency: restaurants pay us to fill their slow days with students, and our app proves every visit."
+
+- **What a campaign includes:** flyers around campus (one deal-link QR per campaign), pitching the offer to clubs, tabling by student ambassadors, club nights, the counter sticker, and a monthly verified-visit report. "Campaign" is the business word for this service; in the app, deals stay deals and there's no campaign system.
+- **Offers:** the restaurant chooses and pays for its own offer. Grove never funds discounts. Campaign offers should be Grove-only and cheap for the owner (e.g. a free drink with any meal, Mon–Wed, shown on the Grove screen), so a visit is only counted when it's redeemed through Grove. Staff rule: **no green screen, no Grove offer.**
+- **Students:** no download. Flyer QR codes and club links open Grove in the browser. Flyer copy says "scan to get the Grove deal", never "download the app". The Grove-only perk is why students use Grove instead of asking at the counter.
+- **How we reach students:** campus clubs, flyers, tabling, and the Grove web app. Grove materials don't mention social media or paid social posts. Clubs and fraternities we know (PAT, ACM, Cyber) and AMA student ambassadors are possible options we could pursue, **not confirmed partners**. Don't describe them as partners anywhere.
+- **Club nights:** a restaurant posts a club night with a giveback (e.g. "15% back to your club"). Any club can claim it; a club isn't tied to one restaurant. Claiming creates a link-only deal for that club, which the club shares with members. The link only opens the deal; members still redeem by scanning the counter sticker. Redemptions on that deal show how many visits came from that club. The giveback is paid outside the app. Club nights are included in the monthly plan; there's no separate fee.
+- **One counter sticker per business handles every channel.** Which deal the student opened tells us whether the visit came from the public campaign or from a specific club. Splitting flyers from the deals page is out of scope (it stays under "tracking which channel brought each visit").
+- **Proof of results:** every reported visit is a verified UCR student scanned at the counter. Owners can also compare Mon–Wed sales before vs. during the campaign, and see new vs. returning students.
 - **Launch:** UC Riverside, then campus by campus.
 - **Name:** "Grove" is a working name; it may be trademarked (see Open decisions in `docs/STATUS.md`).
 - **Class:** CS 175, UCR, Fall 2026. Graded as a funding decision, 80% business, 20% engineering.
+
+### Business model and pitch numbers
+All docs and app copy must match these numbers.
+- **One plan:** $179/month, billed for the 9 school months, covering everything above (club nights included), plus $0.50 per verified visit. First campaign free for pilot restaurants.
+- **Assumption:** 70 verified visits per restaurant per month (~5 students per slow day) = $1,926 per restaurant per year.
+- **Revenue:** Y1 $19K (10 restaurants, UCR) / Y2 $58K (30, 3 campuses) / Y3 $144K (75, 6 campuses) / Y4 $241K (125, 10 campuses) / Y5 $366K (190, 15 campuses).
+- **Market:** top-down $47–93B/yr on U.S. restaurant marketing (NRA 2026 forecast of $1.55T sales × 3–6% marketing spend, from Toast). Bottom-up: ~50 independents per campus × 30 UC/CSU campuses = 1,500 restaurants ≈ $2.9M/yr. A Google Maps search found 40+ independents within 3 miles of UCR.
+- **Restaurant side (our estimates):** $14 average plate − $2 offer − $4.90 food cost (35%) − $0.50 fee = $6.60 profit per visit. 70 visits = $462/month − $179 = ~$283/month kept. The plan pays for itself at ~27 visits.
+- **The ask:** $40K for 10% ($400K post-money) for ambassadors, flyers and 2 more campuses. Milestone: 15 paying UCR restaurants by Dec 2027 (team still confirming the date).
+- **Why the flat plan:** the professor's Activity 2 feedback said $1/student was too low and to think like a marketing company. The plan is the main revenue (~$3 earned per visit).
 
 ## Team
 
@@ -177,9 +192,9 @@ Use the Tailwind class name with any color utility (`bg-green`, `text-ink-muted`
 - **One branch per feature**, named `name/feature` (e.g. `edward/deal-feed`). A feature usually covers a few related tasks. One branch open at a time, about 1–2 a week; merge and delete it before starting the next. No extra branches for experiments or doc-only changes; doc updates ride along with the code.
 - **Commits:** short, plain, present tense, under ~50 characters: `Add deal feed`, `Fix PIN lockout`. No body unless something truly needs explaining. No emojis or file-by-file summaries.
 - **No attribution:** no `Co-Authored-By` lines, "Generated with" lines, or AI mentions in commits, PRs, or branch names. Each person turns this off once in their own Claude Code settings (`~/.claude/settings.json` on their computer, not in the repo): `"attribution": { "commit": "", "pr": "" }`. The repo ignores `.claude/`.
-- **Pull requests:** title in the same style as a commit. Description is 1–3 lines plus a `Closes #<issue>` line for each issue the feature finishes. No checklist; the doc updates in Session protocol → End still go in the same PR.
+- **Pull requests:** title only, in the same style as a commit; no description. Finished issues are closed with `gh issue close <n>` after the PR merges. The doc updates in Session protocol → End still go in the same PR.
 - **Merge into `main` often.** When a feature works, or at the end of a session with working code, suggest a small PR and merge, and say why: log lines and decisions only reach teammates once they're in `main`; small PRs are quick to review and rarely conflict; and anyone waiting on the work gets unblocked. `main` is protected: Moses can push to main and merge on his own; everyone else merges through a PR.
-- **Issues:** every task in a team file has a GitHub issue, assigned to its owner, on the Grove project board. The issue number goes next to the task (`- [ ] Deal feed (#12)`). The PR that finishes it says `Closes #12` (one line per issue), which closes the issue and moves it on the board. When Moses pushes directly to main, put Closes #<issue> in the commit message instead.
+- **Issues:** every task in a team file has a GitHub issue, assigned to its owner, on the Grove project board. The issue number goes next to the task (`- [ ] Deal feed (#12)`). After the PR that finishes it merges, close it with `gh issue close 12`, which moves it on the board.
 - **Reviews:** one review per PR. Moses reviews migrations and functions; Celso reviews auth and RLS. `.github/CODEOWNERS` requests the right reviewer automatically, but code-owner review isn't required yet: any teammate's approval merges once CI ("Lint, typecheck, build") passes. Moses can push to main and merge on his own; everyone else merges through a PR with 1 approval.
 
 ## File map

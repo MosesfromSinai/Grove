@@ -14,7 +14,7 @@ const figtree = Figtree({
 
 export const metadata: Metadata = {
   title: "Grove",
-  description: "Deals from local food spots near campus, for verified students.",
+  description: "Grove-only deals from independent restaurants near campus. Scan to get the Grove deal.",
   applicationName: "Grove",
   manifest: "/manifest.json",
   appleWebApp: { capable: true, title: "Grove", statusBarStyle: "default" },

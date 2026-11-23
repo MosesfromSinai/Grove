@@ -55,7 +55,7 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 
 ### Business
 - [ ] Fill the blank Lean Canvas boxes: Key Metrics, Unfair Advantage, Channels, Cost Structure, Revenue Streams, Project Name (#97)
-- [ ] Pricing questions for interviews (per verified visit, ~$0.50–1 with a monthly cap, vs. a flat fee for club nights; first deal free for pilots); summarize answers (#98)
+- [ ] Pricing questions for interviews (the $179/month plan for 9 school months with club nights included, plus $0.50 per verified visit; first campaign free for pilots); summarize answers (#98)
 - [ ] 1–2 restaurant interviews (hypotheses 1–4, see `CLAUDE.md` → Business); notes in the shared Drive folder (#99)
 - [ ] At least one student interview (hypothesis 5, see `CLAUDE.md` → Business); notes in the shared Drive folder (#118)
 
