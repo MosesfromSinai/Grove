@@ -129,21 +129,21 @@ export function Scanner() {
     <div>
       <h1 className="mb-4 text-2xl">Scan the counter sticker</h1>
 
-      {phase === "locating" && <p className="text-ink-muted">Checking your location…</p>}
+      {phase === "locating" && <p role="status" className="text-ink-muted">Checking your location…</p>}
 
       {phase === "scanning" && (
         <>
           <div id="qr-reader" className="overflow-hidden rounded-card" />
           <p className="mt-3 text-sm text-ink-muted">Point your camera at the Grove sticker at the counter.</p>
-          {notSticker && <p className="mt-2 text-sm font-semibold text-brown">That isn&apos;t a Grove sticker.</p>}
+          {notSticker && <p role="status" className="mt-2 text-sm font-semibold text-brown">That isn&apos;t a Grove sticker.</p>}
         </>
       )}
 
-      {phase === "redeeming" && <p className="text-ink-muted">Checking your visit…</p>}
+      {phase === "redeeming" && <p role="status" className="text-ink-muted">Checking your visit…</p>}
 
       {phase === "denied" && (
         <div>
-          <p className="text-ink">{errorMessages.LOCATION_REQUIRED}</p>
+          <p role="alert" className="text-ink">{errorMessages.LOCATION_REQUIRED}</p>
           <button onClick={retry} className="mt-4 min-h-11 rounded-button bg-ink px-6 font-semibold text-white">
             Try again
           </button>
@@ -153,7 +153,7 @@ export function Scanner() {
 
       {phase === "camera-error" && (
         <div>
-          <p className="text-ink">We couldn&apos;t open your camera. Allow camera access in your browser settings and try again.</p>
+          <p role="alert" className="text-ink">We couldn&apos;t open your camera. Allow camera access in your browser settings and try again.</p>
           <button onClick={retry} className="mt-4 min-h-11 rounded-button bg-ink px-6 font-semibold text-white">
             Try again
           </button>
@@ -163,7 +163,7 @@ export function Scanner() {
 
       {phase === "failed" && (
         <div>
-          <p className="text-ink">Something went wrong checking your visit. Check your connection and try again.</p>
+          <p role="alert" className="text-ink">Something went wrong checking your visit. Check your connection and try again.</p>
           <button onClick={retry} className="mt-4 min-h-11 rounded-button bg-ink px-6 font-semibold text-white">
             Try again
           </button>
@@ -172,7 +172,7 @@ export function Scanner() {
 
       {phase === "error" && error && (
         <div>
-          <p className="text-ink">{errorMessages[error]}</p>
+          <p role="alert" className="text-ink">{errorMessages[error]}</p>
           <button onClick={retry} className="mt-4 min-h-11 rounded-button bg-ink px-6 font-semibold text-white">
             Try again
           </button>

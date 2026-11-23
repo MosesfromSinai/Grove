@@ -84,11 +84,11 @@ export function Feed() {
       )}
 
       {loading ? (
-        <p className="py-10 text-center text-ink-muted">Loading deals…</p>
+        <p role="status" className="py-10 text-center text-ink-muted">Loading deals…</p>
       ) : result?.failed ? (
-        <p className="py-10 text-center text-ink-muted">Couldn&apos;t load deals. Check your connection and try again.</p>
+        <p role="alert" className="py-10 text-center text-ink-muted">Couldn&apos;t load deals. Check your connection and try again.</p>
       ) : result && result.deals.length === 0 ? (
-        <p className="py-10 text-center text-ink-muted">No deals right now. Check back soon.</p>
+        <p role="status" className="py-10 text-center text-ink-muted">No deals right now. Check back soon.</p>
       ) : (
         <ul className="space-y-4">
           {result?.deals.map((deal) => (
