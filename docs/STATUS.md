@@ -29,17 +29,19 @@ Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night
 - **Interviews:** restaurant and student interviews for everyone (#27, #46, #68, #83, #99; #104, #107, #111, #116, #118), student survey (#67), pricing questions (#98).
 - **Optional:** Sentry (#22).
 
-## Open PRs (merge in this order)
-
-One `moses/` branch at a time; each merges when CI passes.
+## Open PRs
+See the 2026-11-22 report in `LOG.md`; open PRs are reviewed and merged by Moses this session.
 
 ## Blockers
 
-- **Real data:** `20261102000000_nearby_and_truck_location.sql` passes all SQL tests locally but isn't applied to grove-dev yet (Moses). The feed and map stay empty on real data until it is. Then set `NEXT_PUBLIC_DATA_SOURCE=supabase` in Vercel.
-- **Mapbox (#84):** the restricted token still needs to reach Moses for Vercel; without it the map shows the labeled pin preview, no tiles.
-- **Test data:** delete Grove Test Kitchen (ids starting `7e57`) from grove-dev before the switch; it would show as a pin near campus.
+- **Interview results:** none recorded in this repo; they live in the shared Drive folder. The pitch numbers in `CLAUDE.md` are estimates until interviews confirm them.
 - **Settings (done):** Vercel Authentication is off for previews. `NEXT_PUBLIC_SITE_URL` is set for Production only, so previews sign in on their own domain. Supabase Auth on grove-dev is Google-only; its Redirect URLs are `https://grove-jade.vercel.app/**`, `http://localhost:3000/**`, and `https://grove-*-mosesfromsinais-projects.vercel.app/**`.
 - **Everyone:** CI ("Lint, typecheck, build") runs `npm test` too. Run `npm run lint && npm run typecheck && npm test && npm run build` (Node 22) before pushing. SQL tests: `npx supabase@2.122.0 db reset && npx supabase@2.122.0 test db` with Docker running.
+
+## Changes in teammates' areas (2026-11-22, Moses, temporary override)
+- Hikaru's `docs/team/hikaru.md` #98: pricing questions updated to the $179/month plan plus $0.50 per visit.
+- Adolfo's `docs/team/adolfo.md` #74 and #82: sticker copy is "Scan in Grove to redeem"; pilot offer is "first campaign free".
+- Adolfo's `components/business/render-sticker.ts`: sticker text "Scan in the Grove app" → "Scan in Grove to redeem" (no download framing).
 
 ## Pilot owner setup (Moses, by hand)
 
@@ -114,14 +116,14 @@ Redeeming by sticker needs you within 150 m of the business (seed coordinates ar
 
 | Decision | Owner | Needed by |
 |---|---|---|
-| Pricing: per verified visit (~$0.50–1, monthly cap) plus a flat fee for club nights; first deal free for pilots. Still to be validated | Hikaru (with everyone's interviews) | Before the pitch deck |
-| MVP demo date (week dates assume a demo around Nov 16–20; re-date the plan once it's set) | Team | Next sync |
+| Demo date | Team | Next sync |
 | Final name ("Grove" may be trademarked) | Team | Before slides are final |
 | Which campus channels to pursue (clubs, fraternities, student ambassadors); none confirmed | Team | Before club night outreach |
 
 ## Business status
 
-- Interviews (five hypotheses, see `CLAUDE.md` → Business): **0 done so far.**
-- Lean Canvas: Problem, Solution, UVP, Customer Segments filled. Key Metrics, Unfair Advantage, Channels, Cost Structure, Revenue Streams, and Project Name still blank.
-- Pilot businesses signed: **0.** Offer: first deal free. Target: at least one signed by Nov 6 for the Week 4 pilot.
-- Effort table: Celso's attendance cell is blank.
+- **Pricing (decided 2026-11-22):** one $179/month plan for 9 school months, club nights included, plus $0.50 per verified visit; first campaign free for pilot restaurants. Interviews still test it (#98).
+- Interviews (five hypotheses, see `CLAUDE.md` → Business): individual results aren't recorded in this repo; notes live in the shared Drive folder.
+- Lean Canvas: Hikaru closed #97 on Nov 12 after reviewing the completed Activity 2 canvas.
+- Pilot businesses signed: none recorded in this repo. Offer: first campaign free.
+- Effort table: Celso's attendance cell (#47) is still open.
