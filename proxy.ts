@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { NEXT_COOKIE, safeNextPath } from "@/lib/auth/next-path";
+import { isPublicPath } from "@/lib/auth/public-paths";
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -33,17 +34,8 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Paths that don't require a session.
-  const isPublic =
-    pathname === "/sign-in" ||
-    pathname.startsWith("/auth/") ||
-    pathname.startsWith("/b/") ||
-    pathname === "/theme" ||
-    pathname === "/manifest.json" ||
-    pathname === "/sw.js" ||
-    pathname.startsWith("/icons/");
-
-  if (!user && !isPublic) {
+  // Signed-out visitors can browse the feed, map and deal pages (#156); see lib/auth/public-paths.ts.
+  if (!user && !isPublicPath(pathname)) {
     const redirect = NextResponse.redirect(new URL("/sign-in", request.url));
     // Remember the page (e.g. a shared deal link) so the callback can return to it (#109).
     const next = safeNextPath(pathname + request.nextUrl.search);

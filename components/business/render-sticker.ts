@@ -66,7 +66,7 @@ export async function renderStickerPng(input: { url: string; name: string; inche
   ctx.drawImage(qr, Math.floor((width - qr.width) / 2), Math.floor(width * 0.2));
   ctx.fillStyle = white;
   ctx.font = `800 ${width * 0.037}px ${body}`;
-  ctx.fillText("Scan in the Grove app", width / 2, width * 0.79);
+  ctx.fillText("Scan in Grove", width / 2, width * 0.79);
   ctx.fillText("to redeem", width / 2, width * 0.835);
   ctx.fillStyle = accent;
   ctx.font = `700 ${width * 0.031}px ${body}`;

@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Grove",
   "short_name": "Grove",
-  "description": "Deals from local food spots near campus, for verified students.",
+  "description": "Grove-only deals from independent restaurants near campus. Scan to get the Grove deal.",
   "lang": "en",
   "start_url": "/",
   "scope": "/",

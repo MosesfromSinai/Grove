@@ -37,7 +37,7 @@ _Last updated: 2026-11-22_
 ### Week 2 — Live data, stickers, repeat days (Oct 26–Nov 1)
 - [x] Wire onboarding, posting, and My deals to real tables (#73) — merged in #151; personal hosted verification continues under #80
 - [x] Repeat days and visibility (#112) — merged in #151; physical/hosted acceptance remains #80
-- [x] Printable counter sticker (#74) — merged in #151; production download/print/phone acceptance remains #80
+- [x] Printable counter sticker (#74) — merged in #151; wording "Scan in Grove to redeem"; actual-size print acceptance remains #80
 - [x] Overview totals, live deals and Realtime visits (#75) — merged in #151; personal hosted acceptance remains #80
 
 ### Week 3 — Stats, settings, staff scanner, club nights (Nov 2–8)
@@ -57,7 +57,7 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 - [ ] Fix or file every issue owners report during the pilot (#81)
 
 ### Business
-- [ ] Pilot outreach: contact local businesses near UCR, track in the shared Drive folder, aim for 2–3 signed, at least one by Nov 6 for the Week 4 pilot; first deal free for pilot restaurants (#82)
+- [ ] Pilot outreach: contact local businesses near UCR, track in the shared Drive folder, aim for 2–3 signed, at least one by Nov 6 for the Week 4 pilot; first campaign free for pilot restaurants (#82)
 - [ ] 1–2 restaurant interviews (hypotheses 1–4, see `CLAUDE.md` → Business); notes in the shared Drive folder (#83)
 - [ ] At least one student interview (hypothesis 5, see `CLAUDE.md` → Business); notes in the shared Drive folder (#116)
 
@@ -95,7 +95,7 @@ This table is the current checkpoint and supersedes historical "next/pending" wo
 
 **Automation/review:** Browser access host was unavailable; native selection stopped before input because its current URL could not be verified. This limitation is recorded, not retried or counted as a Grove failure. No hosted mutation was made in the audit. New Q evidence is `%TEMP%/grove-acceptance-audit-20261122/production-qr-check.json`; M evidence is `D:/CS175/.tools/dashboard-check/screenshots/final-20261119/report.json`, `%TEMP%/grove-recovery-20261122/browser/report.json` and `guided-qr-review/report.json`. One initial Settings contrast flag did not recur in three settled-state scans; no stable defect was established.
 
-**Code/diff review:** Fetched `origin/main` remains `40d1bcf`; branch code is the reviewed `d4a2ba1`. Both QR source/test SHA-256 values match the checked versions. Earlier Node 22.23.4 lint/typecheck/build and 210 tests (23 DB-dependent skips) remain applicable; they were not rerun for notes-only changes. QR changes stay within owned component/test files and preserve the two-QR rule; API, adapters, auth, RLS, migrations, dependencies and theme are unchanged. Added-line credential-pattern scan is clean, not a full history audit. Next.js's previously observed security-upgrade warning remains for Moses's dependency review. No new QR diff blocker found. Local commit only is authorized; push, PRs, merges and issue posting remain held.
+**Code/diff review:** Integrated fetched `origin/main` at `3c9e2da`, preserving local commits and teammates' updates. QR source/test SHA-256 values still match the reviewed versions. Corrected incoming sticker copy to two lines, "Scan in Grove / to redeem", without repeating the phrase. Fresh Node 22.23.4 lint, typecheck, 232 tests (23 DB-dependent skips) and build passed; the unchanged build retry passed after Next.js's security-upgrade reminder. Local mock export passed visual review, 1200×1200 dimensions, exact `/b/orange-peel-tacos` QR decoding and single-phrase label checks, with no page errors; preview/fixture processes stopped afterward. Our delta from main is limited to three owned component/test files and these acceptance notes; API, adapters, auth, RLS, migrations, dependencies and theme have no branch-specific changes. Added-line credential-pattern scan is clean, not a full history audit. Next.js 16.4.2's security warning remains for Moses's dependency review. Adolfo authorized this branch push; PR creation, merging into main and issue posting remain held. No new hosted result is claimed.
 
 **Completed current manual checkpoint:**
 1. Hosted Cancel action and reload persistence for `[test] Cancel 01` are now confirmed by screenshots and Adolfo's explicit "still gone after reload." This gap is closed; no further Cancel test is needed.
@@ -108,6 +108,7 @@ The current hosted checkpoint is complete. Stop testing and finalize the review/
 Chronological entries below retain the evidence available at each step; the acceptance table above is authoritative for current pass/pending status.
 
 ### 2026-11-22
+- **Push approval / integration:** Adolfo authorized pushing the completed QR fix and hosted checkpoint; broader event/PIN/printing/physical acceptance remains pending. Integrated main `3c9e2da`, retaining teammates' context and all acceptance evidence. Fixed incoming duplicated sticker wording. Fresh Node 22 lint/typecheck/build and 232 tests passed (23 DB skips); local sticker visual/export/decode checks passed. Build retry retained the Next.js security warning. No hosted tests repeated; no PR or merge into main authorized. Next: publish the reviewed branch, with deferred gates unchanged.
 - **Current hosted checkpoint complete:** Adolfo confirmed the requested live repeating/link-only feed/map/counter exclusion check after direct UCR opening had passed. Together with the fresh Cancel action/reload confirmation, the two audit gaps are closed. Preserve all previous confirmed passes and stop current testing. Source still matches the validated QR versions; only notes changed. Final scope/contract/diff/credential checks apply, with local commit authorization only. Event/PIN/printing/tablet/real-counter and publication acceptance remain separate; no private details or hosted automation added.
 - **Live link-only student opening confirmed:** Following the requested direct-link check, Adolfo reports it works for deal `926f4c12-dc29-4437-8b2f-9b91a0c8241f` in the intended UCR student session. No new redemption was requested or reported. Only feed/map/counter-page exclusion remains in the current checkpoint; no private details recorded.
 - **Repeating deal live transition/ID:** Production screenshot now shows `[test] Repeat link only 01` under Active (1), Link only/UCR-only, all seven repeat days, daily 00:00–23:59 and 0 redemptions; Scheduled is 0 and Expired remains 1. Adolfo supplied `https://grove-jade.vercel.app/deals/926f4c12-dc29-4437-8b2f-9b91a0c8241f`. This confirms its scheduled-to-active transition after the 6:26 PM campus start. Next: direct student opening and live discovery exclusion. No new redemption or private details recorded.
