@@ -2,28 +2,32 @@
 
 The project's live memory. Read this first every session. Overwrite it (don't append) whenever the current state changes, so it always describes **now**. History goes in `LOG.md`, not here.
 
-_Last updated: 2026-11-09 by Moses_
+_Last updated: 2026-11-22 by Moses_
 
 ---
 
 ## Current phase
 
-**Phase 4: Finish and pilot** (week 4 of 4, Nov 9–15). The feature freeze passed on Nov 8; Moses is finishing the open Week 2–3 code issues (see `LOG.md` → Team, 2026-11-09), then pilot, phone testing, and demo prep.
-**Week 2 gate passed (2026-11-04):** first test redemption with one sticker and two phones (#18).
-**Next gates:** a link-only deal stays out of the feed and map (needs `deals_nearby` on grove-dev); a club claims a club night and a member redeems from its link; first real redemption at a business near UCR.
-**Production:** https://grove-jade.vercel.app (every PR also gets a preview link).
+**After Week 4 (Nov 22).** The Week 4 pilot window (Nov 9–15) has passed. Positioning is final: Grove is a campus marketing agency, one $179/month plan (club nights included) plus $0.50 per verified visit (`CLAUDE.md` → What Grove is, Business model and pitch numbers).
+**Production:** https://grove-jade.vercel.app on real data (`NEXT_PUBLIC_DATA_SOURCE=supabase` since Nov 4; every PR also gets a preview link).
+**Staff-scan mode and push are stretch goals** (#19, #20, #39, #40, #60, #61, #78, #91–#93, #95, #121, #122).
 
-Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove is, MVP scope, Week plan. **Staff-scan mode is now a stretch goal** (#19, #20, #39, #40, #60, #61, #121, #78, #122).
-
-## This week's focus
-
-| Person | Focus |
+| Gate | State |
 |---|---|
-| Moses | Finishing the taken-over code issues on `moses/` branches, in order: nearby deals and truck pin (#138's work), sticker and PIN screens (#139's work), deal link through sign-in (#109), claim club night (#110), profile (#62), claim limit and location checks (#106, #38), all merged. Security pass recorded below (#41). The real-data switch has been live in Vercel since Nov 4 (`NEXT_PUBLIC_DATA_SOURCE=supabase`) |
-| Celso | Business: competitor analysis (#45), interviews (#46, #107), attendance cell (#47). Security test pass (#41) once the screens are merged |
-| Edward | Business: student survey (#67), interviews (#68, #111) |
-| Adolfo | Dashboard work from #140 (and #141, which it contains) merged by Moses on `moses/dashboard`: overview, post-deal with repeat days and visibility, sticker, redemption settings, club night posting; truck pin placed (#94). Next: club night results (#114), deal link and QR (#115), stats (#76), pilot outreach |
-| Hikaru | Business: Lean Canvas (#97), pricing (#98), interviews (#99, #118). Mapbox token (#84) to Moses by one-time link |
+| Week 1: students log in with a school Google account | Done (Oct 27) |
+| Week 2: first test redemption, one sticker and two phones; link-only deal stays out of feed and map | Done (Nov 4; link-only covered by SQL tests) |
+| Week 3: a club claims a club night and a member redeems from its link | Claim, link and owner results are on production (Nov 10); a member redeeming from a club link hasn't been run end to end yet |
+| Week 4: first real redemption at a business near UCR | Open: no pilot redemption is recorded in this repo |
+
+## Done since Nov 9
+Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night claim, profile), business dashboard (overview, post deal with repeat days and visibility, My deals with Share links and QR, club night posting, results and cancel, stats, sticker, redemption settings, truck pin), claim cap and location range check, and the #41 security pass (below).
+
+## Remaining work
+- **Pilot:** onboard a real restaurant (#79), test the dashboard at the counter (#80), first real redemption, owner-reported fixes (#81), outreach (#82).
+- **Phone checks:** security phone checks on production (#158), PWA install on Android (#159), accessibility pass (#66).
+- **Demo and pitch:** demo script (#25), pitch deck (#26), competitor slide (#44).
+- **Interviews:** restaurant and student interviews for everyone (#27, #46, #68, #83, #99; #104, #107, #111, #116, #118), student survey (#67), pricing questions (#98).
+- **Optional:** Sentry (#22).
 
 ## Open PRs (merge in this order)
 
