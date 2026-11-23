@@ -87,9 +87,9 @@ test("install events are one-shot; cancellation keeps manual instructions and st
     window.dispatchEvent(event);
     window.prevented = event.defaultPrevented;
   });
-  await page.getByRole("button", { name: "Install Grove", exact: true }).click();
+  await page.getByRole("button", { name: "Add to home screen", exact: true }).click();
   await expect(page.getByText("You can install later using the steps below.")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Install Grove", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Add to home screen", exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => ({ calls: window.promptCalls, prevented: window.prevented }))).toEqual({ calls: 1, prevented: true });
   await page.evaluate(() => window.dispatchEvent(new Event("appinstalled")));
   await expect(page.getByText("Add Grove to your home screen", { exact: true })).toHaveCount(0);
@@ -108,7 +108,7 @@ test("a rejected native install request leaves Android manual steps available", 
     event.userChoice = Promise.resolve({ outcome: "dismissed" });
     window.dispatchEvent(event);
   });
-  await page.getByRole("button", { name: "Install Grove", exact: true }).click();
+  await page.getByRole("button", { name: "Add to home screen", exact: true }).click();
   await expect(page.getByText("Use the steps below to add Grove to your home screen.")).toBeVisible();
   await expect(page.getByText(/On Android, open Grove in Chrome/)).toBeVisible();
 });

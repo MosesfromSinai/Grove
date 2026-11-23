@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { Download } from "lucide-react";
+import { SquarePlus } from "lucide-react";
 
 type InstallEvent = Event & {
   prompt(): Promise<void>;
@@ -65,7 +65,7 @@ export function InstallGuide() {
       {prompt && (
         <button type="button" onClick={() => void install()} disabled={busy}
           className="mt-3 flex min-h-11 items-center gap-2 rounded-button bg-green px-4 font-bold text-white disabled:opacity-60">
-          <Download size={18} aria-hidden="true" /> Install Grove
+          <SquarePlus size={18} aria-hidden="true" /> Add to home screen
         </button>
       )}
       <p role="status" className="mt-2 text-ink-muted">{message}</p>
