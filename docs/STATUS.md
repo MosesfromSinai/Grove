@@ -2,40 +2,46 @@
 
 The project's live memory. Read this first every session. Overwrite it (don't append) whenever the current state changes, so it always describes **now**. History goes in `LOG.md`, not here.
 
-_Last updated: 2026-11-12 by Hikaru_
+_Last updated: 2026-11-22 by Moses_
 
 ---
 
 ## Current phase
 
-**Phase 4: Finish and pilot** (week 4 of 4, Nov 9–15). The feature freeze passed on Nov 8; Moses is finishing the open Week 2–3 code issues (see `LOG.md` → Team, 2026-11-09), then pilot, phone testing, and demo prep.
-**Week 2 gate passed (2026-11-04):** first test redemption with one sticker and two phones (#18).
-**Next gates:** a link-only deal stays out of the feed and map (needs `deals_nearby` on grove-dev); a club claims a club night and a member redeems from its link; first real redemption at a business near UCR.
-**Production:** https://grove-jade.vercel.app (every PR also gets a preview link).
+**After Week 4 (Nov 22).** The Week 4 pilot window (Nov 9–15) has passed. Positioning is final: Grove is a campus marketing agency, one $179/month plan (club nights included) plus $0.50 per verified visit (`CLAUDE.md` → What Grove is, Business model and pitch numbers).
+**Production:** https://grove-jade.vercel.app on real data (`NEXT_PUBLIC_DATA_SOURCE=supabase` since Nov 4; every PR also gets a preview link).
+**Staff-scan mode and push are stretch goals** (#19, #20, #39, #40, #60, #61, #78, #91–#93, #95, #121, #122).
 
-Scope, direction, and the full week plan with gates: `CLAUDE.md` → What Grove is, MVP scope, Week plan. **Staff-scan mode is now a stretch goal** (#19, #20, #39, #40, #60, #61, #121, #78, #122).
-
-## This week's focus
-
-| Person | Focus |
+| Gate | State |
 |---|---|
-| Moses | Finishing the taken-over code issues on `moses/` branches, in order: nearby deals and truck pin (#138's work), sticker and PIN screens (#139's work), deal link through sign-in (#109), claim club night (#110), profile (#62), claim limit and location checks (#106, #38), all merged. Security pass recorded below (#41). The real-data switch has been live in Vercel since Nov 4 (`NEXT_PUBLIC_DATA_SOURCE=supabase`) |
-| Celso | Business: competitor analysis (#45), interviews (#46, #107), attendance cell (#47). Security test pass (#41) once the screens are merged |
-| Edward | Business: student survey (#67), interviews (#68, #111) |
-| Adolfo | Dashboard work from #140 (and #141, which it contains) merged by Moses on `moses/dashboard`: overview, post-deal with repeat days and visibility, sticker, redemption settings, club night posting; truck pin placed (#94). Next: club night results (#114), deal link and QR (#115), stats (#76), pilot outreach |
-| Hikaru | Week 4 #96 map performance/polish and reassigned #63 install guide implemented on `hikaru/week4-map-polish`; 210 unit and 4 browser checks pass. Physical iPhone check is a user-reported pass (Nov 12); Android installation (#159), shared-Drive publication of the prepared pricing/interview guide (#98), and real interview notes (#99/#118) remain. #97 is closed after reviewing the completed canvas in the supplied export. #84/#85 are closed on GitHub |
+| Week 1: students log in with a school Google account | Done (Oct 27) |
+| Week 2: first test redemption, one sticker and two phones; link-only deal stays out of feed and map | Done (Nov 4; link-only covered by SQL tests) |
+| Week 3: a club claims a club night and a member redeems from its link | Claim, link and owner results are on production (Nov 10); a member redeeming from a club link hasn't been run end to end yet |
+| Week 4: first real redemption at a business near UCR | Open: no pilot redemption is recorded in this repo |
 
-## Open PRs (merge in this order)
+## Done since Nov 9
+Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night claim, profile), business dashboard (overview, post deal with repeat days and visibility, My deals with Share links and QR, club night posting, results and cancel, stats, sticker, redemption settings, truck pin), claim cap and location range check, and the #41 security pass (below).
 
-One `moses/` branch at a time; each merges when CI passes.
+## Remaining work
+- **Pilot:** onboard a real restaurant (#79), test the dashboard at the counter (#80), first real redemption, owner-reported fixes (#81), outreach (#82).
+- **Phone checks:** security phone checks on production (#158), PWA install on Android (#159), accessibility pass (#66).
+- **Demo and pitch:** demo script (#25), pitch deck (#26), competitor slide (#44).
+- **Interviews:** restaurant and student interviews for everyone (#27, #46, #68, #83, #99; #104, #107, #111, #116, #118), student survey (#67), pricing questions (#98).
+- **Optional:** Sentry (#22).
+
+## Open PRs
+See the 2026-11-22 report in `LOG.md`; open PRs are reviewed and merged by Moses this session.
 
 ## Blockers
 
-- **Real data:** Moses recorded passing local SQL tests, but the last hosted-migration note still says `20261102000000_nearby_and_truck_location.sql` is not applied to grove-dev. This conflicts with the already-live real-data switch above; Moses should confirm the hosted migration state. No hosted database check was performed in Hikaru’s Nov 12 session.
-- **Phone installation (#159):** #84/#85 and manifest/icons #119 are closed. Hikaru reported that PR #162’s preview works on their physical iPhone (Nov 12). Model/iOS version and per-step results were not supplied. Android installation remains pending; #159 stays open. Phone performance has no measured device results. The renderer benchmark uses local blank tiles without a provider token.
-- **Test data:** delete Grove Test Kitchen (ids starting `7e57`) from grove-dev before the switch; it would show as a pin near campus.
+- **Interview results:** none recorded in this repo; they live in the shared Drive folder. The pitch numbers in `CLAUDE.md` are estimates until interviews confirm them.
 - **Settings (done):** Vercel Authentication is off for previews. `NEXT_PUBLIC_SITE_URL` is set for Production only, so previews sign in on their own domain. Supabase Auth on grove-dev is Google-only; its Redirect URLs are `https://grove-jade.vercel.app/**`, `http://localhost:3000/**`, and `https://grove-*-mosesfromsinais-projects.vercel.app/**`.
 - **Everyone:** CI ("Lint, typecheck, build") runs `npm test` too. Run `npm run lint && npm run typecheck && npm test && npm run build` (Node 22) before pushing. SQL tests: `npx supabase@2.122.0 db reset && npx supabase@2.122.0 test db` with Docker running.
+
+## Changes in teammates' areas (2026-11-22, Moses, temporary override)
+- Hikaru's `docs/team/hikaru.md` #98: pricing questions updated to the $179/month plan plus $0.50 per visit.
+- Adolfo's `docs/team/adolfo.md` #74 and #82: sticker copy is "Scan in Grove to redeem"; pilot offer is "first campaign free".
+- Adolfo's `components/business/render-sticker.ts`: sticker text "Scan in the Grove app" → "Scan in Grove to redeem" (no download framing).
 
 ## Pilot owner setup (Moses, by hand)
 
@@ -97,6 +103,8 @@ Redeeming by sticker needs you within 150 m of the business (seed coordinates ar
 | Out-of-range location is `INVALID_LOCATION` | `redeem.test.sql`, `redeem.db.test.ts` | Pass |
 | `grove_next` can't open-redirect | `lib/auth/next-path.test.ts` (`//`, `/\`, schemes, control characters, `/auth/*` rejected); callback redirects only to a same-site path | Pass |
 | One business can't read or change another's deals, redemptions, club nights or pin | New `cross_business.test.sql` (12 checks, Orange Peel's owner against Pepper Tree) | Pass |
+| No keys in the repo or its git history (#43, Celso, 2026-11-22) | gitleaks on all 336 commits (every branch, merge diffs included); working-tree hits are only git-ignored local files | Pass |
+| Signed-out visitors read only public data (#156, Celso, 2026-11-22) | `anon_browse.test.sql` (22 checks): no redemptions, profiles, members, club nights or attempts; no link-only deals in discovery; no writes; no redeem or claim functions | Pass |
 
 **Phone checks on production (manual):**
 1. Screenshot a Redeemed screen and show it later: the live clock and animation give it away.
@@ -110,15 +118,15 @@ Redeeming by sticker needs you within 150 m of the business (seed coordinates ar
 
 | Decision | Owner | Needed by |
 |---|---|---|
-| Pricing: per verified visit (~$0.50–1, monthly cap) plus a flat fee for club nights; first deal free for pilots. Still to be validated | Hikaru (with everyone's interviews) | Before the pitch deck |
-| MVP demo date (week dates assume a demo around Nov 16–20; re-date the plan once it's set) | Team | Next sync |
+| Demo date | Team | Next sync |
 | Final name ("Grove" may be trademarked) | Team | Before slides are final |
+| Where `/` sends signed-out visitors: still `/sign-in` after #156, or straight to `/feed` so they can browse first | Team (Celso changes the routing; Moses reviews) | Before the demo |
 | Which campus channels to pursue (clubs, fraternities, student ambassadors); none confirmed | Team | Before club night outreach |
 
 ## Business status
 
-- Interviews: the supplied Activity 2 contains earlier group business discovery, so the old “0 done” note was stale. Current individual H1–H4/H5 interview completion is not established by those aggregate results. Hikaru’s #99/#118 remain open; a guide and blank notes form are prepared outside the public repo.
-- Lean Canvas (#97): completed content is present in the supplied Team-01-Grove export, Activity 2 section 4, including the previously listed blank sections; the project is Grove. Closed after that review on Nov 12. No live shared document was edited in this audit.
-- Pricing/interview guide (#98): completed as a local Word document using the earlier team findings; shared-Drive publication awaits the folder/guide URL. Research documents and private team records are not committed here.
-- Pilot businesses signed: **0.** Offer: first deal free. Target: at least one signed by Nov 6 for the Week 4 pilot.
-- Effort table: Celso's attendance cell is blank.
+- **Pricing (decided 2026-11-22):** one $179/month plan for 9 school months, club nights included, plus $0.50 per verified visit; first campaign free for pilot restaurants. Interviews still test it (#98).
+- Interviews (five hypotheses, see `CLAUDE.md` → Business): individual results aren't recorded in this repo; notes live in the shared Drive folder.
+- Lean Canvas: Hikaru closed #97 on Nov 12 after reviewing the completed Activity 2 canvas.
+- Pilot businesses signed: none recorded in this repo. Offer: first campaign free.
+- Effort table: Celso's attendance cell (#47) is still open.

@@ -58,7 +58,7 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 
 ### Business
 - [x] Lean Canvas content (#97): all requested sections already present in the supplied Team-01-Grove export, Activity 2 section 4; project name is Grove. Closed after reviewing that evidence on Nov 12; no live Drive edit claimed.
-- [ ] Pricing questions and findings in shared Drive (#98): a four-page Word guide is prepared locally, with pricing questions, earlier team findings, H1–H5 prompts and a blank notes form. Shared-folder upload still needs the folder/guide URL. No new interview answers were created.
+- [ ] Pricing questions and findings in shared Drive (#98): a four-page Word guide is prepared locally, with pricing questions, earlier team findings, H1–H5 prompts and a blank notes form. Update its pricing questions to the final plan ($179/month for 9 school months, club nights included, plus $0.50 per verified visit; first campaign free) before uploading. Shared-folder upload still needs the folder/guide URL. No new interview answers were created.
 - [ ] 1–2 restaurant interviews (hypotheses 1–4, see `CLAUDE.md` → Business); notes in the shared Drive folder (#99)
 - [ ] At least one student interview (hypothesis 5, see `CLAUDE.md` → Business); notes in the shared Drive folder (#118)
 
