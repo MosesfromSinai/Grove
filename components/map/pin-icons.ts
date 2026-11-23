@@ -22,6 +22,8 @@ export const pinLabel = (business: MapBusiness) =>
 export function pinElement(business: MapBusiness): HTMLButtonElement {
   const button = document.createElement("button");
   button.type = "button";
+  // Mapbox otherwise assigns role="img" to its marker element.
+  button.setAttribute("role", "button");
   button.className = pinClass(business);
   button.setAttribute("aria-label", pinLabel(business));
   const name = document.createElement("span");

@@ -42,3 +42,6 @@ AGENTS.md
 # supabase cli local state
 supabase/.temp/
 supabase/.branches/
+
+# browser verification artifacts
+/test-results/

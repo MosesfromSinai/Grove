@@ -1,0 +1,6 @@
+/* Only the fixture shell: pin/map styles come from the real component. */
+:root { --color-border-strong: #e3dccb; --radius-card: 24px; --color-bg-student: #fbf7ef; --color-green-tint: #ddf0e2; --color-surface: white; --color-ink-muted: #4f564d; --color-green-dark: #135c33; --color-ink: #1a2019; --color-orange: #ff8a1f; --color-green: #1e7a46; --shadow-card: 0 2px 12px #1a201912; }
+body { margin: 0; background: var(--color-bg-student); font: 16px system-ui; }
+main { max-width: 430px; margin: auto; padding: 16px; }
+button, summary { min-height: 44px; }
+output { display: block; }
