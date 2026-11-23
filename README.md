@@ -2,7 +2,7 @@
 
 **Where food finds its campus.**
 
-Grove is a marketing company for locally owned restaurants and food trucks near a college campus. Restaurants pay us to bring in students, especially on slow days. The Grove app runs the deals and proves every visit: students redeem in store by scanning the counter sticker. Launching at UC Riverside. Built for CS 175 (Entrepreneurship in Computing), Fall 2026.
+Grove is a campus marketing agency: restaurants pay us to fill their slow days with students, and our app proves every visit. Independent restaurants and food trucks near campus get a campaign (flyers, club outreach, tabling, club nights, the counter sticker and a monthly verified-visit report) for one plan of $179/month plus $0.50 per verified visit. Students open Grove in the browser from a flyer or club link, with no download, and redeem in store by scanning the counter sticker. Launching at UC Riverside. Built for CS 175 (Entrepreneurship in Computing), Fall 2026.
 
 **Production:** https://grove-jade.vercel.app
 

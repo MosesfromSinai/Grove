@@ -37,7 +37,7 @@ _Last updated: 2026-11-06_
 ### Week 2 — Live data, stickers, repeat days (Oct 26–Nov 1)
 - [ ] Wire onboarding, posting, and My deals to real tables (#73) — supported adapters implemented/tested locally; authorized real-database verification, provisioning/Storage, and review remain pending
 - [ ] Repeat days and visibility on the post-deal form: day checkboxes, daily start/end time, public or link-only (while wiring it to real tables) (#112) — controls, normalized mocks/real payloads, and local behavior verified; contract review and hosted acceptance pending
-- [ ] Printable sticker: configured origin + `/b/<qr_slug>`, Grove branding, "Scan in the Grove app to redeem," downloadable PNG (#74) — local 3/4/6-inch export/decoding verified; shared review, hosted read, and physical print/phone acceptance pending
+- [ ] Printable sticker: configured origin + `/b/<qr_slug>`, Grove branding, "Scan in Grove to redeem," downloadable PNG (#74) — local 3/4/6-inch export/decoding verified; shared review, hosted read, and physical print/phone acceptance pending
 - [ ] Overview page: today's and this week's redemptions, active deals, live visit feed via Realtime (#75) — implemented/tested locally; review and authorized hosted RLS/Realtime acceptance pending
 
 ### Week 3 — Stats, settings, staff scanner, club nights (Nov 2–8)
@@ -57,7 +57,7 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 - [ ] Fix or file every issue owners report during the pilot (#81)
 
 ### Business
-- [ ] Pilot outreach: contact local businesses near UCR, track in the shared Drive folder, aim for 2–3 signed, at least one by Nov 6 for the Week 4 pilot; first deal free for pilot restaurants (#82)
+- [ ] Pilot outreach: contact local businesses near UCR, track in the shared Drive folder, aim for 2–3 signed, at least one by Nov 6 for the Week 4 pilot; first campaign free for pilot restaurants (#82)
 - [ ] 1–2 restaurant interviews (hypotheses 1–4, see `CLAUDE.md` → Business); notes in the shared Drive folder (#83)
 - [ ] At least one student interview (hypothesis 5, see `CLAUDE.md` → Business); notes in the shared Drive folder (#116)
 
