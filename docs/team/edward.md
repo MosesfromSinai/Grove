@@ -35,28 +35,29 @@ _Last updated: 2026-10-27_
 - [x] Deal detail page with the orange "Redeem in store" button (#52)
 
 ### Week 2 — Sticker redemption and link-only deals (Oct 26–Nov 1)
-- [ ] Scanner page with `html5-qrcode` (not the built-in detector; Safari lacks it) (#53)
-- [ ] Ask for location before scanning; clear message if denied, with the PIN backup link (#54)
+- [x] Scanner page with `html5-qrcode` (not the built-in detector; Safari lacks it) (#53)
+- [x] Ask for location before scanning; clear message if denied, with the PIN backup link (#54) — done by Moses, merged
 - [x] Call `redeem`; show a friendly message for every `ErrorCode` (#55)
 - [x] Redeemed screen: big green check, deal and business name, live ticking clock, moving animation (#56)
-- [ ] Sticker landing page `/b/[slug]`: live public deals, or "No deals right now" (#57)
-- [ ] PIN entry screen calling `redeem-pin` (#58)
-- [ ] Swap mocks for real queries (#59)
-- [ ] Hide link-only deals from the feed and the sticker landing page (public deals only) (#108)
-- [ ] Open link-only deals from their link: `/deals/<id>` works for public and link-only deals (#109)
+- [x] Sticker landing page `/b/[slug]`: live public deals, or "No deals right now" (#57) — done by Moses, merged
+- [x] PIN entry screen calling `redeem-pin` (#58) — done by Moses, merged
+- [x] Swap mocks for real queries (#59) — done by Moses, merged
+- [x] Hide link-only deals from the feed and the sticker landing page (public deals only) (#108) — done by Moses, merged
+- [x] Open link-only deals from their link: `/deals/<id>` works for public and link-only deals (#109) — done by Moses, merged
 
 ### Week 3 — Staff mode, club nights, profile (Nov 2–8)
 - [ ] Show-your-code screen: QR from `issue-code`, refreshes every ~30 s with a countdown, screen stays bright (#60)
 - [ ] Switch to Redeemed screen when the staff scan lands (Realtime) (#61)
-- [ ] Profile: name, school, past redemptions, sign out (#62)
-- [ ] Claim a club night: list open club nights, type the club name, claim, then show the link and QR to share with members (#110)
+- [x] Profile: name, school, past redemptions, sign out (#62) — done by Moses, merged
+- [x] Claim a club night: list open club nights, type the club name, claim, then show the link and QR to share with members (#110) — done by Moses, merged
 
 _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 
 ### Week 4 — Polish, no new features (Nov 9–15)
-- [ ] Test on iPhone Safari and Android Chrome over HTTPS (#64)
-- [ ] Loading, empty, and error messages on every student screen (no new offline features) (#65)
-- [ ] Accessibility: contrast, tap targets, screen reader labels (#66)
+- [x] Test on iPhone Safari and Android Chrome over HTTPS (#64)
+- [x] Loading, empty, and error messages on every student screen (no new offline features) (#65)
+- [x] Accessibility: contrast, tap targets, screen reader labels (#66)
+- [ ] Browse without signing in, student side: "Sign in with your UCR email to redeem" note on deal pages when signed out, and a Sign in tab in place of Profile (#157)
 
 ### Business
 - [ ] Student survey: how students find food deals now, which apps they check, would they use Grove. Results in the shared Drive folder (#67)
@@ -64,7 +65,7 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 - [ ] At least one student interview (hypothesis 5, see `CLAUDE.md` → Business); notes in the shared Drive folder (#111)
 
 ### Stretch goal (possible future implementation)
-- [ ] "Add to Home Screen" prompt (needed for iPhone push) (#63)
+- [x] "Add to Home Screen" prompt (needed for iPhone push) (#63) — done by Hikaru (#162)
 
 ---
 
