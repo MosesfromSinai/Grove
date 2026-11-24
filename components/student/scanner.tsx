@@ -126,18 +126,34 @@ export function Scanner() {
   }
 
   return (
-    <div>
-      <h1 className="mb-4 text-2xl">Scan the counter sticker</h1>
+    // Dark full-screen scanner, like canvas screen 6.
+    <div className="-mx-4 -mt-4 flex min-h-[calc(100dvh-6rem)] flex-col bg-ink px-5 pt-5 pb-8 text-white">
+      <div className="flex items-center justify-between gap-3">
+        <Link href={`/deals/${dealId}`} aria-label="Close scanner" className="flex size-11 items-center justify-center rounded-full bg-white/10">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
+        </Link>
+        <span className="rounded-pill bg-white/10 px-4 py-1.5 text-xs font-extrabold tracking-widest text-white/80">REDEEMING</span>
+        <span className="size-11" aria-hidden="true" />
+      </div>
+      {position && (
+        <p className="mx-auto mt-6 flex items-center gap-2 rounded-pill bg-green px-4 py-2 text-sm font-bold">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
+          Location on
+        </p>
+      )}
 
-      {phase === "locating" && <p role="status" className="text-ink-muted">Checking your location…</p>}
+      {phase === "locating" && <p role="status" className="mt-10 text-center text-white/80">Checking your location…</p>}
 
       {phase === "scanning" && (
         <>
-          <div id="qr-reader" className="overflow-hidden rounded-card" />
-          <p className="mt-3 text-sm text-ink-muted">Point your camera at the Grove sticker at the counter.</p>
-          {notSticker && <p role="status" className="mt-2 text-sm font-semibold text-brown">That isn&apos;t a Grove sticker.</p>}
+          <div className="relative mx-auto mt-6 w-full max-w-xs rounded-card p-2 [box-shadow:inset_0_0_0_3px_var(--color-orange)]">
+            <div id="qr-reader" className="overflow-hidden rounded-button" />
+          </div>
+          {notSticker && <p role="status" className="mt-3 text-center text-sm font-semibold text-orange-light">That isn&apos;t a Grove sticker.</p>}
         </>
       )}
+      <h1 className="mt-8 text-center text-3xl text-white">Scan the Grove code at the counter.</h1>
+      <p className="mt-2 text-center text-white/80">Hold steady. It scans on its own.</p>
 
       {phase === "redeeming" && <p role="status" className="mt-6 text-center text-white/80">Checking your visit…</p>}
 
