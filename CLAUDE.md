@@ -124,7 +124,7 @@ Each person does 1–2 restaurant interviews (1–4) and at least one student in
 
 ## Stack
 
-Next.js 16 (App Router) + React + TypeScript PWA on Vercel, Node 22 (pinned in `.nvmrc` and `package.json` engines; run `nvm use`). Supabase for Postgres + PostGIS, Auth (Google), Storage, Edge Functions, Realtime. Mapbox GL JS. `qrcode` and `html5-qrcode` (Safari has no built-in QR reader). Tailwind + shadcn/ui. Recharts. Sentry. Stretch goal only: Web Push with VAPID, Resend for email.
+Next.js 16 (App Router) + React + TypeScript PWA on Vercel, Node 22 (pinned in `.nvmrc` and `package.json` engines; run `nvm use`). Supabase for Postgres + PostGIS, Auth (Google), Storage, Edge Functions, Realtime. Mapbox GL JS. `qrcode` and `html5-qrcode` (Safari has no built-in QR reader). Tailwind + shadcn/ui. CSS bars for stats. Sentry (optional, #22). Stretch goal only: Web Push with VAPID, Resend for email.
 
 ## Redemption rules
 
