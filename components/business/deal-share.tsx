@@ -10,21 +10,27 @@ import { dealQrPng, dealUrl, qrFileName } from "@/lib/deal-link";
 export function DealShare({ deal }: { deal: Pick<MyDeal, "id" | "title" | "visibility"> }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
-  const [url, setUrl] = useState("");
-  const [qr, setQr] = useState<string | null>(null);
+  const [link, setLink] = useState<{ id: string; url: string } | null>(null);
+  const [asset, setAsset] = useState<{ id: string; attempt: number; png: string | null } | null>(null);
+  const [attempt, setAttempt] = useState(0);
   const [copied, setCopied] = useState<"yes" | "failed" | null>(null);
+  const url = link?.id === deal.id ? link.url : "";
+  const current = asset?.id === deal.id && asset.attempt === attempt ? asset : null;
+  const qr = current?.png;
 
   useEffect(() => {
     if (!open) return;
     const link = dealUrl(window.location.origin, deal.id);
     let active = true;
-    queueMicrotask(() => active && setUrl(link));
-    dealQrPng(link).then((png) => active && setQr(png)).catch(() => {}); // the link still works without the QR
-    dialog.current?.showModal();
+    queueMicrotask(() => active && setLink({ id: deal.id, url: link }));
+    dealQrPng(link)
+      .then((png) => active && setAsset({ id: deal.id, attempt, png }))
+      .catch(() => active && setAsset({ id: deal.id, attempt, png: null }));
+    if (!dialog.current?.open) dialog.current?.showModal();
     return () => {
       active = false;
     };
-  }, [open, deal.id]);
+  }, [open, deal.id, attempt]);
 
   async function copy() {
     try {
@@ -36,7 +42,7 @@ export function DealShare({ deal }: { deal: Pick<MyDeal, "id" | "title" | "visib
   }
 
   return <>
-    <Button variant="outline" onClick={() => { setCopied(null); setOpen(true); }} className="rounded-button">
+    <Button variant="outline" onClick={() => { setCopied(null); setAsset(null); setOpen(true); }} className="rounded-button">
       <Share2 aria-hidden="true" className="size-4" />Share
     </Button>
     <dialog ref={dialog} aria-labelledby={`share-${deal.id}`} onClose={() => setOpen(false)}
@@ -48,10 +54,12 @@ export function DealShare({ deal }: { deal: Pick<MyDeal, "id" | "title" | "visib
         </p>
         <p className="mt-4 break-all rounded-button bg-surface p-3 text-sm font-semibold">{url}</p>
         <div className="mt-3 flex flex-wrap gap-3">
-          <Button onClick={copy} className="rounded-button">{copied === "yes" ? "Copied" : "Copy link"}</Button>
+          <Button onClick={copy} disabled={!url} className="rounded-button">{copied === "yes" ? "Copied" : "Copy link"}</Button>
           {qr && <a href={qr} download={qrFileName(deal.title)} className="inline-flex min-h-11 items-center font-bold text-green-dark underline">Download QR</a>}
         </div>
         {copied === "failed" && <p role="alert" className="mt-2 text-sm text-destructive">Couldn&apos;t copy. Select the link and copy it by hand.</p>}
+        {!current ? <p role="status" className="mt-3 text-sm text-ink-muted">Preparing QR…</p>
+          : !qr && <div className="mt-3"><p role="alert" className="text-sm text-destructive">Couldn&apos;t prepare the QR. You can still copy the deal link.</p><Button variant="outline" onClick={() => setAttempt(value => value + 1)} className="mt-2 rounded-button">Retry QR</Button></div>}
         {/* eslint-disable-next-line @next/next/no-img-element -- generated data URL */}
         {qr && <img src={qr} alt={`QR code for ${deal.title}`} className="mx-auto mt-4 size-48" />}
         <p className="mt-4 text-xs text-ink-fine">This link only opens the deal. Students still redeem with the counter sticker.</p>

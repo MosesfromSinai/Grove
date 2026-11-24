@@ -24,6 +24,7 @@ Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night
 
 ## Remaining work
 - **Pilot:** onboard a real restaurant (#79), test the dashboard at the counter (#80), first real redemption, owner-reported fixes (#81), outreach (#82).
+- **#80 (Adolfo, Nov 22):** the hosted checkpoint on his dedicated test business passed (posting, sharing, at-home sticker redemption, counts, Stats, End now, Cancel, repeating link-only). Still pending: Realtime event delivery, PIN, printing, and owner phone/tablet at a real counter. Clean up test data by that business's ID, not with the broad `[test]%` snippet below, so other testers' rows stay.
 - **Phone checks:** security phone checks on production (#158), PWA install on Android (#159).
 - **Demo and pitch:** demo script (#25), pitch deck (#26), competitor slide (#44).
 - **Interviews:** restaurant and student interviews for everyone (#27, #46, #68, #83, #99; #104, #107, #111, #116, #118), student survey (#67), pricing questions (#98).
