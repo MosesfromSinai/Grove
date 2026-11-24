@@ -29,9 +29,22 @@ export function RedeemedView({ redemption }: { redemption: Redemption }) {
         </span>
       </div>
       <h1 className="mt-4 text-center text-5xl text-white">Redeemed!</h1>
-      <p className="mt-4 text-center text-lg font-semibold">{redemption.deal_title}</p>
-      <p className="text-center">{redemption.business_name}</p>
-      <p className="text-center font-heading text-4xl font-extrabold tabular-nums">{now.toLocaleTimeString()}</p>
+      <section className="mt-8 rounded-card bg-surface p-5 text-ink shadow-card">
+        <p className="text-sm font-semibold text-ink-muted">{redemption.business_name}</p>
+        <p className="font-heading text-2xl font-extrabold">{redemption.deal_title}</p>
+        <div className="mt-4 flex items-end justify-between gap-3 border-t border-border pt-4">
+          <div>
+            <p className="text-xs font-extrabold tracking-widest text-ink-muted">LIVE TIME</p>
+            <p className="font-heading text-4xl font-extrabold tabular-nums text-green-dark">{now.toLocaleTimeString()}</p>
+            <p className="text-sm text-ink-muted">{now.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · redeemed just now</p>
+          </div>
+          <span className="rounded-pill bg-green-tint px-3 py-1 text-sm font-extrabold text-green-dark">LIVE</span>
+        </div>
+        <p className="mt-3 flex items-center gap-2 text-sm text-ink-muted">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="m9 12 2 2 4-4" /></svg>
+          Verified UCR student
+        </p>
+      </section>
       <p className="mt-8 text-center font-heading text-2xl font-extrabold">Show this to the cashier.</p>
       <Link href="/feed" className="mt-auto flex min-h-13 items-center justify-center rounded-button border-2 border-white/60 font-extrabold text-white">
         Done
