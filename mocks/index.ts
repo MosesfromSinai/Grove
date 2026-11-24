@@ -279,7 +279,11 @@ export async function getBusinessStats(input: {
     count,
   }));
   const perHour = src.perHour.map(([hour, count]) => ({ hour, count }));
-  return delay({ perDeal, perHour, total: perDeal.reduce((sum, d) => sum + d.count, 0) });
+  const total = perDeal.reduce((sum, d) => sum + d.count, 0);
+  // Sample split for the demo data: about 3 visits per student, a third of them returning.
+  const studentsInRange = Math.round(total / 3);
+  const returningStudents = Math.round(studentsInRange / 3);
+  return delay({ perDeal, perHour, total, newStudents: studentsInRange - returningStudents, returningStudents });
 }
 
 export async function getMyDeals(input: { businessId: string }): Promise<MyDeal[]> {

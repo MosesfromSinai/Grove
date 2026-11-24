@@ -158,6 +158,9 @@ export type BusinessStats = {
   perDeal: { deal_id: string; title: string; count: number }[];
   perHour: { hour: number; count: number }[]; // hour 0–23, local time
   total: number;
+  // Distinct students in the range: first visit here vs. visited this business before `from`.
+  newStudents?: number;
+  returningStudents?: number;
 };
 
 export type BusinessOverview = { today: number; week: number; recentVisits: Redemption[]; as_of: string };

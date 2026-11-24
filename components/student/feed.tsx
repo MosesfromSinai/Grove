@@ -51,21 +51,21 @@ export function Feed() {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <p className="text-sm text-ink-muted">{where}</p>
-        {status === "located" ? (
-          <button onClick={backToCampus} className="min-h-11 rounded-pill px-4 text-sm font-semibold text-green-dark">
-            Back to campus
-          </button>
-        ) : (
-          <button
-            onClick={locate}
-            disabled={status === "locating"}
-            className="min-h-11 rounded-pill bg-green-tint px-4 text-sm font-semibold text-green-dark disabled:opacity-50"
-          >
-            Use my location
-          </button>
-        )}
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-4xl">Deals</h1>
+          <p className="mt-1 text-ink-muted">
+            {loading || !result ? where : `${result.deals.length || "Nothing"} live ${status === "located" ? "near you" : "near campus"} right now`}
+          </p>
+        </div>
+        <button
+          onClick={status === "located" ? backToCampus : locate}
+          disabled={status === "locating"}
+          className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-pill border border-border-strong bg-surface px-4 text-sm font-bold text-ink disabled:opacity-50"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
+          {status === "located" ? "Back to campus" : "Nearest"}
+        </button>
       </div>
 
       <Link
@@ -91,8 +91,8 @@ export function Feed() {
         <p role="status" className="py-10 text-center text-ink-muted">No deals right now. Check back soon.</p>
       ) : (
         <ul className="space-y-4">
-          {result?.deals.map((deal) => (
-            <DealCard key={deal.deal_id} deal={deal} />
+          {result?.deals.map((deal, i) => (
+            <DealCard key={deal.deal_id} deal={deal} index={i} />
           ))}
         </ul>
       )}
