@@ -2,7 +2,7 @@
 
 The project's live memory. Read this first every session. Overwrite it (don't append) whenever the current state changes, so it always describes **now**. History goes in `LOG.md`, not here.
 
-_Last updated: 2026-11-23 by Moses_
+_Last updated: 2026-11-24 by Moses_
 
 ---
 
@@ -28,15 +28,18 @@ Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night
 - **Demo and pitch:** demo script (#25), pitch deck (#26), competitor slide (#44).
 - **Interviews:** restaurant and student interviews for everyone (#27, #46, #68, #83, #99; #104, #107, #111, #116, #118), student survey (#67), pricing questions (#98).
 - **Optional:** Sentry (#22).
+- **Week 3 gate:** a club member redeems from a club night link end to end on production.
+- **Root route:** signed-out visitors at `/` go to `/feed` (decided 2026-11-24); ships on `moses/root-to-feed` after #168 merges.
 
 ## Open PRs
 - **#163 (Hikaru, push notifications): blocked.** Stretch goal; adds a migration, the `notify-deal` function, VAPID secrets and a cron job, and needs Supabase and Vercel setup plus a team decision. Left open and untouched.
 - **#166 (Moses, stats and share tweaks):** waiting for Moses's preview check.
+- **#168 (Moses, design match):** waiting for Moses's preview check; merge after #166.
+- **#169 (Moses, Next.js 16.4.6):** waiting for Moses's preview check; merge after #168.
 
 ## Blockers
 
-- **Next.js 16.4.2:** `next build` reports a known security vulnerability (the build stops every other run with a notice). Upgrade on its own branch (`moses/next-upgrade`).
-- **Open decision from Celso (#164):** where `/` sends signed-out visitors: `/sign-in` or straight to `/feed`.
+- **Next.js 16.4.2:** `next build` reports a known security vulnerability (the build stops every other run with a notice). Fix is in #169 (16.4.2 → 16.4.6); remove this line once it merges.
 - **Interview results:** none recorded in this repo; they live in the shared Drive folder. The pitch numbers in `CLAUDE.md` are estimates until interviews confirm them.
 - **Settings (done):** Vercel Authentication is off for previews. `NEXT_PUBLIC_SITE_URL` is set for Production only, so previews sign in on their own domain. Supabase Auth on grove-dev is Google-only; its Redirect URLs are `https://grove-jade.vercel.app/**`, `http://localhost:3000/**`, and `https://grove-*-mosesfromsinais-projects.vercel.app/**`.
 - **Everyone:** CI ("Lint, typecheck, build") runs `npm test` too. Run `npm run lint && npm run typecheck && npm test && npm run build` (Node 22) before pushing. SQL tests: `npx supabase@2.122.0 db reset && npx supabase@2.122.0 test db` with Docker running.
@@ -130,8 +133,7 @@ Redeeming by sticker needs you within 150 m of the business (seed coordinates ar
 |---|---|---|
 | Demo date | Team | Next sync |
 | Final name ("Grove" may be trademarked) | Team | Before slides are final |
-| Where `/` sends signed-out visitors: still `/sign-in` after #156, or straight to `/feed` so they can browse first | Team (Celso changes the routing; Moses reviews) | Before the demo |
-| Which campus channels to pursue (clubs, fraternities, student ambassadors); none confirmed | Team | Before club night outreach |
+| Which clubs and fraternities to pursue; none confirmed (paid student ambassadors at new campuses from Year 2 are decided) | Team | Before club night outreach |
 
 ## Business status
 
@@ -139,4 +141,6 @@ Redeeming by sticker needs you within 150 m of the business (seed coordinates ar
 - Interviews (five hypotheses, see `CLAUDE.md` → Business): individual results aren't recorded in this repo; notes live in the shared Drive folder.
 - Lean Canvas: Hikaru closed #97 on Nov 12 after reviewing the completed Activity 2 canvas.
 - Pilot businesses signed: none recorded in this repo. Offer: first campaign free.
+- **Financial model (2026-11-24):** Financial Modeling of Grove in the Team-01-Grove Drive folder. Founders unpaid until Year 3; 3 paid student ambassadors per new campus from Year 2; 25 Staples flyers per restaurant per monthly campaign; Year 1 costs about $2.8K. Numbers are projections.
+- Pitch deck says "8 of 10 restaurants we interviewed": confirm against the interview notes in Drive before presenting.
 - Effort table: Celso's attendance cell (#47) is still open.
