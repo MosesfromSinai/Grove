@@ -173,7 +173,7 @@ export function MyDeals() {
               </div>
               <p className="text-sm text-ink-muted"><span className="font-heading text-2xl font-extrabold tabular-nums text-ink">{deal.redemption_count.toLocaleString()}</span><span className="ml-2 xl:ml-0 xl:block">redeemed so far</span></p>
               <div className="flex flex-wrap items-center gap-2 justify-self-start xl:justify-self-end">
-                <DealShare deal={deal} />
+                {(deal.status === "live" || deal.status === "scheduled") && <DealShare deal={deal} />}
                 {canEnd ? <Button variant="destructive" disabled={busy} onClick={() => ask(deal, "end")} className="rounded-button">End now</Button>
                   : deal.status === "scheduled" ? (deal.redemption_count === 0 ? <Button variant="outline" disabled={busy} onClick={() => ask(deal, "cancel")} className="rounded-button">Cancel</Button> : <p className="text-xs text-ink-fine">Recorded visits prevent cancellation.</p>)
                     : <span className="text-sm font-bold text-ink-fine">Ended</span>}

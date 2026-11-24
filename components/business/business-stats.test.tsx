@@ -12,6 +12,8 @@ const week = {
   perDeal: [{ deal_id: "d1", title: "$2 off any burrito", count: 86 }, { deal_id: "d2", title: "Free horchata", count: 43 }],
   perHour: [{ hour: 12, count: 38 }, { hour: 16, count: 6 }],
   total: 129,
+  newStudents: 30,
+  returningStudents: 12,
 };
 let root: Root; let container: HTMLDivElement;
 beforeEach(() => {
@@ -34,6 +36,7 @@ test("shows the total, per-deal bars and the peak hour", async () => {
   expect(text()).toContain("129 verified redemptions in the last 7 days");
   expect(text()).toContain("$2 off any burrito");
   expect(text()).toContain("Peak: 12 PM");
+  expect(text()).toContain("New students: 30 · Returning (visited before this range): 12");
   expect(text()).toContain("Quietest hour with any visits: 4 PM");
   expect(container.querySelector('[role="img"]')!.getAttribute("aria-label")).toContain("Busiest hour: 12 PM");
 });
@@ -51,6 +54,7 @@ test("no visits shows the empty state", async () => {
   api.stats.mockResolvedValue({ perDeal: [], perHour: [], total: 0 });
   await show();
   expect(text()).toContain("No verified redemptions in this range yet");
+  expect(text()).not.toContain("New students");
 });
 
 test("a failed load says so", async () => {

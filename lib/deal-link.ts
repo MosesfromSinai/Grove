@@ -10,8 +10,9 @@ export async function dealQrPng(url: string): Promise<string> {
   return QRCode.toDataURL(url, { margin: 2, width: 480, errorCorrectionLevel: "M" });
 }
 
-// A safe download name from the deal title: "2-off-any-burrito-qr.png".
+// A safe download name from the deal title: lowercase letters, numbers and dashes only,
+// e.g. "2-off-any-burrito-qr.png"; "grove-deal-qr.png" when nothing usable is left.
 export function qrFileName(title: string): string {
-  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
-  return `${slug || "deal"}-qr.png`;
+  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40).replace(/-+$/, "");
+  return slug ? `${slug}-qr.png` : "grove-deal-qr.png";
 }

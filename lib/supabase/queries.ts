@@ -208,7 +208,7 @@ export async function getBusinessStats(input: { businessId: string; from: string
   const rows = list(
     await db()
       .from("redemptions")
-      .select("deal_id, redeemed_at, deals(title)")
+      .select("deal_id, student_id, redeemed_at, deals(title)")
       .eq("business_id", input.businessId)
       .gte("redeemed_at", input.from)
       .lt("redeemed_at", input.to),
@@ -222,10 +222,19 @@ export async function getBusinessStats(input: { businessId: string; from: string
     const hour = Number(campusClock(new Date(r.redeemed_at)).time.slice(0, 2));
     perHour.set(hour, (perHour.get(hour) ?? 0) + 1);
   }
+  // Returning = visited this business before the range. student_id is granted to members; no migration.
+  const students = [...new Set(rows.map((r) => r.student_id))];
+  const earlier = students.length
+    ? list(await db().from("redemptions").select("student_id").eq("business_id", input.businessId)
+        .lt("redeemed_at", input.from).in("student_id", students))
+    : [];
+  const returning = new Set(earlier.map((r) => r.student_id)).size;
   return {
     perDeal: [...perDeal.values()].sort((a, b) => b.count - a.count),
     perHour: [...perHour].map(([hour, count]) => ({ hour, count })).sort((a, b) => a.hour - b.hour),
     total: rows.length,
+    newStudents: students.length - returning,
+    returningStudents: returning,
   };
 }
 
