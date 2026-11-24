@@ -43,5 +43,6 @@ AGENTS.md
 supabase/.temp/
 supabase/.branches/
 
-# browser verification artifacts
+# Local verification artifacts and Deno npm cache
 /test-results/
+**/node_modules/

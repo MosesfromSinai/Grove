@@ -1,9 +1,10 @@
 "use client";
 
 // Profile (#62): who's signed in, past redemptions, and sign-out. Matches canvas screen 9,
-// without its Deal alerts toggle (push is a stretch goal).
+// Deal alerts remain hidden until Moses enables the reviewed push rollout.
 import { useEffect, useState } from "react";
 import { campusClock, getMyProfile, getMyRedemptions, signOut, type MyProfile, type Redemption } from "@/lib/supabase";
+import { PushSettings } from "@/lib/push/settings";
 import { redemptionWhenLabel } from "./format";
 
 type Loaded = { profile: MyProfile | null; redemptions: Redemption[]; now: number };
@@ -103,6 +104,8 @@ export function Profile() {
           </ul>
         )}
       </section>
+
+      {profile?.verified_student && <PushSettings />}
 
       <button onClick={leave} disabled={signingOut}
         className="flex h-13 items-center justify-center gap-2 rounded-button border-2 border-border-strong bg-surface font-extrabold text-destructive disabled:opacity-50">

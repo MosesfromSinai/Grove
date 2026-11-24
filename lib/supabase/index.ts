@@ -8,6 +8,9 @@ import * as real from "./queries";
 
 type Api = Pick<
   typeof mocks,
+  | "savePushSubscription"
+  | "getPushSubscription"
+  | "removePushSubscription"
   | "getDealsNearby"
   | "updateTruckLocation"
   | "getDeal"
@@ -49,6 +52,7 @@ const mockApi: { [K in keyof Api]: (typeof real)[K] } = mocks;
 const api: Api = process.env.NEXT_PUBLIC_DATA_SOURCE === "supabase" ? realApi : mockApi;
 
 export const {
+  savePushSubscription, getPushSubscription, removePushSubscription,
   getDealsNearby,
   updateTruckLocation,
   getDeal,

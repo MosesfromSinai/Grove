@@ -233,4 +233,11 @@ export type StaffRedeemResult = { ok: true; redemption: Redemption; deal_title: 
 export type ClaimClubNightResult = { ok: true; club_night: ClubNight; deal_id: string } | Failure;
 export type SetPinResult = { ok: true; pin: string } | Failure; // the only time the PIN is ever returned
 export type AddStaffResult = { ok: true; member: StaffMember } | Failure;
-export type NotifyDealResult = { ok: true; sent: number } | Failure;
+export type NotifyDealResult = { ok: true; sent: number; failed?: number } | Failure | { ok: false; error: "PUSH_DISABLED" };
+
+// Opt-in alert area is rounded to ~100m and expires after seven days.
+export type PushInput = { endpoint: string; keys: { p256dh: string; auth: string }; lat: number; lng: number };
+export type PushState = { active: boolean; expires_at: string | null };
+export type PushError = "NOT_SIGNED_IN" | "NOT_VERIFIED_STUDENT" | "INVALID_LOCATION" | "INVALID_SUBSCRIPTION" | "DEVICE_LIMIT" | "SUBSCRIPTION_IN_USE";
+export type PushSaveResult = { ok: true; expires_at: string } | { ok: false; error: PushError };
+export type PushRemoveResult = { ok: true; removed: boolean } | { ok: false; error: "NOT_SIGNED_IN" };

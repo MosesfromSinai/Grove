@@ -2,7 +2,7 @@
 
 The project's live memory. Read this first every session. Overwrite it (don't append) whenever the current state changes, so it always describes **now**. History goes in `LOG.md`, not here.
 
-_Last updated: 2026-11-23 by Moses_
+_Last updated: 2026-11-23 by Hikaru_
 
 ---
 
@@ -30,11 +30,12 @@ Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night
 - **Optional:** Sentry (#22).
 
 ## Open PRs
-- **#163 (Hikaru, push notifications): blocked.** Stretch goal; adds a migration, the `notify-deal` function, VAPID secrets and a cron job, and needs Supabase and Vercel setup plus a team decision. Left open and untouched.
+- **#163 (Hikaru, push notifications): blocked.** Stretch goal; adds a migration, the `notify-deal` function, VAPID secrets and a cron job, and needs Supabase and Vercel setup plus a team decision. Updated against current main on Nov 23; rollout remains disabled pending the same review and team decision.
 - **#166 (Moses, stats and share tweaks):** waiting for Moses's preview check.
 
 ## Blockers
 
+- **Push rollout (#91–93/#95):** proposed implementation is in #163, with both flags off. Moses/Celso review schema, grants and policy; Moses applies the migration, configures matching VAPID/dispatcher secrets, deploys `notify-deal` and configures Vault/cron. Hosted authentication and physical iPhone/Android delivery are still unverified. See `lib/push/README.md` for setup and rollback.
 - **Next.js 16.4.2:** `next build` reports a known security vulnerability (the build stops every other run with a notice). Upgrade on its own branch (`moses/next-upgrade`).
 - **Open decision from Celso (#164):** where `/` sends signed-out visitors: `/sign-in` or straight to `/feed`.
 - **Interview results:** none recorded in this repo; they live in the shared Drive folder. The pitch numbers in `CLAUDE.md` are estimates until interviews confirm them.

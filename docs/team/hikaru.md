@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-11-12_
+_Last updated: 2026-11-23_
 
 ---
 
@@ -15,8 +15,8 @@ _Last updated: 2026-11-12_
 `app/(student)/map/`, `components/map/`, `lib/geo/`, `public/manifest.json`, `public/icons/`, the `deals_nearby` SQL function (Moses reviews the migration). Stretch goal: `lib/push/`, `public/sw.js`, `supabase/functions/notify-deal`.
 
 ## Depends on
-- **Moses:** merged the discovery/truck migration and recorded passing local SQL checks on Nov 9. Hosted migration state still needs confirmation; STATUS has conflicting deployment notes.
-- **Edward:** shared student shell/card are on main. #63 is now assigned to Hikaru; the install guide is placed in the student shell in this PR.
+- **Moses:** merged discovery/truck work; current main records production on real data. Push activation still needs his deployment setup and a team decision; do not treat the existing production app as push-ready.
+- **Edward:** shared student shell/card and the #63 install guide are on main after #162 merged Nov 22.
 - **Adolfo:** dashboard data adapters and truck-button placement are on main.
 
 ## Others depend on you
@@ -62,10 +62,10 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 - [ ] 1–2 restaurant interviews (hypotheses 1–4, see `CLAUDE.md` → Business); notes in the shared Drive folder (#99)
 - [ ] At least one student interview (hypothesis 5, see `CLAUDE.md` → Business); notes in the shared Drive folder (#118)
 
-### Stretch goal (possible future implementation)
-- [ ] VAPID keys; `sw.js` service worker for push (#91)
-- [ ] Subscription flow saving to `push_subscriptions` (#92)
-- [ ] `notify-deal`: when a deal goes live, push to subscribed students near the business (decide the radius, log it as a **Decision** in `LOG.md`) (#93)
+### Push stretch implementation for review
+- [ ] #91 rollout: local key-generation script and push-only `sw.js` implemented on `hikaru/push-notifications`; Moses must configure matching VAPID keys, review and deploy. Sending/client flags default off.
+- [ ] #92 rollout: explicit profile opt-in, saved-area expiry, subscription RPCs/private migration, unsubscribe and sign-out cleanup implemented/tested locally; migration and authenticated hosted verification remain.
+- [ ] #93 rollout: dispatcher, service-only eligibility/claims and separate minute-schedule SQL implemented locally. Proposed radius 3 km; seven-day area; three attempts per saved setup/24h, reset on re-enable. Moses reviews the policy, deploys the function and installs Vault/cron configuration.
 - [ ] Test push on iPhone (installed to home screen, iOS 16.4+) and Android (#95)
 
 ---
@@ -79,6 +79,20 @@ _Record things only you need to remember. Decisions that affect others go in `do
 ---
 
 ## Session log
+
+### 2026-11-23 — PR refresh and Activity 3
+- **Did:** Synced current main into #163 and resolved documentation/ignore conflicts, preserving the merged #162 installation/map work, all session evidence and Moses’s Nov 22 pricing decision. Updated the local phone interview guide to the $179/month plus $0.50/visit plan with club nights included; prepared an Activity 3 reading-reflection draft outside the public repo.
+- **Verified:** On Node 22, lint/typecheck, 268 unit tests (23 service/DB tests skipped) and all four map/install browser tests pass. The build compiles and passes on the ordinary retry after the existing Next.js 16.4.2 security reminder; Moses’s separate `moses/next-upgrade` branch is unchanged. SQL/protocol/physical delivery were not rerun or newly claimed. Source review found no integration regression from the main sync.
+- **Review:** Submitted the requested #168 review with two fixes for Moses: make each map offer navigable and avoid open/visible claims for a missing business profile. Source review only; browser preview inspection was unavailable.
+- **Next:** Teammate review and team scope decision for push; Moses/Celso rollout setup per `lib/push/README.md`, then physical delivery checks. No push flag, hosted setting, migration or secret was changed.
+- **Blockers:** Eight assigned issues remain: #91–93 and #95 require rollout/physical delivery; #159 needs physical Android installation; #98 needs the shared Drive destination; #99/#118 need real interview notes. Activity 3 LinkedIn and event entries require Hikaru’s real connections and attendance details. Reading completion is not asserted by preparing a draft.
+
+### 2026-11-12 — push notifications
+- **Did:** Implemented #91–93 locally for review at Hikaru’s explicit request, independently of #162. Includes push-only service worker, secure opt-in and saved area, private subscription RPCs/migration, shared mocks/data wrappers, profile controls, centralized sign-out cleanup, pinned Web Push dispatcher, offline signing/encryption check, one-time key script and separate schedule SQL. Flags default disabled; no production credentials or hosted Supabase changes.
+- **Verified:** 243 unit tests pass (23 full-service DB tests skipped), plus lint/typecheck/build, Deno typecheck and offline real-library signing/encryption. Isolated PostgreSQL 17/PostGIS/pgTAP tests pass all 182 checks across eight suites (45 push checks) with minimal Supabase-compatible auth/grants; no full hosted/Edge gateway claim. Review fixed sign-out ordering and uncertain-save recovery. Browser fixture checks are documented in `lib/push/README.md`.
+- **Next:** Moses/Celso review the schema/grants, policy and sender; apply migration/regenerate types, configure keys/secrets and preview flags, deploy function and Vault/cron schedule, then physical iPhone/Android #95 tests. Exact handoff: `lib/push/README.md`.
+- **Blockers:** Real Supabase auth/service and phone delivery verification need Moses’s configuration and agreed test devices. #91–93 remain open for their hosted acceptance checks; #95 remains open. Local SQL used only the expressly authorized Grove container; Nanka was untouched.
+
 
 ### 2026-11-12 — assigned issue audit
 - **Did:** Reviewed all 11 open assigned Grove issues as `hika583`. Closed #97 because the supplied team export already contains the completed canvas. Updated #63/#96 as implemented in PR #162, awaiting teammate review/merge; #159 retains the user-reported iPhone pass and pending Android check. Added concrete prerequisites to stretch issues #91–93/#95.
