@@ -27,6 +27,7 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-11-23:** Stats and deal share follow-up: Stats shows "New students: N · Returning (visited before this range): N" from `getBusinessStats` (two optional fields, no migration); Share appears only on live and scheduled deals; QR downloads fall back to `grove-deal-qr.png`.
 - **2026-11-22:** **Decision** (affects everyone): Grove is positioned as a campus marketing agency; one $179/mo plan (club nights included) + $0.50/visit; restaurants fund their own Grove-only offers. `CLAUDE.md` → What Grove is and Business model and pitch numbers; README, app description, sticker copy and team-file pricing updated to match.
 - **2026-11-09:** Deal links (#115, taken over from Adolfo): every deal in My deals has a Share button with its `/deals/<id>` link (copy) and a downloadable QR. The link only opens the deal; students still redeem with the counter sticker.
 - **2026-11-09:** Club night results on the dashboard (#114, taken over from Adolfo): Posted nights show status, the claimed club and verified visits, and owners can cancel an open night. **Decision** (affects Adolfo): added `cancelClubNight` to `lib/supabase` and the contract; it only removes unclaimed nights (same rule as RLS), so claimed nights and their visits are kept.
