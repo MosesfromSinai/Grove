@@ -2,7 +2,7 @@
 
 The project's live memory. Read this first every session. Overwrite it (don't append) whenever the current state changes, so it always describes **now**. History goes in `LOG.md`, not here.
 
-_Last updated: 2026-11-22 by Moses_
+_Last updated: 2026-11-23 by Moses_
 
 ---
 
@@ -30,10 +30,13 @@ Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night
 - **Optional:** Sentry (#22).
 
 ## Open PRs
-See the 2026-11-22 report in `LOG.md`; open PRs are reviewed and merged by Moses this session.
+- **#163 (Hikaru, push notifications): blocked.** Stretch goal; adds a migration, the `notify-deal` function, VAPID secrets and a cron job, and needs Supabase and Vercel setup plus a team decision. Left open and untouched.
+- **#166 (Moses, stats and share tweaks):** waiting for Moses's preview check.
 
 ## Blockers
 
+- **Next.js 16.4.2:** `next build` reports a known security vulnerability (the build stops every other run with a notice). Upgrade on its own branch (`moses/next-upgrade`).
+- **Open decision from Celso (#164):** where `/` sends signed-out visitors: `/sign-in` or straight to `/feed`.
 - **Interview results:** none recorded in this repo; they live in the shared Drive folder. The pitch numbers in `CLAUDE.md` are estimates until interviews confirm them.
 - **Settings (done):** Vercel Authentication is off for previews. `NEXT_PUBLIC_SITE_URL` is set for Production only, so previews sign in on their own domain. Supabase Auth on grove-dev is Google-only; its Redirect URLs are `https://grove-jade.vercel.app/**`, `http://localhost:3000/**`, and `https://grove-*-mosesfromsinais-projects.vercel.app/**`.
 - **Everyone:** CI ("Lint, typecheck, build") runs `npm test` too. Run `npm run lint && npm run typecheck && npm test && npm run build` (Node 22) before pushing. SQL tests: `npx supabase@2.122.0 db reset && npx supabase@2.122.0 test db` with Docker running.
@@ -42,6 +45,12 @@ See the 2026-11-22 report in `LOG.md`; open PRs are reviewed and merged by Moses
 - Hikaru's `docs/team/hikaru.md` #98: pricing questions updated to the $179/month plan plus $0.50 per visit.
 - Adolfo's `docs/team/adolfo.md` #74 and #82: sticker copy is "Scan in Grove to redeem"; pilot offer is "first campaign free".
 - Adolfo's `components/business/render-sticker.ts`: sticker text "Scan in the Grove app" → "Scan in Grove to redeem" (no download framing).
+- Celso's PR #164 (`celso/public-browse`): merged main into it (STATUS conflict, kept main's) and merged it.
+- Edward's PR #161 (`edward/student-states`): merged main into it and merged it. Closed #66 per his LOG.
+- Edward's PR #160 (`TheEdwardVan-patch-2`, `docs/LOG.md`): removed his duplicated LOG lines, cleaned the wording of his Nov 12 line, and merged it.
+- Hikaru's PR #162 (`hikaru/week4-map-polish`): merged main into it; `components/pwa/install-guide.tsx` button reads "Add to home screen" with a plus icon instead of "Install Grove" with a download icon (no-download positioning), and `tests/map-browser/map.browser.mjs` follows it; `docs/team/hikaru.md` #98 notes the final pricing for the interview guide. Merged.
+- Edward's `docs/team/edward.md`: ticked finished tasks (#53, #54, #57, #58, #59, #62, #63, #64, #65, #66, #108, #109, #110) and added his open #157.
+- Adolfo's `docs/team/adolfo.md`: ticked finished tasks (#73, #74, #75, #76, #77, #112, #113, #114, #115).
 
 ## Pilot owner setup (Moses, by hand)
 

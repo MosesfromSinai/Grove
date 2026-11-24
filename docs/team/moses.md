@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-11-09_
+_Last updated: 2026-11-23_
 
 ---
 
@@ -75,11 +75,11 @@ Ticked here, not in teammates' files. Staff-scan issues (#39, #40, #60, #61) are
 - [x] Food-truck location update (#94): component and RPC merged; placed on the dashboard overview for truck owners
 - [x] Location before scan with PIN link (#54), sticker page (#57), PIN screen (#58), from Edward's #139
 - [x] Keep the deal link through sign-in (#109)
-- [ ] Verify link-only hidden from feed (#108) and no mock imports (#59) on real data
+- [x] Verify link-only hidden from feed (#108) and no mock imports (#59) on real data
 - [x] Claim club night screen (#110)
 - [x] Profile page (#62)
 - [x] Rate-limit club night claims (#106) and reject out-of-range coordinates (#38)
-- [ ] Onboarding routing (#33): done in `app/page.tsx`; owners added by hand (`STATUS.md`)
+- [x] Onboarding routing (#33): done in `app/page.tsx`; owners added by hand (`STATUS.md`)
 - [x] Mapbox token (#84) and canvas check for the map (#85)
 - [x] Security test pass (#41)
 - [x] Stats page (#76), from Adolfo's Week 3
@@ -120,6 +120,11 @@ _Record things only you need to remember (gotchas, commands, links). Decisions t
 
 ## Session log
 _Newest at the top. One entry per session._
+
+### 2026-11-22 (cleanup, temporary override)
+- **Did:** Repositioned Grove as a campus marketing agency in `CLAUDE.md` with the pitch numbers and title-only PRs, and aligned README, app description, sticker copy and pricing in team files (#165). Merged teammates' #164, #161, #160 and #162 after merging main into them; held #163 (push) as blocked. Ticked finished tasks across team files. Opened #166 (new vs. returning students on Stats, Share on live and scheduled deals only, QR filename fallback).
+- **Next:** Merge #166 after the preview check; `moses/design-match` against the canvas exports; `moses/next-upgrade` for the Next.js security notice; demo script (#25) and pitch deck (#26).
+- **Blockers:** #163 needs a team decision plus Supabase and Vercel setup.
 
 ### 2026-10-27
 - **Did:** Fixed and merged Adolfo's #126 (merged main, routed `getMyDeals` and `setPin` through the switch) and marked his business writes final. Reviewed Celso's #127 and #128, re-ran the security checks on a fresh local database (26 out of 26), finished both PRs' docs, merged them, and applied #128 to grove-dev. `redeem-pin` (#15) and `set-pin` with the `qr_slug` default (#120) deployed, with the PIN lockout changed to per student per business; `redeem` now rate-limited. Confirmed a UCR Google sign-in on production creates a verified student profile, so the Week 1 sign-in gate passed (closed #29, #31). Hardened the live-redemptions test.
