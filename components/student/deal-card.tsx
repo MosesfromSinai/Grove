@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { DealCard as DealCardData } from "@/lib/supabase";
-import { countdownLabel, distanceLabel } from "./format";
+import { countdownLabel, distanceLabel, untilLabel } from "./format";
 
 export type LiveDeal = Extract<DealCardData, { has_deal: true }>;
 
@@ -42,10 +42,17 @@ export function DealCard({ deal, index = 0 }: { deal: LiveDeal; index?: number }
           )}
         </div>
         <div className="p-4">
-          <p className="text-sm text-ink-muted">
-            {deal.business_name} · {distanceLabel(deal.distance_m)}
+          <p className="text-sm font-semibold text-ink-muted">
+            {deal.business_name}{deal.is_truck ? " · food truck" : ""}
           </p>
-          <h2 className="mt-1 text-xl">{deal.title}</h2>
+          <h2 className="mt-1 text-2xl">{deal.title}</h2>
+          <p className="mt-2 flex items-center gap-4 text-sm text-ink-muted">
+            <span className="flex items-center gap-1">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-green" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
+              {distanceLabel(deal.distance_m)}
+            </span>
+            <span>{untilLabel(deal.live_until)}</span>
+          </p>
         </div>
       </Link>
     </li>
