@@ -120,7 +120,7 @@ function StatsView({ businessId }: { businessId: string }) {
         <div role="group" aria-label="Date range" className="flex gap-1 rounded-button bg-border p-1">
           {([7, 30] as const).map((n) => (
             <button key={n} type="button" aria-pressed={days === n} onClick={() => setDays(n)}
-              className={`min-h-10 rounded-[10px] px-3.5 text-sm ${days === n ? "bg-surface font-extrabold text-ink shadow-card" : "font-bold text-ink-nav"}`}>
+              className={`min-h-11 rounded-[10px] px-3.5 text-sm ${days === n ? "bg-surface font-extrabold text-ink shadow-card" : "font-bold text-ink-nav"}`}>
               Last {n} days
             </button>
           ))}
