@@ -35,18 +35,18 @@ _Last updated: 2026-11-06_
 - [x] My deals list: active, scheduled, expired, with redemption counts; End now and Cancel (mocks) (#72) — implemented on mocks
 
 ### Week 2 — Live data, stickers, repeat days (Oct 26–Nov 1)
-- [ ] Wire onboarding, posting, and My deals to real tables (#73) — supported adapters implemented/tested locally; authorized real-database verification, provisioning/Storage, and review remain pending
-- [ ] Repeat days and visibility on the post-deal form: day checkboxes, daily start/end time, public or link-only (while wiring it to real tables) (#112) — controls, normalized mocks/real payloads, and local behavior verified; contract review and hosted acceptance pending
-- [ ] Printable sticker: configured origin + `/b/<qr_slug>`, Grove branding, "Scan in the Grove app to redeem," downloadable PNG (#74) — local 3/4/6-inch export/decoding verified; shared review, hosted read, and physical print/phone acceptance pending
-- [ ] Overview page: today's and this week's redemptions, active deals, live visit feed via Realtime (#75) — implemented/tested locally; review and authorized hosted RLS/Realtime acceptance pending
+- [x] Wire onboarding, posting, and My deals to real tables (#73) — supported adapters implemented/tested locally; authorized real-database verification, provisioning/Storage, and review remain pending — merged by Moses (#151)
+- [x] Repeat days and visibility on the post-deal form: day checkboxes, daily start/end time, public or link-only (while wiring it to real tables) (#112) — controls, normalized mocks/real payloads, and local behavior verified; contract review and hosted acceptance pending — merged by Moses (#151)
+- [x] Printable sticker: configured origin + `/b/<qr_slug>`, Grove branding, "Scan in Grove to redeem," downloadable PNG (#74) — local 3/4/6-inch export/decoding verified; shared review, hosted read, and physical print/phone acceptance pending — merged by Moses (#151)
+- [x] Overview page: today's and this week's redemptions, active deals, live visit feed via Realtime (#75) — implemented/tested locally; review and authorized hosted RLS/Realtime acceptance pending — merged by Moses (#151)
 
 ### Week 3 — Stats, settings, staff scanner, club nights (Nov 2–8)
-- [ ] Stats: redemptions per deal and busiest hours (Recharts) (#76)
-- [ ] Redemption settings: Sticker vs. Staff scan selector; Reset PIN calls `set-pin` and shows the new PIN once (#77) — implemented/tested locally; live Staff scan activation gated on #20, shared review and authorized hosted checks pending
+- [x] Stats: redemptions per deal and busiest hours (Recharts) (#76) — done by Moses, merged (#152)
+- [x] Redemption settings: Sticker vs. Staff scan selector; Reset PIN calls `set-pin` and shows the new PIN once (#77) — implemented/tested locally; live Staff scan activation gated on #20, shared review and authorized hosted checks pending — merged by Moses (#151)
 - [ ] Staff scanner: camera via `html5-qrcode`, calls `staff-redeem`, green "Verified" or red "Not valid" with reason, "Scan next" (#78)
-- [ ] Post an open club night: date, time window, giveback text (e.g. "15% back to your club") (#113) — implemented/tested locally; shared review, authorized hosted RLS/persistence and downstream claim checks pending
-- [ ] Club night results on the dashboard: claimed club name and verified visits per night (#114)
-- [ ] Deal link and QR download for flyers and group chats (`/deals/<id>`; it opens the deal only, never redeems) (#115)
+- [x] Post an open club night: date, time window, giveback text (e.g. "15% back to your club") (#113) — implemented/tested locally; shared review, authorized hosted RLS/persistence and downstream claim checks pending — merged by Moses (#151)
+- [x] Club night results on the dashboard: claimed club name and verified visits per night (#114) — done by Moses, merged (#153)
+- [x] Deal link and QR download for flyers and group chats (`/deals/<id>`; it opens the deal only, never redeems) (#115) — done by Moses, merged (#154)
 - [ ] Staff list in settings: add staff by Google email (`add-staff`), see invited vs. active (`getStaff`), remove staff (#122)
 
 _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
@@ -57,7 +57,7 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 - [ ] Fix or file every issue owners report during the pilot (#81)
 
 ### Business
-- [ ] Pilot outreach: contact local businesses near UCR, track in the shared Drive folder, aim for 2–3 signed, at least one by Nov 6 for the Week 4 pilot; first deal free for pilot restaurants (#82)
+- [ ] Pilot outreach: contact local businesses near UCR, track in the shared Drive folder, aim for 2–3 signed, at least one by Nov 6 for the Week 4 pilot; first campaign free for pilot restaurants (#82)
 - [ ] 1–2 restaurant interviews (hypotheses 1–4, see `CLAUDE.md` → Business); notes in the shared Drive folder (#83)
 - [ ] At least one student interview (hypothesis 5, see `CLAUDE.md` → Business); notes in the shared Drive folder (#116)
 

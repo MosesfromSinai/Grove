@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-10-26_
+_Last updated: 2026-11-22_
 
 ---
 
@@ -31,27 +31,29 @@ _Last updated: 2026-10-26_
 - [x] Sign-in page (canvas screen 1, one button: "Sign in with your school Google account"); business owners use the same Google sign-in with any account (#30)
 - [x] .edu check: email domain must match a `campuses.email_domain`; set `verified_student` (runs in `handle_new_user()`, PR #128) (#31)
 - [x] Database trigger to create a `profiles` row on first sign-in (#32)
-- [ ] Onboarding: route to student app or business onboarding (root routing in `app/page.tsx`, Moses reviews) (#33)
+- [x] Onboarding: route to student app or business onboarding (root routing in `app/page.tsx`, Moses reviews) (#33)
 - [x] Review the threat model below; add anything missing (#34)
 
 ### Week 2 — Lock down data (Oct 26–Nov 1)
-- [ ] RLS on every table, e.g. students select only public deals (link-only deals open only through `deal_by_id()`) and only their own redemptions; owners read only their own business's data; nobody inserts redemptions directly (only Edge Functions) (#35)
-- [ ] Hash `staff_pin`; never return it to the browser; write the PIN-hash helper early in week 2 so `redeem-pin` and `set-pin` use it (#36)
-- [ ] Rate limits on `redeem` and `redeem-pin`; lockout after repeated bad PINs (log the limit as a **Decision**); write the rate-limit helper early in week 2 so Moses's functions call it (#37)
-- [ ] Server-side sanity checks on location (reject impossible coordinates) (#38)
-- [ ] RLS for `club_nights`: businesses manage their own; students read open nights at their campus; only `claim-club-night` writes the claim columns; `claimed_by` never reaches the browser (#105)
-- [ ] Rate-limit club night claims (per student) in `claim-club-night` (#106)
-- [ ] Review the staff-scan token design with Moses (short-lived, signed, single use), agreed by Nov 1 (#39)
+- [x] RLS on every table, e.g. students select only public deals (link-only deals open only through `deal_by_id()`) and only their own redemptions; owners read only their own business's data; nobody inserts redemptions directly (only Edge Functions) (#35)
+- [x] Hash `staff_pin`; never return it to the browser; write the PIN-hash helper early in week 2 so `redeem-pin` and `set-pin` use it (#36)
+- [x] Rate limits on `redeem` and `redeem-pin`; lockout after repeated bad PINs (log the limit as a **Decision**); write the rate-limit helper early in week 2 so Moses's functions call it (#37)
+- [x] Server-side sanity checks on location (reject impossible coordinates) (#38)
+- [x] RLS for `club_nights`: businesses manage their own; students read open nights at their campus; only `claim-club-night` writes the claim columns; `claimed_by` never reaches the browser (#105)
+- [x] Rate-limit club night claims (per student) in `claim-club-night` (#106)
+- [ ] _Stretch goal (2026-11-09):_ Review the staff-scan token design with Moses (short-lived, signed, single use) (#39)
 
 ### Week 3 — Staff mode security (Nov 2–8)
-- [ ] `business_members` access: only staff of that business can call `staff-redeem` (#40)
-- [ ] Security test pass: try to redeem without being there, reuse a token, redeem twice in a day, read another business's stats, open a link-only deal off campus, claim the same club night twice; log results in the Security test log below (#41)
+- [ ] _Stretch goal (2026-11-09):_ `business_members` access: only staff of that business can call `staff-redeem` (#40)
+- [x] Security test pass: try to redeem without being there, reuse a token, redeem twice in a day, read another business's stats, open a link-only deal off campus, claim the same club night twice; log results in the Security test log below (#41)
 
 _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 
 ### Week 4 — Review, no new features (Nov 9–15)
-- [ ] Fix every failed test from #41, or record it as an accepted risk in the threat model (#42)
-- [ ] Check no secrets are in the repo or browser bundle (#43)
+- [x] Fix every failed test from #41, or record it as an accepted risk in the threat model (#42)
+- [x] Check no secrets are in the repo or its git history, e.g. with gitleaks (browser bundle already clean, Moses #41) (#43)
+- [x] Browse without signing in, auth side: feed, map and deal pages open to signed-out visitors; anon reads only public data (`celso/public-browse`) (#156)
+- [ ] Run the 6 security phone checks in `docs/STATUS.md` → Security test results on production, plus: a signed-out visitor can't redeem or see student data; send results to Moses (#158)
 - [ ] Competitor slide for the pitch (#44)
 
 ### Business
@@ -67,24 +69,25 @@ Update the Status column as defenses are built.
 
 | Threat | Defense | Status |
 |---|---|---|
-| Sticker photo scanned from elsewhere | Location within ~150 m; cashier sees the student | Planned |
+| Sticker photo scanned from elsewhere | Location within ~150 m (`TOO_FAR`); cashier sees the student | Built (Moses #14) |
 | Spoofed GPS | Daily limit; cashier check; flag unusual redemption patterns | Planned |
-| Screenshot of the Redeemed screen | Live clock + animation | Planned |
-| Same deal redeemed repeatedly | Unique rule on (student, deal, date) | Planned |
+| Screenshot of the Redeemed screen | Live clock + animation | Built (phone check in #158) |
+| Same deal redeemed repeatedly | Unique rule on (student, deal, date) | Built (#41 tests) |
 | PIN guessing | PIN functions are service-role only (browser can't call `verify_pin`); bcrypt hash; lockout after 5 failures in 15 min (`is_pin_rate_limited`, `record_pin_attempt`); wrappers fail closed on DB errors | Built (#128) |
 | Reused or shared staff-scan code | Short-lived, single-use, signed token; staff-only redeem | Planned |
 | Non-student signs up | .edu domain check in the `handle_new_user()` trigger sets `verified_student`; redeeming still requires the flag | Built (#128) |
 | Reading another business's data | RLS on every table; `is_business_member` helper prevents cross-business reads | Built |
 | `staff_pin` exposed via API | Column-level REVOKE on `businesses` for anon/authenticated; bcrypt if leaked | Built |
 | `club_nights.claimed_by` exposed via API | Column-level REVOKE on `club_nights` for anon/authenticated | Built |
-| Leaked service-role or VAPID key | Server-only env vars, never committed; rotate if leaked | Planned |
-| Link-only deal shared off campus | Link only shows the deal; redeeming still needs a verified student, the counter sticker, ~150 m, a live window, and the daily limit | Planned |
-| Fake or duplicate club night claims | One claim per club night (conditional update), signed-in verified student, claim rate limit (`claim-club-night` Edge Function) | Planned |
+| Leaked service-role or VAPID key | Server-only env vars, never committed; rotate if leaked | Built: gitleaks finds nothing in any commit (#43, 2026-11-22) |
+| Link-only deal shared off campus | Link only shows the deal; redeeming still needs a verified student, the counter sticker, ~150 m, a live window, and the daily limit | Built (#41 tests) |
+| Fake or duplicate club night claims | One claim per club night (conditional update), signed-in verified student, 3 claims per 7 days | Built (#106) |
 | Claiming a club night for a club you're not in | Not checked: no club accounts in the MVP. **Accepted risk**; the restaurant sees the club name and visits | Accepted |
 | Session token theft | httpOnly cookies + HTTPS (Supabase defaults); sessions expire | Built (Supabase) |
-| Client-side time manipulation to access an out-of-window deal | Server uses `now()` for all deal status checks; client time is never trusted | Planned (in redeem function) |
+| Client-side time manipulation to access an out-of-window deal | Server uses `now()` for all deal status checks; client time is never trusted | Built (`deal_status()`) |
 | User manually sets `verified_student`, `role`, or `campus_id` on their own profile | Column grant: the browser can update only `full_name` (the old `protect_profile_columns` trigger never fired inside `security definer`, so it was replaced) | Built (#128) |
 | Someone signs up with another person's email (email/password provider) to get verified or take a staff invite | Google-only sign-in: turn off the Email provider in Supabase Auth | Planned (needs Moses) |
+| Signed-out visitor reads student data or link-only deals, or redeems (#156) | Anon has no grant on `redemptions`, `profiles`, attempts tables; no anon policy on `business_members`, `club_nights`; `deals_read_public` and `deals_nearby` filter link-only; redeem and claim functions are service-role only; `/scan`, `/pin`, `/club-nights`, `/profile`, `/dashboard` need a session | Built (`anon_browse.test.sql`) |
 | Flooding `redeem` with failed attempts | `redeem_attempts` table; 10 attempts per minute per student, counted before success or failure | Built (#128) |
 
 ## Security test log
@@ -93,6 +96,9 @@ Add a row for every test you run.
 | Date | Test | Result | Fix |
 |---|---|---|---|
 | 2026-10-26 | `supabase/tests/rls_security.test.sql` (45 checks) on a local database: logged-out PIN guessing, making yourself verified or a business, seeing claimed club nights, reading `owner_id`/`staff_pin`/`claimed_by`/`student_location`, editing `qr_slug`, staff editing the business, browser inserting redemptions, attempt-based redeem limit | All pass; reopening the holes makes 7 checks fail | #128 |
+| 2026-11-22 | gitleaks 8.30.1: `gitleaks git --log-opts=--all` (every branch, 336 commits) plus every patch including merge diffs through `gitleaks stdin`; `gitleaks dir` on the working tree | History: no leaks. Working tree: 27 hits, all in git-ignored files never committed (`.env.local`, `.next/`, `supabase/.temp/`); the only JWTs in `.next/static` are the anon key, and `supabase/.temp` holds the local CLI's demo keys | None needed (#43) |
+| 2026-11-22 | `supabase/tests/anon_browse.test.sql` (22 checks) on a fresh local database: signed-out role reads public deals and businesses, opens a link-only deal only by id, can't see link-only deals in the table or `deals_nearby`, can't read redemptions, profiles, members, club nights or attempts, can't write deals, club nights or businesses, can't run redeem, claim or truck functions | All pass with no grant changes; full suite 159 checks pass | #156 |
+| 2026-11-09 | Moses's #41 pass (automated checks and bundle scan) | All pass | See `docs/STATUS.md` → Security test results |
 | 2026-10-26 | Old `protect_profile_columns` trigger, as a signed-in user | **Failed**: user set `verified_student = true`, `role = business` | Replaced with a column grant (#128) |
 
 ---
@@ -104,6 +110,12 @@ _Record things only you need to remember. Decisions that affect others go in `do
 
 ## Session log
 _Newest at the top. One entry per session._
+
+### 2026-11-22 (#156 browse without signing in)
+- **Did:** Caught up on Nov 9–15 (Moses finished my open Week 2–3 code, closing #33, #35–#38, #41, #42, #105, #106; staff scan moved to stretch, so #39 and #40 too). On `celso/public-browse`: `/feed`, `/map` and `/deals/<id>` open to signed-out visitors (`lib/auth/public-paths.ts`, used by `proxy.ts`, with tests); redeeming, PIN, claiming and Profile still redirect to sign-in and come back through `grove_next`. New `supabase/tests/anon_browse.test.sql` (22 checks) confirms the anon role reads only public data; no migration or grant change needed. Lint, typecheck, 229 unit tests, build and 159 SQL checks pass; local signed-out routes checked with curl. Ticked closed issues and updated the threat model.
+- **Also:** #43 gitleaks scan: no secrets in any commit on any branch; working-tree hits are only git-ignored local files (see Security test log). PR #164 opened for #156.
+- **Next:** Moses reviews #164, then Edward's #157 can start. #158 phone checks on production (ask Moses for a test deal). Business: #44–#47, #107.
+- **Blockers:** none. `/` still sends signed-out visitors to `/sign-in` (team call, see STATUS).
 
 ### 2026-10-26 (#128 review fixes)
 - **Did:** Merged main; renamed migrations to `20261026220000`–`220200`; replaced the broken `protect_profile_columns` trigger with a column grant (browser updates only `full_name`); added `lat`/`lng` to the businesses select grant; revoked browser rights on `pin_attempts` and `redeem_attempts`; PIN helper wrappers now throw on DB errors; rewrote `rls_security.test.sql` (45 behavioral checks, all pass locally, plus Moses's tests and `npm run test:db`). Unticked #29–#33, #35–#37, #105 per Moses's review.

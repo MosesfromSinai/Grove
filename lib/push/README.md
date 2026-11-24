@@ -1,6 +1,6 @@
 # Grove push notifications
 
-Local implementation for #91–93; physical delivery remains #95. This branch is independent of PR #162. The install guide in #162 is helpful on iPhone, but the push settings also explain the Home Screen requirement themselves.
+Local implementation for #91–93; physical delivery remains #95. PR #162’s map polish and Home Screen guide merged on Nov 22 and are included after the Nov 23 main sync. The push settings also explain the iPhone Home Screen requirement themselves.
 
 Both rollout switches default off. No production keys are generated, migration applied remotely, schedule installed, or real notification sent by this work. Profile controls, service worker, subscription RPCs and dispatcher are ready for Moses/Celso review.
 
@@ -43,7 +43,7 @@ deno run --allow-env offline_check.ts
 
 `offline_check.ts` generates throwaway keys in memory and signs/encrypts a synthetic Web Push request using pinned `web-push@4.0.0`. It has **no network permission**, sends nothing and prints no key values. `deno.lock` pins dependencies. It also catches module-export/runtime compatibility issues that static type checking alone can miss.
 
-All 243 unit tests pass (23 service/DB tests are skipped without the full Supabase stack), along with lint, typecheck and production build. Unit tests cover flags, explicit opt-in, denied location/notification, saved-area rounding, rejected/uncertain saves, rollback and unknown-state recovery, both sign-out race orders, private endpoint rejection, subscription RPCs/mocks, one-shot key generation, worker auth/disabled behavior, provider failures, expired endpoints and safe worker click paths. UI simulation is not OS delivery proof.
+Original Nov 12 verification: all 243 unit tests pass (23 service/DB tests are skipped without the full Supabase stack), along with lint, typecheck and production build. Unit tests cover flags, explicit opt-in, denied location/notification, saved-area rounding, rejected/uncertain saves, rollback and unknown-state recovery, both sign-out race orders, private endpoint rejection, subscription RPCs/mocks, one-shot key generation, worker auth/disabled behavior, provider failures, expired endpoints and safe worker click paths. UI simulation is not OS delivery proof.
 
 With explicit user permission, an isolated PostgreSQL 17/PostGIS/pgTAP container was created with a 512 MB/1 CPU limit and no published port. Its network was disconnected after package setup. A minimal Supabase-compatible auth schema/default grants allowed all migrations and the seed to run. All eight SQL suites pass (182 checks, including 45 push checks). This proves those SQL paths in PostgreSQL; it is not a full Supabase service/hosted test. Only this Grove container is removed after verification; Nanka resources are untouched.
 
@@ -51,3 +51,5 @@ Relevant platform references: [PushManager opt-in](https://developer.mozilla.org
 
 
 Chrome verification used the real component on a temporary public `/theme` fixture with dummy loopback Supabase configuration. The original route was restored before the final build. Native `/sw.js` registration at `/` and no-cache headers passed without requesting permission. A separate mocked-browser/API fixture verified explicit permission/location calls, rounded inputs, opt-out, denied-location no-op, uncertain-save recovery, iPhone install instructions and no overflow at 320/390/1280 px; no provider message was sent. The preview server was stopped and the authorized Grove test container/anonymous volumes were removed; Nanka was untouched.
+
+Nov 23 main sync: lint/typecheck, 268 unit tests (23 service/DB tests skipped) and all four map/install browser checks pass on Node 22. The build compiles and passes on the normal retry after the existing Next.js 16.4.2 security reminder; Moses’s separate `moses/next-upgrade` branch addresses that dependency. No SQL suite, hosted authentication or physical push delivery was newly verified in this refresh.
