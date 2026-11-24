@@ -32,67 +32,44 @@ export default function SignInForm() {
     });
   }
 
+  // Layout follows canvas screen 1: green hero with food tiles, then a cream sheet.
   return (
-    <div className="w-full max-w-sm flex flex-col items-center gap-8">
-      {/* Wordmark */}
-      <div className="flex flex-col items-center gap-2 text-center">
-        <span className="text-5xl font-heading font-extrabold text-white tracking-tight">
-          Grove
-        </span>
-        <span className="text-orange-light font-sans text-base font-medium">
-          Where food finds its campus.
-        </span>
+    <>
+      <div className="relative flex-1 px-6 pt-10 pb-10">
+        <span className="absolute -top-24 -left-24 size-80 rounded-full bg-green" aria-hidden="true" />
+        <span className="absolute -right-24 bottom-0 size-56 rounded-full bg-green" aria-hidden="true" />
+        <div className="relative h-40" aria-hidden="true">
+          <span className="absolute top-2 left-2 flex size-20 -rotate-6 items-center justify-center rounded-card bg-peach shadow-card"><TacoArt /></span>
+          <span className="absolute top-0 right-4 flex size-16 rotate-6 items-center justify-center rounded-card bg-green-tint shadow-card"><DrinkArt /></span>
+          <span className="absolute bottom-0 left-6 -rotate-3 rounded-pill bg-orange px-4 py-2 text-sm font-extrabold text-ink shadow-card">Free drink with any meal</span>
+        </div>
+        <div className="relative mt-8 flex items-center gap-3">
+          <span className="flex size-14 items-center justify-center rounded-full bg-surface text-green" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14" /><path d="M5 19 13 11" /></svg>
+          </span>
+          <span className="font-heading text-6xl font-extrabold tracking-tight text-surface">grove</span>
+        </div>
+        <p className="relative mt-3 font-heading text-3xl font-extrabold text-orange-light">Where food finds its campus.</p>
       </div>
 
-      {/* Card */}
-      <div className="w-full bg-surface rounded-card shadow-card px-6 py-8 flex flex-col gap-5">
-        <p className="text-ink font-sans text-sm font-medium text-center leading-snug">
+      <div className="rounded-t-card bg-bg-student px-6 pt-8 pb-10">
+        {errorMessage && <p role="alert" className="text-sm text-destructive">{errorMessage}</p>}
+        <button onClick={handleSignIn} className="mt-6 flex min-h-14 w-full items-center justify-center rounded-button bg-ink px-4 font-extrabold text-white">
           Sign in with your school Google account
-          <br />
-          <span className="text-ink-fine">
-            UCR students use their @ucr.edu address.
-            <br />
-            Business owners can sign in with any Google account.
-          </span>
-        </p>
-
-        {errorMessage && (
-          <p className="text-destructive text-sm text-center font-sans">
-            {errorMessage}
-          </p>
-        )}
-
-        <button
-          onClick={handleSignIn}
-          className="flex items-center justify-center gap-3 w-full min-h-[44px] rounded-button bg-ink text-white font-sans font-semibold text-sm px-4 py-3 hover:bg-ink/90 transition-colors"
-        >
-          <GoogleIcon />
-          Continue with Google
         </button>
       </div>
-    </div>
+    </>
   );
 }
 
-function GoogleIcon() {
+function TacoArt() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
-      <path
-        d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
-        fill="#4285F4"
-      />
-      <path
-        d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"
-        fill="#34A853"
-      />
-      <path
-        d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"
-        fill="#FBBC05"
-      />
-      <path
-        d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"
-        fill="#EA4335"
-      />
-    </svg>
+    <svg width="44" height="44" viewBox="0 0 64 64" aria-hidden="true"><path d="M6 44a26 26 0 0 1 52 0z" fill="#F6C453" stroke="#1A2019" strokeWidth="2.5" strokeLinejoin="round" /><path d="M10 40c3-6 7-4 10-8 3 3 7 1 10-3 3 3 7 3 10 0 3 2 7 3 10 9" fill="none" stroke="#2E9B57" strokeWidth="4" strokeLinecap="round" /><circle cx="22" cy="36" r="3" fill="#E8553B" /><circle cx="40" cy="34" r="3" fill="#E8553B" /></svg>
+  );
+}
+
+function DrinkArt() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 64 64" aria-hidden="true"><path d="M18 20h28l-4 36a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4z" fill="#E9CFA8" stroke="#1A2019" strokeWidth="2.5" strokeLinejoin="round" /><path d="M16 20h32" stroke="#1A2019" strokeWidth="2.5" strokeLinecap="round" /><path d="M36 20 42 4" stroke="#1E7A46" strokeWidth="4" strokeLinecap="round" /></svg>
   );
 }
