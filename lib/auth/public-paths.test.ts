@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import { isPublicPath } from "./public-paths";
 
 test.each([
+  "/",
   "/feed",
   "/map",
   "/deals/8f2c1e4a-0000-4000-8000-000000000000",
@@ -17,7 +18,6 @@ test.each([
 });
 
 test.each([
-  "/",
   "/scan",
   "/pin",
   "/club-nights",

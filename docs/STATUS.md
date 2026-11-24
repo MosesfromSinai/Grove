@@ -55,6 +55,7 @@ Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night
 - Edward's `docs/team/edward.md`: ticked finished tasks (#53, #54, #57, #58, #59, #62, #63, #64, #65, #66, #108, #109, #110) and added his open #157.
 - Adolfo's `docs/team/adolfo.md`: ticked finished tasks (#73, #74, #75, #76, #77, #112, #113, #114, #115).
 - Design match (`moses/design-match`, 2026-11-23): Celso's `app/(auth)/layout.tsx` and `app/(auth)/sign-in/sign-in-form.tsx` (canvas hero and sheet; tagline unchanged); Edward's `components/student/deal-card.tsx`, `feed.tsx`, `format.ts`, `scanner.tsx`, `redeemed-view.tsx`, `club-nights.tsx`, `club-night-claimed.tsx` and `app/(student)/feed/page.tsx`; Adolfo's `components/business/business-overview.tsx`, `my-deals.tsx`, `business-stats.tsx`, `business-context.tsx` and `app/(business)/dashboard/deals/page.tsx`; Hikaru's `components/map/pin-details.tsx`.
+- Celso's `lib/auth/public-paths.ts` and `lib/auth/public-paths.test.ts` (`moses/root-to-feed`, 2026-11-24): `/` is now public so `app/page.tsx` can send signed-out visitors to `/feed` (team decision of 2026-11-24).
 
 ## Pilot owner setup (Moses, by hand)
 
