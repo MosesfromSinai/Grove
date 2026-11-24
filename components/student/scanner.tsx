@@ -19,9 +19,9 @@ function PinLink({ dealId }: { dealId: string }) {
   return (
     <Link
       href={`/pin?deal=${dealId}`}
-      className="mt-3 flex min-h-11 items-center font-semibold text-green-dark underline"
+      className="mt-6 flex min-h-11 items-center justify-center font-bold text-orange-light underline"
     >
-      Can&apos;t scan? Ask staff to enter their PIN
+      No location? Ask staff for the store PIN.
     </Link>
   );
 }
@@ -139,12 +139,12 @@ export function Scanner() {
         </>
       )}
 
-      {phase === "redeeming" && <p role="status" className="text-ink-muted">Checking your visit…</p>}
+      {phase === "redeeming" && <p role="status" className="mt-6 text-center text-white/80">Checking your visit…</p>}
 
       {phase === "denied" && (
         <div>
-          <p role="alert" className="text-ink">{errorMessages.LOCATION_REQUIRED}</p>
-          <button onClick={retry} className="mt-4 min-h-11 rounded-button bg-ink px-6 font-semibold text-white">
+          <p role="alert" className="mt-6 text-center text-white">{errorMessages.LOCATION_REQUIRED}</p>
+          <button onClick={retry} className="mx-auto mt-4 flex min-h-11 items-center rounded-button bg-surface px-6 font-semibold text-ink">
             Try again
           </button>
           <PinLink dealId={dealId} />
@@ -153,8 +153,8 @@ export function Scanner() {
 
       {phase === "camera-error" && (
         <div>
-          <p role="alert" className="text-ink">We couldn&apos;t open your camera. Allow camera access in your browser settings and try again.</p>
-          <button onClick={retry} className="mt-4 min-h-11 rounded-button bg-ink px-6 font-semibold text-white">
+          <p role="alert" className="mt-6 text-center text-white">We couldn&apos;t open your camera. Allow camera access in your browser settings and try again.</p>
+          <button onClick={retry} className="mx-auto mt-4 flex min-h-11 items-center rounded-button bg-surface px-6 font-semibold text-ink">
             Try again
           </button>
           <PinLink dealId={dealId} />
@@ -163,8 +163,8 @@ export function Scanner() {
 
       {phase === "failed" && (
         <div>
-          <p role="alert" className="text-ink">Something went wrong checking your visit. Check your connection and try again.</p>
-          <button onClick={retry} className="mt-4 min-h-11 rounded-button bg-ink px-6 font-semibold text-white">
+          <p role="alert" className="mt-6 text-center text-white">Something went wrong checking your visit. Check your connection and try again.</p>
+          <button onClick={retry} className="mx-auto mt-4 flex min-h-11 items-center rounded-button bg-surface px-6 font-semibold text-ink">
             Try again
           </button>
         </div>
@@ -172,8 +172,8 @@ export function Scanner() {
 
       {phase === "error" && error && (
         <div>
-          <p role="alert" className="text-ink">{errorMessages[error]}</p>
-          <button onClick={retry} className="mt-4 min-h-11 rounded-button bg-ink px-6 font-semibold text-white">
+          <p role="alert" className="mt-6 text-center text-white">{errorMessages[error]}</p>
+          <button onClick={retry} className="mx-auto mt-4 flex min-h-11 items-center rounded-button bg-surface px-6 font-semibold text-ink">
             Try again
           </button>
           {(error === "TOO_FAR" || error === "LOCATION_REQUIRED") && <PinLink dealId={dealId} />}
