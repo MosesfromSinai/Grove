@@ -55,7 +55,7 @@ export function Feed() {
         <div>
           <h1 className="text-4xl">Deals</h1>
           <p className="mt-1 text-ink-muted">
-            {loading || !result ? where : `${result.deals.length} live ${status === "located" ? "near you" : "near campus"} right now`}
+            {loading || !result ? where : `${result.deals.length || "Nothing"} live ${status === "located" ? "near you" : "near campus"} right now`}
           </p>
         </div>
         <button

@@ -57,7 +57,7 @@ export default function SignInForm() {
         {errorMessage && <p role="alert" className="mt-4 text-sm text-destructive">{errorMessage}</p>}
         <button
           onClick={handleSignIn}
-          className="mt-6 flex min-h-14 w-full items-center justify-center gap-3 rounded-button bg-ink px-4 font-extrabold text-white hover:bg-ink/90"
+          className="mt-6 flex min-h-14 w-full items-center justify-center gap-2.5 rounded-button bg-ink px-3 text-[15px] font-extrabold text-white hover:bg-ink/90"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5z" /><path d="M6 12v5c3 2 9 2 12 0v-5" /></svg>
           Sign in with your school Google account
