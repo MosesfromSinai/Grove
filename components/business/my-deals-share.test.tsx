@@ -7,7 +7,7 @@ import { MyDeals } from "./my-deals";
 // Share (deal link and QR) shows on live and scheduled deals only, not ended ones.
 const api = vi.hoisted(() => ({ deals: vi.fn() }));
 vi.mock("@/lib/supabase", () => ({ getMyDeals: api.deals, endDeal: vi.fn(), cancelDeal: vi.fn(), isMockData: true }));
-vi.mock("@/components/business/business-context", () => ({ useBusiness: () => ({ profile: { business: { id: "b1" } } }), BusinessLoading: () => null }));
+vi.mock("@/components/business/business-context", () => ({ useBusiness: () => ({ profile: { business: { id: "b1", name: "Orange Peel Tacos" } } }), BusinessLoading: () => null }));
 vi.mock("./deal-share", () => ({ DealShare: ({ deal }: { deal: { title: string } }) => <span>share {deal.title}</span> }));
 
 const base = { business_id: "b1", description: "", photo_url: null, ends_at: null, active_days: null, daily_start: null, daily_end: null,
