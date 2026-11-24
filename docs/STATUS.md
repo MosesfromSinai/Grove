@@ -24,7 +24,7 @@ Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night
 
 ## Remaining work
 - **Pilot:** onboard a real restaurant (#79), test the dashboard at the counter (#80), first real redemption, owner-reported fixes (#81), outreach (#82).
-- **Phone checks:** security phone checks on production (#158), PWA install on Android (#159), accessibility pass (#66).
+- **Phone checks:** security phone checks on production (#158), PWA install on Android (#159).
 - **Demo and pitch:** demo script (#25), pitch deck (#26), competitor slide (#44).
 - **Interviews:** restaurant and student interviews for everyone (#27, #46, #68, #83, #99; #104, #107, #111, #116, #118), student survey (#67), pricing questions (#98).
 - **Optional:** Sentry (#22).
