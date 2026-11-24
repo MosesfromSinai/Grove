@@ -20,7 +20,7 @@ _Last updated: 2026-11-24 by Moses_
 | Week 4: first real redemption at a business near UCR | Open: no pilot redemption is recorded in this repo |
 
 ## Done since Nov 9
-Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night claim, profile), business dashboard (overview, post deal with repeat days and visibility, My deals with Share links and QR, club night posting, results and cancel, stats, sticker, redemption settings, truck pin), claim cap and location range check, and the #41 security pass (below).
+Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night claim, profile), business dashboard (overview, post deal with repeat days and visibility, My deals with Share links and QR, club night posting, results and cancel, stats, sticker, redemption settings, truck pin), claim cap and location range check, the #41 security pass (below), Stats new vs. returning students (#166), the design canvas match (#168), Next.js 16.4.6 (#169), and signed-out visitors at `/` landing on `/feed` (#170).
 
 ## Remaining work
 - **Pilot:** onboard a real restaurant (#79), test the dashboard at the counter (#80), first real redemption, owner-reported fixes (#81), outreach (#82).
@@ -29,17 +29,12 @@ Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night
 - **Interviews:** restaurant and student interviews for everyone (#27, #46, #68, #83, #99; #104, #107, #111, #116, #118), student survey (#67), pricing questions (#98).
 - **Optional:** Sentry (#22).
 - **Week 3 gate:** a club member redeems from a club night link end to end on production.
-- **Root route:** signed-out visitors at `/` go to `/feed` (decided 2026-11-24); ships on `moses/root-to-feed` after #168 merges.
 
 ## Open PRs
 - **#163 (Hikaru, push notifications): blocked.** Stretch goal; adds a migration, the `notify-deal` function, VAPID secrets and a cron job, and needs Supabase and Vercel setup plus a team decision. Left open and untouched.
-- **#166 (Moses, stats and share tweaks):** waiting for Moses's preview check.
-- **#168 (Moses, design match):** waiting for Moses's preview check; merge after #166.
-- **#169 (Moses, Next.js 16.4.6):** waiting for Moses's preview check; merge after #168.
 
 ## Blockers
 
-- **Next.js 16.4.2:** `next build` reports a known security vulnerability (the build stops every other run with a notice). Fix is in #169 (16.4.2 → 16.4.6); remove this line once it merges.
 - **Interview results:** none recorded in this repo; they live in the shared Drive folder. The pitch numbers in `CLAUDE.md` are estimates until interviews confirm them.
 - **Settings (done):** Vercel Authentication is off for previews. `NEXT_PUBLIC_SITE_URL` is set for Production only, so previews sign in on their own domain. Supabase Auth on grove-dev is Google-only; its Redirect URLs are `https://grove-jade.vercel.app/**`, `http://localhost:3000/**`, and `https://grove-*-mosesfromsinais-projects.vercel.app/**`.
 - **Everyone:** CI ("Lint, typecheck, build") runs `npm test` too. Run `npm run lint && npm run typecheck && npm test && npm run build` (Node 22) before pushing. SQL tests: `npx supabase@2.122.0 db reset && npx supabase@2.122.0 test db` with Docker running.
