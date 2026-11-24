@@ -56,3 +56,19 @@ export function redemptionWhenLabel(redeemedAt: string, nowMs: number): string {
   const { label, half } = clock(at.time);
   return `Today · ${label.includes(":") ? label : `${label}:00`} ${half}`;
 }
+
+// Deal card countdown like the canvas: "2:15:20 left".
+export function countdownLabel(endIso: string, nowMs: number): string {
+  const secs = Math.max(0, Math.floor((new Date(endIso).getTime() - nowMs) / 1000));
+  if (secs === 0) return "Ending now";
+  const h = Math.floor(secs / 3600);
+  const m = String(Math.floor((secs % 3600) / 60)).padStart(2, "0");
+  const sec = String(secs % 60).padStart(2, "0");
+  return `${h}:${m}:${sec} left`;
+}
+
+// "Until 3 PM" in campus time, for the end of the current live window.
+export function untilLabel(endIso: string): string {
+  const { label, half } = clock(campusClock(new Date(endIso)).time);
+  return `Until ${label} ${half}`;
+}
