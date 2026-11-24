@@ -24,6 +24,7 @@ Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night
 
 ## Remaining work
 - **Pilot:** onboard a real restaurant (#79), test the dashboard at the counter (#80), first real redemption, owner-reported fixes (#81), outreach (#82).
+- **#80 (Adolfo, Nov 22):** the hosted checkpoint on his dedicated test business passed (posting, sharing, at-home sticker redemption, counts, Stats, End now, Cancel, repeating link-only). Still pending: Realtime event delivery, PIN, printing, and owner phone/tablet at a real counter. Clean up test data by that business's ID, not with the broad `[test]%` snippet below, so other testers' rows stay.
 - **Phone checks:** security phone checks on production (#158), PWA install on Android (#159).
 - **Demo and pitch:** demo script (#25), pitch deck (#26), competitor slide (#44).
 - **Interviews:** restaurant and student interviews for everyone (#27, #46, #68, #83, #99; #104, #107, #111, #116, #118), student survey (#67), pricing questions (#98).
@@ -54,6 +55,7 @@ Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night
 - Adolfo's `components/business/business-overview.tsx` (health fixes, 2026-11-24): the empty visits text says "Sticker and PIN redemptions count" (staff scan is stretch).
 - Adolfo's `components/business/dashboard-placeholder.tsx` (health fixes, 2026-11-24): deleted; no page imported it.
 - Stale branches deleted (2026-11-24): Adolfo's `adolfo/business-stats`, `adolfo/club-night-results` and `adolfo/deal-sharing` (superseded by #152, #153 and #154); Edward's `edward/scanner-PIN-backup-and-sticker-page` (PR #139 merged; its extra LOG lines are already on main); and the merged `adolfo/counter-sticker`, `adolfo/dashboard-data`, `adolfo/dashboard-review`, `adolfo/open-club-nights`, `adolfo/overview`, `adolfo/redemption-settings`, `hikaru/food-trucks-and-pwa` and `TheEdwardVan-patch-1`. Kept: `adolfo/deal-share-recovery`, `adolfo/staff-management`, `adolfo/staff-scanner` (work not on main) and `hikaru/push-notifications` (#163).
+- Adolfo's `adolfo/deal-share-recovery` merged (2026-11-24, `moses/adolfo-share-fix`): `components/business/deal-share.tsx` and its test take his QR recovery fix (#81); `components/business/render-sticker.ts` line 1 reads "Scan in Grove"; `docs/team/adolfo.md` keeps main's content plus his #80/#81 acceptance table and a condensed Nov 22 entry; his LOG section's 27 step-by-step Nov 19–22 lines are condensed to three. Branch deleted after merge.
 
 ## Pilot owner setup (Moses, by hand)
 

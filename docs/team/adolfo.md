@@ -46,7 +46,7 @@ _Last updated: 2026-11-06_
 - [ ] Staff scanner: camera via `html5-qrcode`, calls `staff-redeem`, green "Verified" or red "Not valid" with reason, "Scan next" (#78)
 - [x] Post an open club night: date, time window, giveback text (e.g. "15% back to your club") (#113) — implemented/tested locally; shared review, authorized hosted RLS/persistence and downstream claim checks pending — merged by Moses (#151)
 - [x] Club night results on the dashboard: claimed club name and verified visits per night (#114) — done by Moses, merged (#153)
-- [x] Deal link and QR download for flyers and group chats (`/deals/<id>`; it opens the deal only, never redeems) (#115) — done by Moses, merged (#154)
+- [x] Deal link and QR download for flyers and group chats (`/deals/<id>`; it opens the deal only, never redeems) (#115) — done by Moses, merged (#154); QR failure/stale-download fix from Adolfo's branch merged 2026-11-24 (#81)
 - [ ] Staff list in settings: add staff by Google email (`add-staff`), see invited vs. active (`getStaff`), remove staff (#122)
 
 _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
@@ -63,7 +63,40 @@ _Feature freeze Nov 8 (see `CLAUDE.md` → Week plan)._
 
 ---
 
+## #80/#81 acceptance checkpoint — 2026-11-22
+
+Production checks on Adolfo's dedicated test business (`[test]` deals only), from his Nov 22 screenshots and confirmations. Passes apply only to the stated environment. #80 and #81 stay open: Realtime event delivery, PIN, printing, and owner phone/tablet use at a real counter are still pending.
+
+| Workflow | Status | Evidence and limit |
+|---|---|---|
+| Owner provisioning, Google access and onboarding/hour save | **Passed hosted** | C: business profile, one linked owner membership and final owner match reported; dedicated business name/hours saved. |
+| Public deal creation and reload persistence | **Passed hosted** | C: `[test] Public deal 01` remains Active/Public after explicit reload confirmation. |
+| End now and retained redemption history | **Passed hosted** | C: Expired/Ended screenshot, end shortened to 5:33 PM, count 1 retained. |
+| Cancel an unused scheduled deal and persisted absence | **Passed hosted** | Before/after screenshots show `[test] Cancel 01` scheduled Nov 23 2–3 PM with 0 redemptions, then Scheduled deal canceled, Scheduled 0 and Expired 1. Adolfo explicitly confirmed it was still gone after reload. This resolves the earlier ambiguity; no repeat cancellation test is needed. Local/mock results remain separate. |
+| Repeating days/window and link-only save/reload | **Passed hosted, bounded repeat; local mock/fixture also passed** | New saved/list screenshots and Adolfo's explicit reload confirmation show `[test] Repeat link only 01`, all seven days, 00:00–23:59 campus window, Link only/UCR-only and 0 redemptions. Saved bounds are Nov 22 6:26 PM–Dec 1 11:21 PM. This does not demonstrate an unbounded Until off end; no extra test combination is added. |
+| Link-only hidden from feed/map/counter discovery while direct link opens | **Passed hosted, Adolfo-confirmed** | Owner screenshot establishes Active; Adolfo confirmed the direct URL opens in his UCR session and then confirmed the requested feed/map/counter exclusion check. Business visibility is allowed; the deal stays hidden. These are manual hosted results, separate from Team local SQL/M evidence and not an independent RLS audit. |
+| Public Share link, downloaded PNG and QR payload | **Passed hosted plus offline** | C: link copy, QR/download display and image opening. Q: saved 480×480 PNG independently decodes to the exact production URL for deal `1b0ee828-5f63-4075-aa36-50c045335a99`. Native phone-camera launching remains a separate device follow-up. |
+| QR error/retry, stale-download protection and keyboard behavior | **Passed local; merged to main 2026-11-24** | Six share regressions and guided mock failure/retry/deal-switch/Escape/Enter review; hosted check of the deployed fix still pending. |
+| Counter-sticker preview and at-home phone redemption | **Passed hosted/physical phone at home** | C: correct permanent link/preview, successful UCR phone redemption, owner count 1 and matching Counter sticker visit. This is not a printed sticker or real-counter pass. |
+| Saved student used state | **Passed hosted** | C: same UCR phone session shows Already used today after reload. This does not claim a second backend redemption request was rejected; Team's prior DB duplicate checks remain separate. |
+| My deals, Overview and Stats counts | **Passed hosted, one-visit case** | C: My deals 1; Overview today/week 1/1 and matching visit; both 7/30-day Stats total/per-deal 1/1, peak 5 PM for the 5:21 PM visit. Large-history completeness is not established. |
+| Realtime arriving event/reconnect | **Passed local simulation; pending hosted event** | Earlier loopback HTTP/WebSocket recovery checks passed. A Live badge plus manual refresh proves neither arrival nor reconnect delivery. Keep outside the two current evidence gaps. |
+| Club-night posting, cancellation and claimed results | **Passed local mock/fixture; pending hosted/event** | Saved posting/results/race tests and team-reported merged functionality; no dedicated-business hosted evidence in this conversation. |
+| Club claim → member redemption during its window | **Pending event** | Final plan explicitly leaves the last Week 3 end-to-end run pending; no evidence here closes it. |
+| PIN generation/reset, one-time privacy and backup redemption | **Passed local mock/fixture; pending hosted/account** | Saved settings tests cover confirmation/privacy/cleanup. Adolfo reported PIN untested; no later PIN result. Do not generate or record a PIN during this audit. |
+| Counter-sticker download dimensions and printing | **Passed local asset checks; pending physical print** | Prior mock/HTTP fixture PNG decoding/dimensions/300-DPI checks passed. Production preview/on-screen scan is confirmed; actual-size paper dimensions/scan are not. |
+| Dashboard phone/tablet use at a real counter | **Passed desktop emulations; pending physical acceptance** | M: 320/390/768/1440px layouts and keyboard checks. C: real phone student flow at home only. No owner dashboard tablet or real-counter evidence. #80 stays open. |
+| Stats range-control 44px project target | **Failed local target; separate finding open** | Saved report measures approximately 101×40px; current main still uses `min-h-10`. Functional Stats passes do not close this finding. No change or issue posting in this audit. |
+| Owner-reported fix completion under #81 | **Pending overall** | QR regression fix merged 2026-11-24. Stats range-control 44px finding is drafted; stats pagination is a shared-review candidate. |
+
+---
+
 ## Notes and session log
+
+### 2026-11-22
+- **#80 hosted checkpoint (Adolfo-confirmed):** owner setup and onboarding; public deal posted and persisted after reload; Share link, QR download and direct student opening; at-home sticker redemption as a UCR student; My deals 1, Already used today after reload, Overview today/week 1/1, Stats 7/30 days 1/1 with peak 5 PM; End now kept the redemption; Cancel removed a future deal and stayed gone after reload; a repeating link-only deal saved, went Active, opened by direct link and stayed out of feed, map and the sticker page.
+- **#81 QR fix:** a failed QR shows an alert and Retry QR while the link still copies; a reopened or switched deal never offers a stale QR. Three regressions added (`d4a2ba1`). Merged to main by Moses on 2026-11-24.
+- **Findings:** Stats range controls are 40px tall against the 44px touch target (drafted, not filed). Repeating test deal cleanup is scoped to the dedicated test business only.
 
 ### 2026-11-06
 - **#113 Commit/publication approval:** Adolfo approved committing #113 and pushing the completed #75/#77/#113 feature branches. Prior verification remains valid; authorized hosted/shared acceptance stays pending. No PR or merge requested; GitHub Actions runs on PR/main, so branch pushes alone do not run CI. Next: #114.
