@@ -53,10 +53,20 @@ export default function SignInForm() {
       </div>
 
       <div className="rounded-t-card bg-bg-student px-6 pt-8 pb-10">
-        {errorMessage && <p role="alert" className="text-sm text-destructive">{errorMessage}</p>}
-        <button onClick={handleSignIn} className="mt-6 flex min-h-14 w-full items-center justify-center rounded-button bg-ink px-4 font-extrabold text-white">
+        <h1 className="text-3xl">Deals from the spots around campus, made for students.</h1>
+        {errorMessage && <p role="alert" className="mt-4 text-sm text-destructive">{errorMessage}</p>}
+        <button
+          onClick={handleSignIn}
+          className="mt-6 flex min-h-14 w-full items-center justify-center gap-3 rounded-button bg-ink px-4 font-extrabold text-white hover:bg-ink/90"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5z" /><path d="M6 12v5c3 2 9 2 12 0v-5" /></svg>
           Sign in with your school Google account
         </button>
+        <p className="mt-4 flex items-center justify-center gap-2 text-ink-muted">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
+          Use your @ucr.edu email.
+        </p>
+        <p className="mt-4 text-center text-sm text-ink-fine">Restaurant owners: sign in with the Google account Grove invited.</p>
       </div>
     </>
   );
