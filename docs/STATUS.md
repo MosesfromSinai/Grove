@@ -39,7 +39,7 @@ Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night
 - **Settings (done):** Vercel Authentication is off for previews. `NEXT_PUBLIC_SITE_URL` is set for Production only, so previews sign in on their own domain. Supabase Auth on grove-dev is Google-only; its Redirect URLs are `https://grove-jade.vercel.app/**`, `http://localhost:3000/**`, and `https://grove-*-mosesfromsinais-projects.vercel.app/**`.
 - **Everyone:** CI ("Lint, typecheck, build") runs `npm test` too. Run `npm run lint && npm run typecheck && npm test && npm run build` (Node 22) before pushing. SQL tests: `npx supabase@2.122.0 db reset && npx supabase@2.122.0 test db` with Docker running.
 
-## Changes in teammates' areas (2026-11-22, Moses, temporary override)
+## Changes in teammates' areas (2026-11-22 and 2026-11-24, Moses, temporary override)
 - Hikaru's `docs/team/hikaru.md` #98: pricing questions updated to the $179/month plan plus $0.50 per visit.
 - Adolfo's `docs/team/adolfo.md` #74 and #82: sticker copy is "Scan in Grove to redeem"; pilot offer is "first campaign free".
 - Adolfo's `components/business/render-sticker.ts`: sticker text "Scan in the Grove app" → "Scan in Grove to redeem" (no download framing).
@@ -51,6 +51,9 @@ Student app (feed, map, deal page, scanner, PIN backup, sticker page, club night
 - Adolfo's `docs/team/adolfo.md`: ticked finished tasks (#73, #74, #75, #76, #77, #112, #113, #114, #115).
 - Design match (`moses/design-match`, 2026-11-23): Celso's `app/(auth)/layout.tsx` and `app/(auth)/sign-in/sign-in-form.tsx` (canvas hero and sheet; tagline unchanged); Edward's `components/student/deal-card.tsx`, `feed.tsx`, `format.ts`, `scanner.tsx`, `redeemed-view.tsx`, `club-nights.tsx`, `club-night-claimed.tsx` and `app/(student)/feed/page.tsx`; Adolfo's `components/business/business-overview.tsx`, `my-deals.tsx`, `business-stats.tsx`, `business-context.tsx` and `app/(business)/dashboard/deals/page.tsx`; Hikaru's `components/map/pin-details.tsx`.
 - Celso's `lib/auth/public-paths.ts` and `lib/auth/public-paths.test.ts` (`moses/root-to-feed`, 2026-11-24): `/` is now public so `app/page.tsx` can send signed-out visitors to `/feed` (team decision of 2026-11-24).
+- Adolfo's `components/business/business-overview.tsx` (health fixes, 2026-11-24): the empty visits text says "Sticker and PIN redemptions count" (staff scan is stretch).
+- Adolfo's `components/business/dashboard-placeholder.tsx` (health fixes, 2026-11-24): deleted; no page imported it.
+- Stale branches deleted (2026-11-24): Adolfo's `adolfo/business-stats`, `adolfo/club-night-results` and `adolfo/deal-sharing` (superseded by #152, #153 and #154); Edward's `edward/scanner-PIN-backup-and-sticker-page` (PR #139 merged; its extra LOG lines are already on main); and the merged `adolfo/counter-sticker`, `adolfo/dashboard-data`, `adolfo/dashboard-review`, `adolfo/open-club-nights`, `adolfo/overview`, `adolfo/redemption-settings`, `hikaru/food-trucks-and-pwa` and `TheEdwardVan-patch-1`. Kept: `adolfo/deal-share-recovery`, `adolfo/staff-management`, `adolfo/staff-scanner` (work not on main) and `hikaru/push-notifications` (#163).
 
 ## Pilot owner setup (Moses, by hand)
 

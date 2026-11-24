@@ -27,6 +27,7 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-11-24:** Health check fixes (`moses/health-fixes`): contract sticker copy and stretch labels on `issue-code`, `staff-redeem` and `add-staff`; CLAUDE.md Stack (CSS bars, Sentry optional) and README pre-push `npm test`; dropped closed #66 from STATUS; overview empty text without staff scan; removed the unused dashboard placeholder; `eslint-config-next` 16.4.6; deleted 12 stale remote branches. `shadcn` stays in dependencies because `app/globals.css` imports `shadcn/tailwind.css`.
 - **2026-11-24:** Merged #170 (send visitors to feed) after its preview: signed-out `/` lands on `/feed`, and Redeem still goes to sign-in and remembers the deal.
 - **2026-11-24:** Merged #169 (Next.js 16.4.2 → 16.4.6) after merging main in; two builds in a row with no security notice.
 - **2026-11-24:** Merged #168 (design canvas match) after merging main in. Fixed on the preview: the feed said "0 live" with no deals (now "Nothing live"), and the sign-in button wrapped to two lines on phones; the #166 share test needed the business name the new initials tile reads.
