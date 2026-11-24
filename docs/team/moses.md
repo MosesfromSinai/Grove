@@ -2,7 +2,7 @@
 
 > Session rules: `CLAUDE.md` → Session protocol. Your next Claude session starts from this file, so keep it current.
 
-_Last updated: 2026-11-23_
+_Last updated: 2026-11-24_
 
 ---
 
@@ -120,6 +120,11 @@ _Record things only you need to remember (gotchas, commands, links). Decisions t
 
 ## Session log
 _Newest at the top. One entry per session._
+
+### 2026-11-24 (cleanup, end of temporary override)
+- **Did:** Checked the #166, #168 and #169 previews signed out with Playwright and fixed two #168 issues ("0 live" subtitle, sign-in button wrapping). Merged #166, #168 and #169 in order after merging main in and rerunning the checks. Recorded the root route and financial model decisions, then shipped signed-out `/` → `/feed` (#170). Ended the temporary override in `CLAUDE.md`.
+- **Next:** Demo script (#25) and pitch deck (#26), including checking the "8 of 10 restaurants" claim against the Drive notes; pilot support (#24); my interviews (#27, #104).
+- **Blockers:** #163 (push) needs a team decision plus Supabase and Vercel setup. Signed-in student and owner screens weren't checked on the previews (no live deals on grove-dev, and Google sign-in can't be automated).
 
 ### 2026-11-22 (cleanup, temporary override)
 - **Did:** Repositioned Grove as a campus marketing agency in `CLAUDE.md` with the pitch numbers and title-only PRs, and aligned README, app description, sticker copy and pricing in team files (#165). Merged teammates' #164, #161, #160 and #162 after merging main into them; held #163 (push) as blocked. Ticked finished tasks across team files. Opened #166 (new vs. returning students on Stats, Share on live and scheduled deals only, QR filename fallback).
