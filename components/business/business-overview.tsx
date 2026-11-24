@@ -140,7 +140,7 @@ function Overview({ businessId }: { businessId: string }) {
           <p className="min-w-0 flex-1 text-sm [overflow-wrap:anywhere]">Verified student redeemed <b>{visit.deal_title || "a deal"}</b><span className="sr-only"> by {methods[visit.method]}</span></p>
           {index === 0 && <span className="rounded-pill bg-orange px-2 py-0.5 text-xs font-extrabold text-ink">NEW</span>}
           <time dateTime={visit.redeemed_at} className="shrink-0 text-sm font-bold text-ink-muted">{dateTime.format(new Date(visit.redeemed_at))}</time>
-        </li>)}</ol> : <Empty icon="visits" title="Every visit counts" text="Your first verified student visit will appear here. Sticker, PIN, and staff-scan redemptions all count." />}
+        </li>)}</ol> : <Empty icon="visits" title="Every visit counts" text="Your first verified student visit will appear here. Sticker and PIN redemptions count." />}
       </section>
     </div>
     <p role="status" className="sr-only">{announcement}</p>

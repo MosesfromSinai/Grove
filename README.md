@@ -25,7 +25,7 @@ cp .env.example .env.local   # then fill in the URL and anon key; .env.local is 
 npm run dev                  # http://localhost:3000
 ```
 
-When a key changes, copy it again from the dashboard (or Moses sends a one-time link). Before pushing, run `npm run lint`, `npm run typecheck`, and `npm run build`.
+When a key changes, copy it again from the dashboard (or Moses sends a one-time link). Before pushing, run `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`.
 
 **Environment variables:** `.env.example` lists every variable and what it's for, with empty values. Set `NEXT_PUBLIC_SITE_URL=http://localhost:3000` locally.
 

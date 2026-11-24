@@ -6,7 +6,7 @@ The shapes everyone builds against. Frontend work uses `mocks/` that match this 
 **Rule:** any change here goes in a pull request reviewed by the people it affects, plus a line in `docs/LOG.md`.
 **Code copies:** the TypeScript types below live in `lib/supabase/types.ts`; `mocks/index.ts` exports every query and function below with the same name, input, and return type. Change all three together. Screens import from `lib/supabase` (`index.ts`), which serves `mocks/` or the real wrappers in `queries.ts` depending on `NEXT_PUBLIC_DATA_SOURCE`; a compile-time check keeps their signatures identical. The wrappers are browser-only: call them from client components so they run with the signed-in user's session.
 
-_Last updated: 2026-11-06_
+_Last updated: 2026-11-24_
 
 ---
 
@@ -370,7 +370,7 @@ Writes return `Promise` results; errors are `{ ok: false, error, fields? }`. Rea
 - Image Storage buckets/policies/uploads are absent. Real posting requires `photo_url: null`; real business saves may retain the exact existing logo URL or remove it. New images return `IMAGE_STORAGE_UNAVAILABLE` without a write. Mock data URLs remain memory-only. HTTPS URLs permit existing Storage logos to pass shared validation; this is not proof an upload exists.
 - Mutations recheck current state and constrain updates/deletes by business and schedule. FK constraints preserve redemptions and club-night references racing deletion. Browser UTC supplies write timestamps as in existing adapters; verify clock and race behavior against the real database before acceptance.
 - `getBusinessSticker` (#74) checks the signed-in user's owner/staff membership, then selects only `businesses.id, name, qr_slug`. Existing SQL column grants permit this; no migration, function, or write is needed. `qr_slug` remains excluded from `BusinessPublic`. A missing slug returns null; no slug is invented. The mock returns only the sample owner's sticker and rejects other businesses with `NOT_MEMBER`.
-- Counter stickers encode the configured `NEXT_PUBLIC_SITE_URL` origin plus `/b/<qr_slug>`, never a deal or redemption endpoint. The origin must be HTTPS (HTTP is allowed only for loopback previews), without credentials/path/query/fragment. Missing/invalid configuration blocks downloading. PNG exports use the Grove theme/fonts, 3/4/6-inch squares at 300 DPI (900/1200/1800 pixels, with PNG pHYs metadata), an unobstructed QR with four-module quiet zone, and the wording "Scan in the Grove app to redeem." Mock exports are marked DEMO. Actual-size printing/physical scans and the hosted membership/slug read remain acceptance checks; Edward's `/b/[slug]` page still depends on PR #139.
+- Counter stickers encode the configured `NEXT_PUBLIC_SITE_URL` origin plus `/b/<qr_slug>`, never a deal or redemption endpoint. The origin must be HTTPS (HTTP is allowed only for loopback previews), without credentials/path/query/fragment. Missing/invalid configuration blocks downloading. PNG exports use the Grove theme/fonts, 3/4/6-inch squares at 300 DPI (900/1200/1800 pixels, with PNG pHYs metadata), an unobstructed QR with four-module quiet zone, and the wording "Scan in Grove to redeem." Mock exports are marked DEMO. Actual-size printing/physical scans and the hosted membership/slug read remain acceptance checks.
 
 ---
 
@@ -382,11 +382,11 @@ All return either `{ ok: true, ... }` or `{ ok: false, error: ErrorCode }`. `lib
 |---|---|---|---|
 | `redeem` (sticker) — `redeem()` | `{ deal_id, qr_slug, lat, lng }` (`lat`/`lng` null if location is denied) | `{ redemption: Redemption }` | Moses |
 | `redeem-pin` — `redeemPin()` | `{ deal_id, business_id, pin }` | `{ redemption: Redemption }` | Moses |
-| `issue-code` (staff mode) — `issueCode()` | `{ deal_id }` | `{ token, expires_at }` | Moses |
-| `staff-redeem` — `staffRedeem()` | `{ token }` | `{ redemption: Redemption, deal_title }` | Moses |
+| `issue-code` (staff mode) — `issueCode()` | `{ deal_id }` | `{ token, expires_at }`. **Stretch goal, not built** | Moses |
+| `staff-redeem` — `staffRedeem()` | `{ token }` | `{ redemption: Redemption, deal_title }`. **Stretch goal, not built** | Moses |
 | `claim-club-night` — `claimClubNight()` | `{ club_night_id, club_name }` | `{ club_night: ClubNight, deal_id }` (share `/deals/<deal_id>` with members) | Moses |
 | `set-pin` — `setPin()` | `{ business_id }` (owner only) | `{ pin }`: a new random 4-digit PIN, returned this once and stored hashed. Used at onboarding and for "Reset PIN" | Moses |
-| `add-staff` — `addStaff()` | `{ business_id, email }` (owner only) | `{ member: StaffMember }`; status `invited` until that email signs in | Moses |
+| `add-staff` — `addStaff()` | `{ business_id, email }` (owner only) | `{ member: StaffMember }`; status `invited` until that email signs in. **Stretch goal, not built** | Moses |
 | `notify-deal` — `notifyDeal()` | `{ deal_id }`, called when a deal goes live. **Stretch goal** | `{ sent: number }` | Hikaru |
 
 `redeem` checks in this order: `NOT_SIGNED_IN`, `NOT_VERIFIED_STUDENT` (every redemption needs a verified student; `students_only` is display-only), `RATE_LIMITED` (more than 10 `redeem` or `redeem-pin` attempts by the student in a minute), then `WRONG_BUSINESS`, `DEAL_NOT_LIVE` (also for an unknown deal), `LOCATION_REQUIRED`, `INVALID_LOCATION` (latitude outside −90…90 or longitude outside −180…180), `TOO_FAR` (over 150 m), `ALREADY_REDEEMED_TODAY`. Functions always answer HTTP 200 with `{ ok, ... }`; anything else means a server error, and the wrapper throws.

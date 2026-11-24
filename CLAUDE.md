@@ -44,7 +44,7 @@ Doc updates go in the same pull request as the code. **A session isn't finished 
 - Don't change another person's area (see Team) without saying so; suggest coordinating with them.
 - **Never write in someone else's team file.** If work affects them, note it in `docs/STATUS.md` under Blockers or tell them directly.
 - Never invent customer research: no made-up interview answers, quotes, survey numbers, or pilot results. Research lives in the team's shared Google Drive folder, not in this repo.
-- **Temporary override (decided by Moses, 2026-11-22; ended 2026-11-24):** for the 2026-11-22 cleanup session only, Moses (default owner and team lead) may edit any teammate's code, push fixes to their branches, resolve conflicts on and merge their PRs once CI passes, and correct tasks or issue numbers in their `docs/team/<name>.md`. Every such change is noted in `docs/STATUS.md`. Force-pushes and history rewrites on shared branches stay forbidden. The session ended on 2026-11-24, and the rules above apply again.
+- **Temporary override (decided by Moses, 2026-11-22; ended 2026-11-24):** for the 2026-11-22 cleanup session only, Moses (default owner and team lead) may edit any teammate's code, push fixes to their branches, resolve conflicts on and merge their PRs once CI passes, and correct tasks or issue numbers in their `docs/team/<name>.md`. Every such change is noted in `docs/STATUS.md`. Force-pushes and history rewrites on shared branches stay forbidden. The session ended on 2026-11-24. It was reopened and ended again on 2026-11-24 for the health check cleanup, and the rules above apply again.
 
 ---
 
@@ -124,7 +124,7 @@ Each person does 1–2 restaurant interviews (1–4) and at least one student in
 
 ## Stack
 
-Next.js 16 (App Router) + React + TypeScript PWA on Vercel, Node 22 (pinned in `.nvmrc` and `package.json` engines; run `nvm use`). Supabase for Postgres + PostGIS, Auth (Google), Storage, Edge Functions, Realtime. Mapbox GL JS. `qrcode` and `html5-qrcode` (Safari has no built-in QR reader). Tailwind + shadcn/ui. Recharts. Sentry. Stretch goal only: Web Push with VAPID, Resend for email.
+Next.js 16 (App Router) + React + TypeScript PWA on Vercel, Node 22 (pinned in `.nvmrc` and `package.json` engines; run `nvm use`). Supabase for Postgres + PostGIS, Auth (Google), Storage, Edge Functions, Realtime. Mapbox GL JS. `qrcode` and `html5-qrcode` (Safari has no built-in QR reader). Tailwind + shadcn/ui. CSS bars for stats. Sentry (optional, #22). Stretch goal only: Web Push with VAPID, Resend for email.
 
 ## Redemption rules
 
