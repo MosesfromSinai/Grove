@@ -75,11 +75,11 @@ Ticked here, not in teammates' files. Staff-scan issues (#39, #40, #60, #61) are
 - [x] Food-truck location update (#94): component and RPC merged; placed on the dashboard overview for truck owners
 - [x] Location before scan with PIN link (#54), sticker page (#57), PIN screen (#58), from Edward's #139
 - [x] Keep the deal link through sign-in (#109)
-- [ ] Verify link-only hidden from feed (#108) and no mock imports (#59) on real data
+- [x] Verify link-only hidden from feed (#108) and no mock imports (#59) on real data
 - [x] Claim club night screen (#110)
 - [x] Profile page (#62)
 - [x] Rate-limit club night claims (#106) and reject out-of-range coordinates (#38)
-- [ ] Onboarding routing (#33): done in `app/page.tsx`; owners added by hand (`STATUS.md`)
+- [x] Onboarding routing (#33): done in `app/page.tsx`; owners added by hand (`STATUS.md`)
 - [x] Mapbox token (#84) and canvas check for the map (#85)
 - [x] Security test pass (#41)
 - [x] Stats page (#76), from Adolfo's Week 3
