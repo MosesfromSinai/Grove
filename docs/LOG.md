@@ -27,6 +27,7 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-11-23:** Stats and deal share follow-up: Stats shows "New students: N · Returning (visited before this range): N" from `getBusinessStats` (two optional fields, no migration); Share appears only on live and scheduled deals; QR downloads fall back to `grove-deal-qr.png`.
 - **2026-11-22:** Cleanup session (temporary override): merged Celso's #164 (browse without sign-in; closed #156, #43), Edward's #161 (student states) and #160 (LOG, deduplicated), and Hikaru's #162 (map polish, install guide reworded to "Add to home screen"); closed #66, #96, #63. Held Hikaru's #163 (push, stretch) as blocked. Ticked finished tasks in Edward's and Adolfo's team files and added #157. Every change in a teammate's area is listed in `STATUS.md`.
 - **2026-11-22:** **Decision** (affects everyone): Grove is positioned as a campus marketing agency; one $179/mo plan (club nights included) + $0.50/visit; restaurants fund their own Grove-only offers. `CLAUDE.md` → What Grove is and Business model and pitch numbers; README, app description, sticker copy and team-file pricing updated to match.
 - **2026-11-09:** Deal links (#115, taken over from Adolfo): every deal in My deals has a Share button with its `/deals/<id>` link (copy) and a downloadable QR. The link only opens the deal; students still redeem with the counter sticker.

@@ -264,6 +264,8 @@ type BusinessStats = {
   perDeal: { deal_id: string; title: string; count: number }[];
   perHour: { hour: number; count: number }[];  // hour 0–23, local time
   total: number;
+  newStudents?: number;        // distinct students in the range with no earlier visit here
+  returningStudents?: number;  // distinct students in the range who visited this business before `from`
 };
 
 type BusinessOverview = { today: number; week: number; recentVisits: Redemption[]; as_of: string };

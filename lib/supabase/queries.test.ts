@@ -86,9 +86,9 @@ test("getBusinessStats counts per deal and per campus hour", async () => {
   use({
     tables: {
       redemptions: [
-        { deal_id: "d1", redeemed_at: "2026-10-26T19:10:00Z", deals: { title: "A" } }, // 12:10 PM campus
-        { deal_id: "d1", redeemed_at: "2026-10-26T19:40:00Z", deals: { title: "A" } },
-        { deal_id: "d2", redeemed_at: "2026-10-26T01:05:00Z", deals: { title: "B" } }, // 6:05 PM the day before
+        { deal_id: "d1", student_id: "s1", redeemed_at: "2026-10-26T19:10:00Z", deals: { title: "A" } }, // 12:10 PM campus
+        { deal_id: "d1", student_id: "s1", redeemed_at: "2026-10-26T19:40:00Z", deals: { title: "A" } },
+        { deal_id: "d2", student_id: "s2", redeemed_at: "2026-10-26T01:05:00Z", deals: { title: "B" } }, // 6:05 PM the day before
       ],
     },
   });
@@ -102,6 +102,9 @@ test("getBusinessStats counts per deal and per campus hour", async () => {
       { hour: 18, count: 1 },
     ],
     total: 3,
+    // The fake ignores filters, so the "earlier visits" query sees both students again.
+    newStudents: 0,
+    returningStudents: 2,
   });
 });
 

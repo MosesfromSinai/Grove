@@ -14,5 +14,6 @@ test("the QR encodes the deal link as a PNG", async () => {
 
 test("download names are safe slugs", () => {
   expect(qrFileName("$2 off any burrito!")).toBe("2-off-any-burrito-qr.png");
-  expect(qrFileName("***")).toBe("deal-qr.png");
+  expect(qrFileName("***")).toBe("grove-deal-qr.png");
+  expect(qrFileName("Café Ñoño 50% OFF")).toBe("caf-o-o-50-off-qr.png");
 });
