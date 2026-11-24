@@ -2,7 +2,7 @@
 
 This file is the shared memory for every team member's AI sessions. Claude Code reads it automatically from the repo root. In claude.ai, paste or attach it at the start of each session along with the files listed under **Session protocol**. **All shared rules live here and only here.** Team files hold personal tasks, notes, and logs.
 
-_Last updated: 2026-11-22 by Moses_
+_Last updated: 2026-11-24 by Moses_
 
 ---
 
@@ -44,7 +44,7 @@ Doc updates go in the same pull request as the code. **A session isn't finished 
 - Don't change another person's area (see Team) without saying so; suggest coordinating with them.
 - **Never write in someone else's team file.** If work affects them, note it in `docs/STATUS.md` under Blockers or tell them directly.
 - Never invent customer research: no made-up interview answers, quotes, survey numbers, or pilot results. Research lives in the team's shared Google Drive folder, not in this repo.
-- **Temporary override (decided by Moses, 2026-11-22):** for the 2026-11-22 cleanup session only, Moses (default owner and team lead) may edit any teammate's code, push fixes to their branches, resolve conflicts on and merge their PRs once CI passes, and correct tasks or issue numbers in their `docs/team/<name>.md`. Every such change is noted in `docs/STATUS.md`. Force-pushes and history rewrites on shared branches stay forbidden. The rules above apply again after that session.
+- **Temporary override (decided by Moses, 2026-11-22; ended 2026-11-24):** for the 2026-11-22 cleanup session only, Moses (default owner and team lead) may edit any teammate's code, push fixes to their branches, resolve conflicts on and merge their PRs once CI passes, and correct tasks or issue numbers in their `docs/team/<name>.md`. Every such change is noted in `docs/STATUS.md`. Force-pushes and history rewrites on shared branches stay forbidden. The session ended on 2026-11-24, and the rules above apply again.
 
 ---
 
