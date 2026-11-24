@@ -38,6 +38,8 @@ function BusiestHours({ stats }: { stats: Stats }) {
   const peak = peakHour(hours);
   const quiet = quietestHour(hours);
   const max = Math.max(1, ...hours.map((h) => h.count));
+  // Axis top rounded up to an even number so the midline label is whole, like the canvas (0 / 20 / 40).
+  const top = Math.ceil(max / 2) * 2;
   const summary = peak ? `Busiest hour: ${hourLabel(peak.hour)}.${quiet && quiet.hour !== peak.hour ? ` Quietest hour with any visits: ${hourLabel(quiet.hour)}.` : ""}` : "";
   return (
     <section aria-labelledby="hours-heading" className={`${card} flex-[1.3_1_480px]`}>
@@ -52,17 +54,24 @@ function BusiestHours({ stats }: { stats: Stats }) {
           </span>
         )}
       </div>
-      <div role="img" aria-label={`Bar chart of redemptions by hour. ${summary}`} className="mt-5">
-        <div className="flex h-60 items-end gap-0.5 border-b-[1.5px] border-border-strong">
-          {hours.map((h) => (
-            <div key={h.hour} className="flex h-full flex-1 items-end justify-center px-[3px]">
-              <div title={`${hourLabel(h.hour)} · ${h.count}`} className={`w-full max-w-11 rounded-t-[4px] ${peak && h.hour === peak.hour ? "bg-orange" : "bg-green"}`}
-                style={{ height: `${Math.round((h.count / max) * 100)}%` }} />
-            </div>
-          ))}
+      <div role="img" aria-label={`Bar chart of redemptions by hour. ${summary}`} className="mt-5 flex gap-2.5">
+        <div className="flex h-60 w-6 flex-col justify-between text-right text-xs text-ink-fine" aria-hidden="true">
+          <span>{top}</span><span>{top / 2}</span><span>0</span>
         </div>
-        <div className="mt-2 flex gap-0.5" aria-hidden="true">
-          {hours.map((h) => <span key={h.hour} className="flex-1 text-center text-xs text-ink-fine">{hourLabel(h.hour, true)}</span>)}
+        <div className="min-w-0 flex-1">
+          <div className="relative flex h-60 items-end gap-0.5 border-b-[1.5px] border-border-strong">
+            <span className="absolute inset-x-0 top-0 border-t border-border-soft" aria-hidden="true" />
+            <span className="absolute inset-x-0 top-1/2 border-t border-border-soft" aria-hidden="true" />
+            {hours.map((h) => (
+              <div key={h.hour} className="relative flex h-full flex-1 items-end justify-center px-[3px]">
+                <div title={`${hourLabel(h.hour)} · ${h.count}`} className={`w-full max-w-11 rounded-t-[4px] ${peak && h.hour === peak.hour ? "bg-orange" : "bg-green"}`}
+                  style={{ height: `${Math.round((h.count / top) * 100)}%` }} />
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 flex gap-0.5" aria-hidden="true">
+            {hours.map((h) => <span key={h.hour} className="flex-1 text-center text-xs text-ink-fine">{hourLabel(h.hour, true)}</span>)}
+          </div>
         </div>
       </div>
       <ul className="sr-only">{hours.map((h) => <li key={h.hour}>{hourLabel(h.hour)}: {h.count}</li>)}</ul>
