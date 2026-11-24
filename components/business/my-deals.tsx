@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { Plus, Tags } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Tags } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cancelDeal, endDeal, getMyDeals, isMockData } from "@/lib/supabase";
 import { BusinessAccessError } from "@/lib/supabase/business-errors";
 import { CAMPUS_TZ } from "@/lib/supabase/deal-status";
@@ -11,6 +10,10 @@ import type { DealMutationError, DealStatus, MyDeal } from "@/lib/supabase/types
 import { cn } from "@/lib/utils";
 import { DealShare } from "./deal-share";
 import { BusinessLoading, useBusiness } from "@/components/business/business-context";
+
+function initials(name: string) {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+}
 
 const tabs = [{ status: "live", label: "Active" }, { status: "scheduled", label: "Scheduled" }, { status: "ended", label: "Expired" }] as const;
 const dateTime = new Intl.DateTimeFormat("en-US", { timeZone: CAMPUS_TZ, year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
@@ -130,7 +133,6 @@ export function MyDeals() {
     <>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-ink-muted">UC Riverside time{isMockData ? " · Sample deals reset on full page reload." : " · Your business's saved deals."}</p>
-        <Link href="/dashboard/deals/new" className={buttonVariants({ className: "rounded-button" })}><Plus aria-hidden="true" className="size-4" />Post a deal</Link>
       </div>
 
       {loadError && <div role="alert" className="mb-4 rounded-button border border-destructive bg-surface-dashboard p-4 text-sm text-destructive"><p>{loadError}</p><Button variant="outline" onClick={() => setRevision(current => current + 1)} className="mt-3">Retry loading deals</Button></div>}
@@ -139,8 +141,8 @@ export function MyDeals() {
 
       <div role="tablist" aria-label="Deal status" className="mb-5 flex flex-wrap gap-2">
         {tabs.map(({ status, label }, index) => (
-          <button key={status} ref={element => { tabButtons.current[index] = element; }} type="button" role="tab" id={`deals-tab-${status}`} aria-selected={tab === status} aria-controls="deals-panel" tabIndex={tab === status ? 0 : -1} onClick={() => setTab(status)} onKeyDown={event => tabKey(event, index)} className={cn("inline-flex min-h-11 items-center gap-2 rounded-pill border border-border-strong px-4 py-2 text-sm font-bold text-ink-nav focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green", tab === status ? "border-green-tint bg-green-tint text-green-dark" : "bg-surface-dashboard hover:bg-green-tint/50")}>
-            {label}<span className="rounded-pill bg-bg-dashboard px-2 py-0.5 text-xs tabular-nums">{deals ? deals.filter(deal => deal.status === status).length : "—"}</span>
+          <button key={status} ref={element => { tabButtons.current[index] = element; }} type="button" role="tab" id={`deals-tab-${status}`} aria-selected={tab === status} aria-controls="deals-panel" tabIndex={tab === status ? 0 : -1} onClick={() => setTab(status)} onKeyDown={event => tabKey(event, index)} className={cn("inline-flex min-h-11 items-center gap-2 rounded-pill border border-border-strong px-4 py-2 text-sm font-bold text-ink-nav focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green", tab === status ? "border-ink bg-ink text-white" : "bg-surface-dashboard hover:bg-green-tint/50")}>
+            {label}<span className={cn("rounded-pill px-2 py-0.5 text-xs tabular-nums", tab === status ? "bg-white/20" : "bg-bg-dashboard")}>{deals ? deals.filter(deal => deal.status === status).length : "—"}</span>
           </button>
         ))}
       </div>
@@ -156,16 +158,20 @@ export function MyDeals() {
           {visibleDeals.map(deal => {
             const canEnd = deal.status === "live" || (deal.active_days !== null && deal.status === "scheduled" && Date.parse(deal.starts_at) < checkedAt);
             return <li key={deal.id} className="grid min-w-0 gap-5 p-5 sm:p-6 xl:grid-cols-[minmax(0,1fr)_120px_auto] xl:items-center">
-              <div className="min-w-0">
-                <h2 className="break-words text-xl">{deal.title}</h2>
-                <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold">
-                  <span className="rounded-pill bg-green-tint px-2.5 py-1 text-green-dark">{deal.visibility === "link_only" ? "Link only" : "Public"}</span>
-                  {deal.students_only && <span className="rounded-pill bg-peach px-2.5 py-1 text-brown">UCR students only</span>}
+              <div className="flex min-w-0 gap-4">
+                <span className="flex size-14 shrink-0 items-center justify-center rounded-button bg-peach-deep font-heading text-lg font-extrabold" aria-hidden="true">{initials(profile.business.name)}</span>
+                <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="break-words text-xl">{deal.title}</h2>
+                  {deal.status === "live" && <span className="rounded-pill bg-green-tint px-2.5 py-0.5 text-xs font-bold text-green-dark">Live</span>}
+                  {deal.students_only && <span className="rounded-pill bg-peach px-2.5 py-0.5 text-xs font-bold text-brown">UCR only</span>}
+                  {deal.visibility === "link_only" && <span className="rounded-pill bg-border px-2.5 py-0.5 text-xs font-bold text-ink-muted">Link only</span>}
                 </div>
                 <p className="mt-3 text-sm leading-relaxed text-ink-muted"><time dateTime={deal.starts_at}>{dateTime.format(new Date(deal.starts_at))}</time><span> – </span>{deal.ends_at ? <time dateTime={deal.ends_at}>{dateTime.format(new Date(deal.ends_at))}</time> : "Until turned off"}</p>
                 {deal.active_days && <p className="mt-1 text-sm text-ink-fine">Repeats {deal.active_days.join(", ")} · {deal.daily_start}–{deal.daily_end} campus time</p>}
+                </div>
               </div>
-              <p className="text-sm text-ink-muted"><span className="font-heading text-2xl font-extrabold tabular-nums text-ink">{deal.redemption_count.toLocaleString()}</span><span className="ml-2 xl:ml-0 xl:block">redemptions</span></p>
+              <p className="text-sm text-ink-muted"><span className="font-heading text-2xl font-extrabold tabular-nums text-ink">{deal.redemption_count.toLocaleString()}</span><span className="ml-2 xl:ml-0 xl:block">redeemed so far</span></p>
               <div className="flex flex-wrap items-center gap-2 justify-self-start xl:justify-self-end">
                 <DealShare deal={deal} />
                 {canEnd ? <Button variant="destructive" disabled={busy} onClick={() => ask(deal, "end")} className="rounded-button">End now</Button>
