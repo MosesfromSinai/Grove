@@ -101,6 +101,12 @@ function StatsView({ businessId }: { businessId: string }) {
         <p className="mt-2 text-ink-muted">
           {stats ? <><b className="text-ink">{stats.total} verified redemptions</b> in the last {days} days</> : "See how your deals bring students through the door."}
         </p>
+        {stats && stats.total > 0 && stats.newStudents !== undefined && stats.returningStudents !== undefined && (
+          <p className="mt-1 text-sm text-ink-muted">
+            New students: <b className="tabular-nums text-ink">{stats.newStudents}</b> · Returning (visited before this range):{" "}
+            <b className="tabular-nums text-ink">{stats.returningStudents}</b>
+          </p>
+        )}
         </div>
         <div role="group" aria-label="Date range" className="flex gap-1 rounded-button bg-border p-1">
           {([7, 30] as const).map((n) => (

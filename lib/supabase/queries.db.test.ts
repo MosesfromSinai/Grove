@@ -131,6 +131,20 @@ describe.skipIf(!process.env.SUPABASE_DB_TESTS)("queries on the local seed", () 
     }
   });
 
+  test("getBusinessStats splits new and returning students", async () => {
+    // An earlier visit by the beforeAll student; the beforeAll visit itself happened just now.
+    const { data } = await service.from("redemptions").insert({ deal_id: BURRITO, business_id: OPT, student_id: studentId,
+      redeemed_on: "2026-10-20", redeemed_at: "2026-10-20T19:00:00Z", method: "pin" }).select("id").single();
+    try {
+      const from = new Date(Date.now() - 86_400_000).toISOString();
+      const to = new Date(Date.now() + 86_400_000).toISOString();
+      // The in-range visit's student also visited on Oct 20, so they count as returning.
+      expect(await getBusinessStats({ businessId: OPT, from, to })).toMatchObject({ newStudents: 0, returningStudents: 1 });
+    } finally {
+      await service.from("redemptions").delete().eq("id", data!.id);
+    }
+  });
+
   test("getStaff shows the owner, active staff, and invited staff", async () => {
     const staff = await getStaff({ businessId: OPT });
     expect(staff.map((m) => `${m.role}:${m.status}`).sort()).toEqual(["owner:active", "staff:active", "staff:invited"]);
