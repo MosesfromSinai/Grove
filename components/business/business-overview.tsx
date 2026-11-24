@@ -16,25 +16,29 @@ const methods = { sticker: "Counter sticker", pin: "Backup PIN", staff_scan: "St
 type Snapshot = { overview: BusinessOverview; deals: MyDeal[] };
 
 // Greeting and weekday in campus time, like the canvas header ("Good afternoon", "Tuesday").
-function campusParts() {
-  return new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", hourCycle: "h23", weekday: "long" }).formatToParts(new Date());
+// Read on the client after mount: the clock can't be read while prerendering.
+function campusParts(at: Date) {
+  return new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", hourCycle: "h23", weekday: "long" }).formatToParts(at);
 }
-function greeting() {
-  const hour = Number(campusParts().find((p) => p.type === "hour")?.value ?? 12);
+function greeting(at: Date | null) {
+  if (!at) return "Welcome back";
+  const hour = Number(campusParts(at).find((p) => p.type === "hour")?.value ?? 12);
   return hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 }
-function weekday() {
-  return campusParts().find((p) => p.type === "weekday")?.value ?? "";
+function weekday(at: Date | null) {
+  return at ? `${campusParts(at).find((p) => p.type === "weekday")?.value} · ` : "";
 }
 
 export function BusinessOverviewPage() {
   const { profile, updateProfile } = useBusiness();
+  const [clock, setClock] = useState<Date | null>(null);
+  useEffect(() => { queueMicrotask(() => setClock(new Date())); }, []);
   // #94: food-truck owners move their pin from here; update_truck_location is owner-only.
   const truckOwner = profile?.business.is_truck && profile.membership_role === "owner";
   return <>
     <header className="mb-7 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-      <div className="min-w-0"><h1 className="text-3xl sm:text-4xl">{greeting()}</h1>
-        <p className="mt-2 text-ink-muted [overflow-wrap:anywhere]">{weekday()} · <BusinessName /> is {profile?.business.open_now === false ? "closed right now" : "open and visible to students"}</p></div>
+      <div className="min-w-0"><h1 className="text-3xl sm:text-4xl">{greeting(clock)}</h1>
+        <p className="mt-2 text-ink-muted [overflow-wrap:anywhere]">{weekday(clock)}<BusinessName /> is {profile?.business.open_now === false ? "closed right now" : "open and visible to students"}</p></div>
       <Link href="/dashboard/deals/new" className={buttonVariants({ size: "lg", className: "rounded-button" })}><Plus aria-hidden="true" className="size-5" />Post a deal</Link>
     </header>
     {profile && truckOwner && <div className="mb-6"><TruckLocation businessId={profile.business.id}
