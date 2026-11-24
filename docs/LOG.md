@@ -27,6 +27,10 @@ How each session catches up on this file: `CLAUDE.md` → Session protocol, step
 - **2026-10-08:** Professor approved the reframed idea: campus marketing platform for food businesses near campuses.
 
 ## Moses
+- **2026-11-24:** Merged #170 (send visitors to feed) after its preview: signed-out `/` lands on `/feed`, and Redeem still goes to sign-in and remembers the deal.
+- **2026-11-24:** Merged #169 (Next.js 16.4.2 → 16.4.6) after merging main in; two builds in a row with no security notice.
+- **2026-11-24:** Merged #168 (design canvas match) after merging main in. Fixed on the preview: the feed said "0 live" with no deals (now "Nothing live"), and the sign-in button wrapped to two lines on phones; the #166 share test needed the business name the new initials tile reads.
+- **2026-11-24:** Merged #166 (Stats new vs. returning students, Share on live and scheduled deals only, QR filename fallback).
 - **2026-11-24:** Root route (`moses/root-to-feed`): signed-out visitors at `/` now land on `/feed`; `/` is a public path, and signed-in users keep their role routing (business → `/dashboard`, students → `/feed`).
 - **2026-11-24:** **Decision** (affects Celso, Edward): signed-out visitors at / go to /feed. Browsing without sign-in is already live (#164); sign-in is only required at Redeem.
 - **2026-11-24:** **Decision** (affects everyone): financial model updated (Financial Modeling of Grove, Team-01-Grove Drive): founders unpaid until Year 3, 3 paid student ambassadors per new campus starting Year 2, 25 Staples flyers per restaurant per monthly campaign; Year 1 costs about $2.8K.
