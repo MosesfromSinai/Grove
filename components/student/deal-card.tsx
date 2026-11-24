@@ -1,50 +1,51 @@
 "use client";
 
+// Deal card (canvas screen 4): colored tile with a countdown and the students-only badge,
+// then business, offer, distance and when the live window ends.
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { DealCard as DealCardData } from "@/lib/supabase";
-import { discountLabel, distanceLabel, timeLeftLabel } from "./format";
+import { countdownLabel, distanceLabel } from "./format";
 
 export type LiveDeal = Extract<DealCardData, { has_deal: true }>;
 
-export function DealCard({ deal }: { deal: LiveDeal }) {
+const tiles = ["bg-peach-deep", "bg-peach", "bg-green-tint"];
+
+export function DealCard({ deal, index = 0 }: { deal: LiveDeal; index?: number }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 30000);
+    const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
 
-  const discount = discountLabel(deal.discount_type, deal.discount_value);
-
   return (
     <li>
-      <Link
-        href={`/deals/${deal.deal_id}`}
-        className="block overflow-hidden rounded-card border border-border bg-surface shadow-card"
-      >
-        {deal.photo_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={deal.photo_url} alt="" className="h-36 w-full object-cover" />
-        ) : (
-          <div className="flex h-36 items-center justify-center bg-peach text-brown">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
-              <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
+      <Link href={`/deals/${deal.deal_id}`} className="block overflow-hidden rounded-card bg-surface shadow-card">
+        <div className={`relative flex h-40 items-center justify-center ${tiles[index % tiles.length]}`}>
+          {deal.photo_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={deal.photo_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          ) : (
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="text-brown" aria-hidden="true">
+              <path d="M3 12V4h8l10 10-8 8z" /><circle cx="7.5" cy="7.5" r="1.5" />
             </svg>
-          </div>
-        )}
+          )}
+          <span className="absolute top-3 left-3 flex items-center gap-1.5 rounded-pill bg-ink px-3 py-1.5 text-sm font-bold text-white" suppressHydrationWarning>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="text-orange-light" aria-hidden="true"><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2 2M9 2h6" /></svg>
+            {countdownLabel(deal.live_until, now)}
+          </span>
+          {deal.students_only && (
+            <span className="absolute top-3 right-3 flex items-center gap-1 rounded-pill bg-surface px-3 py-1.5 text-sm font-bold text-brown">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="m9 12 2 2 4-4" /></svg>
+              UCR students only
+            </span>
+          )}
+        </div>
         <div className="p-4">
           <p className="text-sm text-ink-muted">
             {deal.business_name} · {distanceLabel(deal.distance_m)}
           </p>
           <h2 className="mt-1 text-xl">{deal.title}</h2>
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold">
-            {discount && <span className="rounded-pill bg-orange px-3 py-1 text-ink">{discount}</span>}
-            {deal.students_only && <span className="rounded-pill bg-peach px-3 py-1 text-brown">UCR students only</span>}
-            <span className="text-ink-fine" suppressHydrationWarning>
-              {timeLeftLabel(deal.live_until, now)}
-            </span>
-          </div>
         </div>
       </Link>
     </li>
