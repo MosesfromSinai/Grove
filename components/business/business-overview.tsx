@@ -15,14 +15,26 @@ const dateTime = new Intl.DateTimeFormat("en-US", { timeZone: CAMPUS_TZ, month: 
 const methods = { sticker: "Counter sticker", pin: "Backup PIN", staff_scan: "Staff scan" };
 type Snapshot = { overview: BusinessOverview; deals: MyDeal[] };
 
+// Greeting and weekday in campus time, like the canvas header ("Good afternoon", "Tuesday").
+function campusParts() {
+  return new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", hourCycle: "h23", weekday: "long" }).formatToParts(new Date());
+}
+function greeting() {
+  const hour = Number(campusParts().find((p) => p.type === "hour")?.value ?? 12);
+  return hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+}
+function weekday() {
+  return campusParts().find((p) => p.type === "weekday")?.value ?? "";
+}
+
 export function BusinessOverviewPage() {
   const { profile, updateProfile } = useBusiness();
   // #94: food-truck owners move their pin from here; update_truck_location is owner-only.
   const truckOwner = profile?.business.is_truck && profile.membership_role === "owner";
   return <>
     <header className="mb-7 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-      <div className="min-w-0"><p className="mb-1 text-sm font-bold text-green-dark [overflow-wrap:anywhere]"><BusinessName /></p>
-        <h1 className="text-3xl sm:text-4xl">Overview</h1><p className="mt-2 text-ink-muted">A little local love. More students through your door.</p></div>
+      <div className="min-w-0"><h1 className="text-3xl sm:text-4xl">{greeting()}</h1>
+        <p className="mt-2 text-ink-muted [overflow-wrap:anywhere]">{weekday()} · <BusinessName /> is {profile?.business.open_now === false ? "closed right now" : "open and visible to students"}</p></div>
       <Link href="/dashboard/deals/new" className={buttonVariants({ size: "lg", className: "rounded-button" })}><Plus aria-hidden="true" className="size-5" />Post a deal</Link>
     </header>
     {profile && truckOwner && <div className="mb-6"><TruckLocation businessId={profile.business.id}
@@ -119,8 +131,11 @@ function Overview({ businessId }: { businessId: string }) {
       <section aria-labelledby="recent-visits" className="order-first min-w-0 rounded-card border border-border bg-surface-dashboard p-5 shadow-card sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-soft pb-4"><h2 id="recent-visits" className="flex min-h-11 items-center text-xl">Live visits</h2><span role="status" className="inline-flex items-center gap-1.5 text-xs font-bold text-green-dark"><span className={`size-1.5 rounded-full ${connection === "live" && !error ? "bg-green" : "bg-ink-muted"}`} />{error ? "Refresh needed" : connection === "live" ? isMockData ? "Demo feed" : "Live" : connection === "connecting" ? "Connecting" : "Reconnecting"}</span></div>
         <p className="mt-3 text-xs leading-relaxed text-ink-fine">Latest 8 verified visits · {isMockData ? "Sample data" : connection === "live" ? "Updates as students redeem" : "Refreshing every minute while the live feed connects"}</p>
-        {!snapshot ? <p className="py-8 text-sm text-ink-muted">{error ? "Visits unavailable." : "Loading recent visits…"}</p> : snapshot.overview.recentVisits.length ? <ol className="mt-1 divide-y divide-border-soft">{snapshot.overview.recentVisits.map(visit => <li key={visit.id} className="flex items-start gap-3 py-4">
-          <span className="mt-0.5 rounded-full bg-green-tint p-2 text-green"><Check aria-hidden="true" className="size-4" /></span><div className="min-w-0 flex-1"><p className="text-sm font-bold">Verified student visit</p><p className="mt-1 text-sm text-ink-muted [overflow-wrap:anywhere]">{visit.deal_title || "Deal"}</p><p className="mt-1 text-xs leading-relaxed text-ink-fine">{methods[visit.method]} · <time dateTime={visit.redeemed_at}>{dateTime.format(new Date(visit.redeemed_at))}</time></p></div>
+        {!snapshot ? <p className="py-8 text-sm text-ink-muted">{error ? "Visits unavailable." : "Loading recent visits…"}</p> : snapshot.overview.recentVisits.length ? <ol className="mt-1 divide-y divide-border-soft">{snapshot.overview.recentVisits.map((visit, index) => <li key={visit.id} className="flex items-center gap-3 py-4">
+          <span className="rounded-full bg-green-tint p-2 text-green"><Check aria-hidden="true" className="size-4" /></span>
+          <p className="min-w-0 flex-1 text-sm [overflow-wrap:anywhere]">Verified student redeemed <b>{visit.deal_title || "a deal"}</b><span className="sr-only"> by {methods[visit.method]}</span></p>
+          {index === 0 && <span className="rounded-pill bg-orange px-2 py-0.5 text-xs font-extrabold text-ink">NEW</span>}
+          <time dateTime={visit.redeemed_at} className="shrink-0 text-sm font-bold text-ink-muted">{dateTime.format(new Date(visit.redeemed_at))}</time>
         </li>)}</ol> : <Empty icon="visits" title="Every visit counts" text="Your first verified student visit will appear here. Sticker, PIN, and staff-scan redemptions all count." />}
       </section>
     </div>
