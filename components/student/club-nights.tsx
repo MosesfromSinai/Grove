@@ -87,7 +87,7 @@ export function ClubNights() {
 
   return (
     <div>
-      <h1 className="text-3xl">Club nights</h1>
+      <h1 className="text-4xl">Club nights</h1>
       <p className="mt-1 text-sm text-ink-muted">
         Claim a night for your club. Members visit with Grove, and the restaurant gives part of the sales back to your club.
       </p>
@@ -97,7 +97,7 @@ export function ClubNights() {
       ) : (
         <ul className="mt-6 space-y-4">
           {nights.map((night) => (
-            <li key={night.id} className="rounded-card border border-border bg-surface p-5 shadow-card">
+            <li key={night.id} className="rounded-card bg-surface p-5 shadow-card">
               <h2 className="text-xl">{night.business_name}</h2>
               <p className="mt-1 text-sm text-ink-muted">
                 {nightDateLabel(night.night_date)} · {timeWindowLabel(night.start_time, night.end_time)}

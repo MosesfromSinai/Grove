@@ -46,7 +46,7 @@ export function ClubNightClaimed({ claimed }: { claimed: Claimed }) {
         {nightDateLabel(night.night_date)} · {timeWindowLabel(night.start_time, night.end_time)} · {night.giveback}
       </p>
 
-      <div className="mt-6 rounded-card border border-border bg-surface p-5 shadow-card">
+      <div className="mt-6 rounded-card bg-surface p-5 shadow-card">
         <p className="text-sm text-ink-muted">Share this link with your members</p>
         <p className="mt-1 break-all font-semibold">{url}</p>
         <div className="mt-4 flex gap-3">

@@ -50,10 +50,12 @@ export function BusinessName() {
 
 export function BusinessIdentity() {
   const { profile, error, loading, refresh } = useBusiness();
-  return <div className="my-5 rounded-button border border-border bg-bg-dashboard p-3 lg:my-7">
+  return <div className="my-5 rounded-button bg-bg-dashboard p-2.5 lg:my-7">
     <div className="flex items-center gap-3">
       <span className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-button bg-peach-deep text-brown">
-        {profile?.business.logo_url ? <Image src={profile.business.logo_url} alt="Business logo" fill sizes="44px" unoptimized className="object-cover" /> : <Store aria-hidden="true" className="size-5" />}
+        {profile?.business.logo_url ? <Image src={profile.business.logo_url} alt="Business logo" fill sizes="44px" unoptimized className="object-cover" />
+          : profile ? <span aria-hidden="true" className="font-heading font-extrabold text-ink">{profile.business.name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase()}</span>
+          : <Store aria-hidden="true" className="size-5" />}
       </span>
       <div className="min-w-0">
         <p className="text-sm font-extrabold [overflow-wrap:anywhere]">{profile?.business.name ?? (loading ? "Loading business…" : error ? "Business unavailable" : "No business linked")}</p>
