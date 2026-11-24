@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
-import { DealCard } from "@/components/student/deal-card";
+import Link from "next/link";
+import { untilLabel } from "@/components/student/format";
 import { formatDistance, type MapBusiness } from "@/lib/geo/nearby";
 import { StatusPill } from "./status-pill";
 
@@ -49,11 +50,25 @@ export function PinDetails({
             </button>
           </div>
           {business.deals.length ? (
-            <ul className="mt-4 grid gap-3" aria-label="Live deals">
-              {business.deals.map((deal) => (
-                <DealCard key={deal.deal_id} deal={deal} />
-              ))}
-            </ul>
+            <>
+              <ul className="mt-4 grid gap-3" aria-label="Live deals">
+                {business.deals.map((deal) => (
+                  <li key={deal.deal_id} className="flex items-center gap-3 rounded-card bg-peach p-3.5">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-button bg-orange text-ink" aria-hidden="true">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12V4h8l10 10-8 8z" /><circle cx="7.5" cy="7.5" r="1.5" /></svg>
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-xs font-extrabold tracking-wider text-brown">TODAY&apos;S DEAL</p>
+                      <p className="font-extrabold [overflow-wrap:anywhere]">{deal.title}</p>
+                      <p className="text-xs text-brown">{deal.students_only ? "UCR students only · " : ""}{untilLabel(deal.live_until)}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <Link href={`/deals/${business.deals[0].deal_id}`} className="mt-5 flex min-h-13 items-center justify-center gap-2 rounded-button bg-green font-extrabold text-white">
+                View deal <span aria-hidden="true">→</span>
+              </Link>
+            </>
           ) : (
             <p className="mt-5 rounded-card border bg-surface p-5 text-ink-muted">
               No deals right now. Try another nearby spot.
