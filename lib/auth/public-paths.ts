@@ -2,8 +2,8 @@
 // is public; anything that redeems, claims, or shows student data (/scan, /pin, /club-nights,
 // /profile, /dashboard) still needs a session, and the proxy remembers the page in grove_next.
 // The anon role only reads public data: RLS hides link-only deals from discovery, and
-// redemptions and profiles have no anon grant.
-const PUBLIC_EXACT = new Set(["/sign-in", "/theme", "/feed", "/map", "/manifest.json", "/sw.js"]);
+// redemptions and profiles have no anon grant. "/" is public so app/page.tsx can send visitors to /feed.
+const PUBLIC_EXACT = new Set(["/", "/sign-in", "/theme", "/feed", "/map", "/manifest.json", "/sw.js"]);
 
 export function isPublicPath(pathname: string): boolean {
   return (
